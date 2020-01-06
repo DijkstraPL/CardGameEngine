@@ -4,6 +4,6 @@ namespace CardGame_Game.Cards.Triggers.Interfaces
 {
     public interface IEffect
     {
-        void Invoke(IGame game);
+        void Invoke(params string[] args);
     }
 }

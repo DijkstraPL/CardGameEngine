@@ -1,9 +1,14 @@
-﻿namespace CardGame_Game.BoardTable
+﻿using CardGame_Game.BoardTable.Interfaces;
+using CardGame_Game.Cards.Interfaces;
+
+namespace CardGame_Game.BoardTable
 {
-    public class Field
+    public class Field : IField
     {
         public int X { get; }
         public int Y { get; }
+
+        public ICard Card { get; set; }
 
         public Field(int x, int y)
         {

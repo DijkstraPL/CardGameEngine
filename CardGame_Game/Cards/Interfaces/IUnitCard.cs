@@ -1,12 +1,11 @@
-﻿using CardGame_Game.Cards.Enums;
-using CardGame_Game.Game.Interfaces;
+﻿using CardGame_Game.Game.Interfaces;
 using System.Collections.Generic;
 
 namespace CardGame_Game.Cards.Interfaces
 {
-    public interface ICreatureCard : ICard
+    public interface IUnitCard : ICard
     {
-        Element Element { get; }
+        //Element Element { get; }
         int Attack { get; }
         int Cooldown { get; }
         int Health { get; }

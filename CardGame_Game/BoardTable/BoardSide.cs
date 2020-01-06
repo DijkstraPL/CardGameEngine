@@ -1,10 +1,15 @@
-﻿using CardGame_Game.BoardTable.Interfaces;
+﻿using CardGame_Data.Entities;
+using CardGame_Game.BoardTable.Interfaces;
 using CardGame_Game.Cards.Interfaces;
+using CardGame_Game.Cards.Triggers;
+using CardGame_Game.Cards.Triggers.Interfaces;
 using CardGame_Game.Game;
 using CardGame_Game.Game.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Composition.Hosting;
 using System.Linq;
+using System.Reflection;
 
 namespace CardGame_Game.BoardTable
 {
@@ -61,7 +66,70 @@ namespace CardGame_Game.BoardTable
         public void StartTurn(IGame game)
         {
             TurnStarting?.Invoke(this, new GameEventArgs { Game = game });
+            foreach (var landCard in LandCards)
+            {
+                foreach (var rule in landCard.Rules)
+                {
+                    var conditionName = rule.Condition.Substring(0, rule.Condition.IndexOf('('));
+                    var condition = GetCondition(conditionName);
+
+                    var effectName = rule.Effect.Substring(0, rule.Effect.IndexOf('('));
+                    var effect = GetEffect(effectName);
+
+                    var conditionArgs = rule.Condition.EverythingBetween("(", ")").First().Split(',');
+                    var effectArgs = rule.Effect.EverythingBetween("(", ")").First().Split(',');
+
+                    if (condition.Validate(conditionArgs))
+                        effect.Invoke(effectArgs);
+                }
+            }
+
             TurnStarted?.Invoke(this, new GameEventArgs { Game = game });
+        }
+
+        public void Move(Field start, Field target)
+        {
+            var card = start.Card;
+            target.Card = card;
+            start.Card = null;
+        }
+
+        public Trigger GetTrigger(string conditionName, string effectName)
+        {
+            ICondition condition = GetCondition(conditionName);
+            IEffect effect = GetEffect(effectName);
+
+            return new Trigger(condition, effect);
+        }
+
+        private static ICondition GetCondition(string conditionName)
+        {
+            ICondition condition;
+            var configuration = new ContainerConfiguration()
+               .WithAssembly(typeof(Card).GetTypeInfo().Assembly);
+
+            using (var container = configuration.CreateContainer())
+            {
+                if (!container.TryGetExport(conditionName, out condition))
+                    throw new InvalidOperationException(nameof(conditionName));
+            }
+
+            return condition;
+        }
+
+        private static IEffect GetEffect(string effectName)
+        {
+            IEffect effect;
+            var configuration = new ContainerConfiguration()
+               .WithAssembly(typeof(Card).GetTypeInfo().Assembly);
+
+            using (var container = configuration.CreateContainer())
+            {
+                if (!container.TryGetExport(effectName, out effect))
+                    throw new InvalidOperationException(nameof(effectName));
+            }
+
+            return effect;
         }
     }
 }

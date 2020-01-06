@@ -1,11 +1,11 @@
-﻿using CardGame_Game.BoardTable.Interfaces;
+﻿using CardGame_Data.Entities.Enums;
+using CardGame_Game.BoardTable.Interfaces;
 using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Game;
 using CardGame_Game.Game.Interfaces;
 using CardGame_Game.Players.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace CardGame_Game.Players
 {
@@ -15,7 +15,15 @@ namespace CardGame_Game.Players
         public Stack<ILandCard> LandDeck { get; private set; }
         public Stack<ICard> Deck { get; private set; }
         public IList<ICard> Hand { get; private set; } = new List<ICard>();
-        public int Energy { get; private set; } = 0;
+
+        public CardColor PlayerColor { get; }
+
+        public IDictionary<CardColor, int> Energy { get; } = new Dictionary<CardColor, int>
+        {
+            [CardColor.White] = 0,
+            [CardColor.Red] = 0,
+            [CardColor.Green] = 0,
+        };
 
         public bool CardTaken { get; private set; } = false;
         public IBoardSide BoardSide { get; set; }
@@ -48,7 +56,7 @@ namespace CardGame_Game.Players
 
         public void EndTurn()
         {
-            Energy = 0;
+            Energy[PlayerColor] = 0;
             CardTaken = false;
             IsLandCardPlayed = false;
         }
@@ -65,9 +73,9 @@ namespace CardGame_Game.Players
             Hand.Add(LandDeck.Pop());
         }
 
-        public void IncreaseEnergy(int amount)
+        public void IncreaseEnergy(CardColor cardColor, int amount)
         {
-            Energy += amount;
+            Energy[cardColor] += amount;
         }
 
         public IEnumerable<ICard> GetHand()
@@ -81,7 +89,7 @@ namespace CardGame_Game.Players
                 return;
 
             IsLandCardPlayed = true;
-            Energy -= card.Cost;
+            Energy[PlayerColor] -= card.GetCost(PlayerColor);
             Hand.Remove(card);
             card.Play(game, this);
             BoardSide.AddLandCard(card);

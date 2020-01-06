@@ -4,6 +4,7 @@ namespace CardGame_Game.Cards.Triggers.Interfaces
 {
     public interface ICondition
     {
-        bool Validate(IGame game);
+        string Happend { get; }
+        bool Validate(params string[] args);
     }
 }

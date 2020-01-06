@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_Console", "CardGam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_Game", "CardGame_Game\CardGame_Game.csproj", "{5613D44F-1924-41DF-8112-6B25DFD3DCFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardGame_Data", "CardGame_Data\CardGame_Data.csproj", "{12583C96-26E5-412D-B74D-10F084D127BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_Data", "CardGame_Data\CardGame_Data.csproj", "{12583C96-26E5-412D-B74D-10F084D127BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardGame_DataAccess", "CardGame_DataAccess\CardGame_DataAccess.csproj", "{BD2C7E0E-1E6F-482D-ABFE-ED52C6C79785}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_DataAccess", "CardGame_DataAccess\CardGame_DataAccess.csproj", "{BD2C7E0E-1E6F-482D-ABFE-ED52C6C79785}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardGame_GameTests", "CardGame_GameTests\CardGame_GameTests.csproj", "{C0AB4104-2DD6-4E07-9AEC-B1CBEEB8D575}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{BD2C7E0E-1E6F-482D-ABFE-ED52C6C79785}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD2C7E0E-1E6F-482D-ABFE-ED52C6C79785}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD2C7E0E-1E6F-482D-ABFE-ED52C6C79785}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0AB4104-2DD6-4E07-9AEC-B1CBEEB8D575}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0AB4104-2DD6-4E07-9AEC-B1CBEEB8D575}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0AB4104-2DD6-4E07-9AEC-B1CBEEB8D575}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0AB4104-2DD6-4E07-9AEC-B1CBEEB8D575}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

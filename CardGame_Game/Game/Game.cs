@@ -1,4 +1,5 @@
-﻿using CardGame_Game.BoardTable.Interfaces;
+﻿using CardGame_Data.Entities.Enums;
+using CardGame_Game.BoardTable.Interfaces;
 using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Game.Interfaces;
 using CardGame_Game.Players.Interfaces;
@@ -17,6 +18,8 @@ namespace CardGame_Game.Game
         public IPlayer CurrentPlayer { get; private set; }
         public IPlayer NextPlayer { get; private set; }
 
+        public event EventHandler<GameEventArgs> GameStarting;
+        public event EventHandler<GameEventArgs> GameStarted;
         public event EventHandler<GameEventArgs> TurnFinished;
 
         public Game(IPlayer firstPlayer, IPlayer secondPlayer, IBoard board)
@@ -30,6 +33,8 @@ namespace CardGame_Game.Game
 
         public void StartGame()
         {
+            GameStarting?.Invoke(this, new GameEventArgs { Game = this });
+
             FirstPlayer.ShuffleDeck();
             FirstPlayer.ShuffleLandDeck();
 
@@ -46,6 +51,8 @@ namespace CardGame_Game.Game
                 CurrentPlayer = SecondPlayer;
                 NextPlayer = FirstPlayer;
             }
+            
+            GameStarted?.Invoke(this, new GameEventArgs { Game = this });
         }
 
         private bool FlipCoin()
@@ -54,9 +61,14 @@ namespace CardGame_Game.Game
             return random.Next(0, 2) == 0;
         }
 
-        public void NextTurn()
+        public void FinishTurn()
         {
             TurnFinished?.Invoke(this, new GameEventArgs { Game = this });
+            NextTurn();
+        }
+
+        public void NextTurn()
+        {
             CurrentPlayer.EndTurn();
             TurnCounter++;
 
@@ -88,9 +100,22 @@ namespace CardGame_Game.Game
 
         public void PlayLandCard(ILandCard card)
         {
-            if (CurrentPlayer.Energy >= card.Cost &&
+            if (CurrentPlayer.Energy[CurrentPlayer.PlayerColor] >= card.GetCost(CurrentPlayer.PlayerColor) &&
                 CurrentPlayer.GetHand().Any(h => h == card))
                 CurrentPlayer.PlayLandCard(this, card);
         }
+
+        public void PlayCard(ICard card)
+        {
+            if (CurrentPlayer.Energy[CurrentPlayer.PlayerColor] >= card.GetCost(CurrentPlayer.PlayerColor) &&
+                CurrentPlayer.GetHand().Any(h => h == card)) ;
+               // CurrentPlayer.PlayCard(this, card);
+        }
+
+        public void MoveCreature(ICard card)
+        {
+
+        }
+
     }
 }
