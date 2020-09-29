@@ -1,4 +1,5 @@
 ﻿using CardGame_Data.Entities;
+using CardGame_DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

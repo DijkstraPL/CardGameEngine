@@ -11,11 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Cards\CardTypes\" />
+    <ProjectReference Include="..\CardGame_Data\CardGame_Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CardGame_Data\CardGame_Data.csproj" />
+    <Folder Include="Cards\Strategies\" />
   </ItemGroup>
 
 </Project>

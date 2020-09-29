@@ -1,7 +1,9 @@
-﻿using CardGame_Game.Cards.Interfaces;
+﻿using CardGame_Game.Cards;
+using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Game.Interfaces;
 using CardGame_Game.Players.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace CardGame_Game.Game
 {
@@ -9,6 +11,7 @@ namespace CardGame_Game.Game
     {
         public IGame Game { get; set; }
         public IPlayer Player { get; set; }
-        public ILandCard Card { get; internal set; }
+        public GameCard SourceCard { get; internal set; }
+        public IEnumerable<GameCard> Targets { get; internal set; }
     }
 }

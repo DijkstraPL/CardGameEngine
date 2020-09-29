@@ -1,4 +1,5 @@
 ﻿using CardGame_Game.BoardTable.Interfaces;
+using CardGame_Game.GameEvents.Interfaces;
 
 namespace CardGame_Game.BoardTable
 {
@@ -7,10 +8,10 @@ namespace CardGame_Game.BoardTable
         public IBoardSide LeftBoardSite { get; }
         public IBoardSide RightBoardSite { get; }
 
-        public Board()
+        public Board(IGameEventsContainer gameEventsContainer)
         {
-            LeftBoardSite = new BoardSide();
-            RightBoardSite = new BoardSide();
+            LeftBoardSite = new BoardSide(gameEventsContainer);
+            RightBoardSite = new BoardSide(gameEventsContainer);
         }
     }
 }

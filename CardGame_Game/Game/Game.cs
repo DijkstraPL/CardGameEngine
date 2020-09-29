@@ -1,7 +1,9 @@
-﻿using CardGame_Data.Entities.Enums;
-using CardGame_Game.BoardTable.Interfaces;
-using CardGame_Game.Cards.Interfaces;
+﻿using CardGame_Game.BoardTable.Interfaces;
+using CardGame_Game.Cards;
 using CardGame_Game.Game.Interfaces;
+using CardGame_Game.GameEvents;
+using CardGame_Game.GameEvents.Interfaces;
+using CardGame_Game.Helpers;
 using CardGame_Game.Players.Interfaces;
 using System;
 using System.Linq;
@@ -12,75 +14,67 @@ namespace CardGame_Game.Game
     public class Game : IGame
     {
         public int TurnCounter { get; private set; }
-        public IPlayer FirstPlayer { get; }
-        public IPlayer SecondPlayer { get; }
         public IBoard Board { get; }
+
         public IPlayer CurrentPlayer { get; private set; }
         public IPlayer NextPlayer { get; private set; }
 
-        public event EventHandler<GameEventArgs> GameStarting;
-        public event EventHandler<GameEventArgs> GameStarted;
-        public event EventHandler<GameEventArgs> TurnFinished;
+        public IGameEventsContainer GameEventsContainer { get; }
 
-        public Game(IPlayer firstPlayer, IPlayer secondPlayer, IBoard board)
+        private readonly IPlayer _firstPlayer;
+        private readonly IPlayer _secondPlayer;
+        private readonly IRandomHelper _randomHelper;
+
+        public Game(IPlayer firstPlayer, IPlayer secondPlayer, IBoard board, IRandomHelper randomHelper, IGameEventsContainer gameEventsContainer)
         {
-            FirstPlayer = firstPlayer ?? throw new ArgumentNullException(nameof(firstPlayer));
-            SecondPlayer = secondPlayer ?? throw new ArgumentNullException(nameof(secondPlayer));
+            _firstPlayer = firstPlayer ?? throw new ArgumentNullException(nameof(firstPlayer));
+            _secondPlayer = secondPlayer ?? throw new ArgumentNullException(nameof(secondPlayer));
             Board = board ?? throw new ArgumentNullException(nameof(board));
-            FirstPlayer.BoardSide = Board.LeftBoardSite;
-            SecondPlayer.BoardSide = Board.RightBoardSite;
+            _randomHelper = randomHelper ?? throw new ArgumentNullException(nameof(randomHelper));
+            GameEventsContainer = gameEventsContainer ?? throw new ArgumentNullException(nameof(gameEventsContainer));
+
+            _firstPlayer.BoardSide = Board.LeftBoardSite;
+            _secondPlayer.BoardSide = Board.RightBoardSite;
         }
 
         public void StartGame()
         {
-            GameStarting?.Invoke(this, new GameEventArgs { Game = this });
+            GameEventsContainer.GameStartingEvent.Raise(this, new GameEventArgs { Game = this });
 
-            FirstPlayer.ShuffleDeck();
-            FirstPlayer.ShuffleLandDeck();
+            _firstPlayer.PrepareForGame();
+            _secondPlayer.PrepareForGame();
 
-            SecondPlayer.ShuffleDeck();
-            SecondPlayer.ShuffleLandDeck();
+            _firstPlayer.RegisterTriggers(this);
+            _secondPlayer.RegisterTriggers(this);
 
-            if (FlipCoin())
-            {
-                CurrentPlayer = FirstPlayer;
-                NextPlayer = SecondPlayer;
-            }
-            else
-            {
-                CurrentPlayer = SecondPlayer;
-                NextPlayer = FirstPlayer;
-            }
-            
-            GameStarted?.Invoke(this, new GameEventArgs { Game = this });
-        }
+            _firstPlayer.SetStartingHand();
+            _secondPlayer.SetStartingHand();
 
-        private bool FlipCoin()
-        {
-            var random = new Random();
-            return random.Next(0, 2) == 0;
+            SetPlayerOrder();
+
+            GameEventsContainer.GameStartedEvent.Raise(this, new GameEventArgs { Game = this });
         }
 
         public void FinishTurn()
         {
-            TurnFinished?.Invoke(this, new GameEventArgs { Game = this });
+            GameEventsContainer.TurnFinishedEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
             NextTurn();
         }
 
-        public void NextTurn()
+        private void NextTurn()
         {
             CurrentPlayer.EndTurn();
             TurnCounter++;
 
-            if (FirstPlayer == CurrentPlayer)
+            if (_firstPlayer == CurrentPlayer)
             {
-                NextPlayer = FirstPlayer;
-                CurrentPlayer = SecondPlayer;
+                NextPlayer = _firstPlayer;
+                CurrentPlayer = _secondPlayer;
             }
             else
             {
-                NextPlayer = SecondPlayer;
-                CurrentPlayer = FirstPlayer;
+                NextPlayer = _secondPlayer;
+                CurrentPlayer = _firstPlayer;
             }
 
             CurrentPlayer.BoardSide.StartTurn(this);
@@ -98,24 +92,26 @@ namespace CardGame_Game.Game
                 CurrentPlayer.GetCardFromLandDeck();
         }
 
-        public void PlayLandCard(ILandCard card)
+        public void PlayCard(GameCard card, InvocationData invocationData)
         {
-            if (CurrentPlayer.Energy[CurrentPlayer.PlayerColor] >= card.GetCost(CurrentPlayer.PlayerColor) &&
-                CurrentPlayer.GetHand().Any(h => h == card))
-                CurrentPlayer.PlayLandCard(this, card);
+            if (CurrentPlayer.Energy >= card.Cost &&
+                CurrentPlayer.Hand.Any(h => h == card) &&
+                card.CanBePlayed(this, CurrentPlayer, invocationData))
+                    card.Play(this, CurrentPlayer, invocationData);
         }
 
-        public void PlayCard(ICard card)
+        private void SetPlayerOrder()
         {
-            if (CurrentPlayer.Energy[CurrentPlayer.PlayerColor] >= card.GetCost(CurrentPlayer.PlayerColor) &&
-                CurrentPlayer.GetHand().Any(h => h == card)) ;
-               // CurrentPlayer.PlayCard(this, card);
+            if (_randomHelper.FlipCoin())
+            {
+                CurrentPlayer = _firstPlayer;
+                NextPlayer = _secondPlayer;
+            }
+            else
+            {
+                CurrentPlayer = _secondPlayer;
+                NextPlayer = _firstPlayer;
+            }
         }
-
-        public void MoveCreature(ICard card)
-        {
-
-        }
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CardGame_Game.BoardTable.Interfaces;
+using CardGame_Game.Cards;
 using CardGame_Game.Cards.Interfaces;
 
 namespace CardGame_Game.BoardTable
@@ -8,7 +9,7 @@ namespace CardGame_Game.BoardTable
         public int X { get; }
         public int Y { get; }
 
-        public ICard Card { get; set; }
+        public GameCard Card { get; set; }
 
         public Field(int x, int y)
         {

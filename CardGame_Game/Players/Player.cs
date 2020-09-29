@@ -1,62 +1,66 @@
-﻿using CardGame_Data.Entities.Enums;
+﻿using CardGame_Data.Data;
+using CardGame_Data.Data.Enums;
 using CardGame_Game.BoardTable.Interfaces;
-using CardGame_Game.Cards.Interfaces;
+using CardGame_Game.Cards;
+using CardGame_Game.Cards.Enums;
 using CardGame_Game.Game;
 using CardGame_Game.Game.Interfaces;
+using CardGame_Game.Helpers;
 using CardGame_Game.Players.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CardGame_Game.Players
 {
-    public class Player : IPlayer
+    public abstract class Player : IPlayer
     {
         public string Name { get; }
-        public Stack<ILandCard> LandDeck { get; private set; }
-        public Stack<ICard> Deck { get; private set; }
-        public IList<ICard> Hand { get; private set; } = new List<ICard>();
 
-        public CardColor PlayerColor { get; }
+        public Stack<GameCard> LandDeck { get; private set; }
+        public Stack<GameCard> Deck { get; private set; }
+        public IList<GameCard> Hand { get; private set; } = new List<GameCard>();
 
-        public IDictionary<CardColor, int> Energy { get; } = new Dictionary<CardColor, int>
-        {
-            [CardColor.White] = 0,
-            [CardColor.Red] = 0,
-            [CardColor.Green] = 0,
-        };
+        public CardColor PlayerColor { get; protected set; }
+        public int Energy { get; private set; }
 
         public bool CardTaken { get; private set; } = false;
         public IBoardSide BoardSide { get; set; }
 
         public bool IsLandCardPlayed { get; set; }
 
-        public event EventHandler<GameEventArgs> LandCardPlayed;
+        private readonly Stack<Card> _landDeck;
+        private readonly GameCardFactory _gameCardFactory;
+        private readonly Stack<Card> _deck;
 
-        public Player(string name, Stack<ICard> deck, Stack<ILandCard> landDeck)
+        public Player(string name, Stack<Card> deck, Stack<Card> landDeck, GameCardFactory gameCardFactory)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException(nameof(name));
 
             Name = name;
-            Deck = deck ?? throw new ArgumentNullException(nameof(deck)); 
-            LandDeck = landDeck ?? throw new ArgumentNullException(nameof(landDeck)); 
+            _deck = deck ?? throw new ArgumentNullException(nameof(deck));
+            _landDeck = landDeck ?? throw new ArgumentNullException(nameof(landDeck));
+            _gameCardFactory = gameCardFactory ?? throw new ArgumentNullException(nameof(gameCardFactory));
         }
 
-        public void ShuffleDeck()
+        public void PrepareForGame()
         {
-            var deck = new Stack<ICard>(Deck);
-            Deck = deck.Shuffle();
+            var organizedDeck = _deck.Where(c => c.Kind != Kind.Land).Select(c => _gameCardFactory.CreateGameCard(this, c));
+            Deck = new Stack<GameCard>(organizedDeck).Shuffle();
+            var organizedLandDeck = _landDeck.Where(c => c.Kind == Kind.Land).Select(c => _gameCardFactory.CreateGameCard(this, c));
+            LandDeck = new Stack<GameCard>(organizedLandDeck).Shuffle();
         }
 
-        public void ShuffleLandDeck()
+        public void RegisterTriggers(IGame game)
         {
-            var landDeck = new Stack<ILandCard>(LandDeck);
-            LandDeck = landDeck.Shuffle();
+            foreach (var card in Deck.Concat(LandDeck))
+                card.RegisterTriggers(game);
         }
 
         public void EndTurn()
         {
-            Energy[PlayerColor] = 0;
+            Energy = 0;
             CardTaken = false;
             IsLandCardPlayed = false;
         }
@@ -64,37 +68,40 @@ namespace CardGame_Game.Players
         public void GetCardFromDeck()
         {
             CardTaken = true;
-            Hand.Add(Deck.Pop());
+            var card = Deck.Pop();
+            card.CardState = CardState.InHand;
+            Hand.Add(card);
         }
 
         public void GetCardFromLandDeck()
         {
             CardTaken = true;
-            Hand.Add(LandDeck.Pop());
+            var card = LandDeck.Pop();
+            card.CardState = CardState.InHand;
+            Hand.Add(card);
         }
 
-        public void IncreaseEnergy(CardColor cardColor, int amount)
+        public void SetStartingHand()
         {
-            Energy[cardColor] += amount;
+            for (int i = 0; i < 3; i++)
+            {
+                var card = LandDeck.Pop();
+                card.CardState = CardState.InHand;
+                Hand.Add(card);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                var card = Deck.Pop();
+                card.CardState = CardState.InHand;
+                Hand.Add(card);
+            }
         }
 
-        public IEnumerable<ICard> GetHand()
+        public void IncreaseEnergy(CardColor cardColor, int value)
         {
-            return Hand;
-        }
-
-        public void PlayLandCard(IGame game, ILandCard card)
-        {
-            if (IsLandCardPlayed)
-                return;
-
-            IsLandCardPlayed = true;
-            Energy[PlayerColor] -= card.GetCost(PlayerColor);
-            Hand.Remove(card);
-            card.Play(game, this);
-            BoardSide.AddLandCard(card);
-
-            LandCardPlayed?.Invoke(this, new GameEventArgs { Card = card });
+            if (PlayerColor == cardColor)
+                Energy += value;
         }
     }
 }

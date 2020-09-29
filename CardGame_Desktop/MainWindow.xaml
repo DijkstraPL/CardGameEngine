@@ -1,0 +1,34 @@
+﻿<Window x:Class="CardGame_Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CardGame_Desktop"
+        xmlns:vm="clr-namespace:CardGame_Desktop.ViewModels"
+        xmlns:view="clr-namespace:CardGame_Desktop.Views"
+        xmlns:cards="clr-namespace:CardGame_Game.Cards;assembly=CardGame_Game"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        MinHeight="700" MinWidth="1300"
+        DataContext="{StaticResource MainWindowViewModel}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <view:PlayerSideTop Player="{Binding Player2}"
+                         IsEnabled="{Binding IsPlayer2}"/>
+
+
+        <Separator Grid.Row="1" 
+                       Grid.ColumnSpan="3"/>
+
+
+        <view:PlayerSideBottom Player="{Binding Player1}"
+                         IsEnabled="{Binding IsPlayer1}"
+                         Grid.Row="2"/>
+
+    </Grid>
+</Window>

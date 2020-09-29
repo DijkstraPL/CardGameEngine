@@ -1,9 +1,11 @@
-﻿using CardGame_Game.Game.Interfaces;
+﻿using CardGame_Game.Game;
+using CardGame_Game.Game.Interfaces;
 
 namespace CardGame_Game.Cards.Triggers.Interfaces
 {
     public interface IEffect
     {
-        void Invoke(params string[] args);
+        string Name { get; }
+        void Invoke(GameEventArgs gameEventArgs, params string[] args);
     }
 }
