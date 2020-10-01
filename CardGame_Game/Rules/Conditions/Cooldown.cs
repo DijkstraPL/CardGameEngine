@@ -10,6 +10,9 @@ using System.Composition;
 
 namespace CardGame_Game.Rules.Conditions
 {
+    /// <summary>
+    /// Morale({'SELF'/'TARGET'},{Amount})
+    /// </summary>
     [Export(Name, typeof(ICondition))]
     public class Cooldown : ICondition
     {

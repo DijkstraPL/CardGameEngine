@@ -23,9 +23,7 @@ namespace CardGame_Game.Cards
 
         public override void Play(IGame game, IPlayer player, InvocationData invocationData)
         {
-            if (Cost != null)
-                player.IncreaseEnergy(_card.Color, -(int)Cost);
-            player.Hand.Remove(this);
+            base.Play(game, player, invocationData);
             player.BoardSide.AddLandCard(this);
             this.CardState = Enums.CardState.OnField;
             player.IsLandCardPlayed = true;

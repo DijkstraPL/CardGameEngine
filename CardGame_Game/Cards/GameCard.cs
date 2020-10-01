@@ -37,7 +37,12 @@ namespace CardGame_Game.Cards
 
         public virtual bool CanBePlayed(IGame game, IPlayer player, InvocationData invocationData)
             => player.Energy >= Cost;
-        public abstract void Play(IGame game, IPlayer player, InvocationData invocationData);
+        public virtual void Play(IGame game, IPlayer player, InvocationData invocationData)
+        {
+            if (Cost != null)
+                player.IncreaseEnergy(_card.Color, -(int)Cost);
+            player.Hand.Remove(this);
+        }
 
         internal void RegisterTriggers(IGame game)
         {

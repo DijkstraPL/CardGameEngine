@@ -7,6 +7,7 @@ using CardGame_Game.Game;
 using CardGame_Game.Game.Interfaces;
 using CardGame_Game.GameEvents.Interfaces;
 using CardGame_Game.Helpers;
+using CardGame_Game.Players.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Composition.Hosting;
@@ -21,6 +22,11 @@ namespace CardGame_Game.BoardTable
         public IList<GameLandCard> LandCards { get; } = new List<GameLandCard>();
 
         private readonly IGameEventsContainer _gameEventsContainer;
+
+        public Field this[int columnIndex, int rowIndex]
+        {
+            get => Fields.FirstOrDefault(f => f.X == rowIndex && f.Y == columnIndex);
+        }
 
         public BoardSide(IGameEventsContainer gameEventsContainer)
         {
@@ -67,8 +73,6 @@ namespace CardGame_Game.BoardTable
 
         public void StartTurn(IGame game)
         {
-            _gameEventsContainer.TurnStartingEvent.Raise(this, new GameEventArgs { Game = game, Player = game.CurrentPlayer });
-
             foreach (var landCard in LandCards)
             {
                 if (landCard.Cooldown == 0)
@@ -76,70 +80,57 @@ namespace CardGame_Game.BoardTable
                 landCard.Cooldown--;
             }
 
-            //foreach (var landCard in LandCards)
-            //{
-            //    foreach (var rule in landCard.Rules)
-            //    {
-            //        var conditionName = rule.Condition.Substring(0, rule.Condition.IndexOf('('));
-            //        var condition = GetCondition(conditionName);
-
-            //        var effectName = rule.Effect.Substring(0, rule.Effect.IndexOf('('));
-            //        var effect = GetEffect(effectName);
-
-            //        var conditionArgs = rule.Condition.EverythingBetween("(", ")").First().Split(',');
-            //        var effectArgs = rule.Effect.EverythingBetween("(", ")").First().Split(',');
-
-            //        if (condition.Validate(conditionArgs))
-            //            effect.Invoke(effectArgs);
-            //    }
-            //}
-
-            _gameEventsContainer.TurnStartedEvent.Raise(this, new GameEventArgs { Game = game, Player = game.CurrentPlayer });
+            foreach (var field in Fields)
+            {
+                if(field.Card != null)
+                {
+                    if (field.Card.Cooldown == 0)
+                        field.Card.Cooldown = field.Card.BaseCooldown;
+                    field.Card.Cooldown--;
+                }
+            }
         }
 
-        public void Move(Field start, Field target)
+        public void Move(IPlayer player, Field start, Field target)
         {
-            var card = start.Card;
-            target.Card = card;
-            start.Card = null;
+            if(player.Energy > 0 && 
+                target.Card == null &&
+                GetNeighbourFields(start).Contains(target))
+            {
+                player.IncreaseEnergy(player.PlayerColor, -1);
+                var card = start.Card;
+                target.Card = card;
+                start.Card = null;
+            }
         }
 
-        //public Trigger GetTrigger(string conditionName, string effectName)
-        //{
-        //    ICondition condition = GetCondition(conditionName);
-        //    IEffect effect = GetEffect(effectName);
+        public void FinishTurn(IGame game, IPlayer player)
+        {
+            foreach (var field in Fields)
+            {
+                if (field.Card == null || field.Card.Cooldown > 0)
+                    continue;
 
-        //    return new Trigger(condition, effect);
-        //}
+                if (field.Card.AttackPlayer)
+                {
+                    game.NextPlayer.HitPoints -= field.Card.FinalAttack ?? 0;
+                    field.Card.AttackPlayer = false;
+                }
+                else if (field.Card.AttackTarget != null)
+                {
+                    field.Card.AttackTarget.HealthCalculators.Add(-field.Card.FinalAttack ?? 0);
+                    field.Card.HealthCalculators.Add(-field.Card.AttackTarget.FinalAttack / 2 ?? 0);
 
-        //private static ICondition GetCondition(string conditionName)
-        //{
-        //    ICondition condition;
-        //    var configuration = new ContainerConfiguration()
-        //       .WithAssembly(typeof(GameCard).GetTypeInfo().Assembly);
+                    field.Card.AttackTarget = null;
+                }
+            }
+        }
 
-        //    using (var container = configuration.CreateContainer())
-        //    {
-        //        if (!container.TryGetExport(conditionName, out condition))
-        //            throw new InvalidOperationException(nameof(conditionName));
-        //    }
-
-        //    return condition;
-        //}
-
-        //private static IEffect GetEffect(string effectName)
-        //{
-        //    IEffect effect;
-        //    var configuration = new ContainerConfiguration()
-        //       .WithAssembly(typeof(GameCard).GetTypeInfo().Assembly);
-
-        //    using (var container = configuration.CreateContainer())
-        //    {
-        //        if (!container.TryGetExport(effectName, out effect))
-        //            throw new InvalidOperationException(nameof(effectName));
-        //    }
-
-        //    return effect;
-        //}
+        public void Kill(GameUnitCard gameUnitCard)
+        {
+            var field = Fields.FirstOrDefault(f => f.Card == gameUnitCard);
+            field.Card = null;
+            _gameEventsContainer.UnitKilledEvent.Raise(this, new GameEventArgs { SourceCard = gameUnitCard });
+        }
     }
 }

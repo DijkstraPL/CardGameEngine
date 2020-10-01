@@ -52,11 +52,16 @@ namespace CardGame_Game.Game
 
             SetPlayerOrder();
 
+            GameEventsContainer.PlayerInitializedEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
+            GameEventsContainer.PlayerInitializedEvent.Raise(this, new GameEventArgs { Game = this, Player = NextPlayer });
+
             GameEventsContainer.GameStartedEvent.Raise(this, new GameEventArgs { Game = this });
         }
 
         public void FinishTurn()
         {
+            CurrentPlayer.BoardSide.FinishTurn(this, CurrentPlayer);
+
             GameEventsContainer.TurnFinishedEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
             NextTurn();
         }
@@ -77,7 +82,11 @@ namespace CardGame_Game.Game
                 CurrentPlayer = _firstPlayer;
             }
 
+            GameEventsContainer.TurnStartingEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
+
             CurrentPlayer.BoardSide.StartTurn(this);
+
+            GameEventsContainer.TurnStartedEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
         }
 
         public void GetCardFromDeck()
@@ -99,6 +108,9 @@ namespace CardGame_Game.Game
                 card.CanBePlayed(this, CurrentPlayer, invocationData))
                     card.Play(this, CurrentPlayer, invocationData);
         }
+
+        public bool IsGameFinished() 
+            => CurrentPlayer.HitPoints <= 0 || NextPlayer.HitPoints <= 0;
 
         private void SetPlayerOrder()
         {

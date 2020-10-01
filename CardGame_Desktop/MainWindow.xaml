@@ -18,8 +18,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <view:PlayerSideTop Player="{Binding Player2}"
-                         IsEnabled="{Binding IsPlayer2}"/>
+        <view:PlayerSideTop Player="{Binding Player2}"/>
 
 
         <Separator Grid.Row="1" 
@@ -27,7 +26,6 @@
 
 
         <view:PlayerSideBottom Player="{Binding Player1}"
-                         IsEnabled="{Binding IsPlayer1}"
                          Grid.Row="2"/>
 
     </Grid>

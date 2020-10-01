@@ -12,6 +12,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="{Binding ElementName=root, Path=Player.Name}"
@@ -33,9 +35,19 @@
                        HorizontalAlignment="Center"
                        Margin="20"/>
         </Border>
+
+        <TextBlock Text="{Binding ElementName=root, Path=Player.Morale, StringFormat='Morale:{0}'}"
+                   Grid.Row="2"
+                   FontSize="20" 
+                   HorizontalAlignment="Center"/>
+        <TextBlock Text="{Binding ElementName=root, Path=Player.HitPoints, StringFormat='HP:{0}'}"
+                   Grid.Row="3"
+                   FontSize="20" 
+                   HorizontalAlignment="Center"/>
+
         <Button 
             Content="Turn"
-                Grid.Row="2"
+                Grid.Row="4"
                    Width="60"
                    Height="30"
                    VerticalAlignment="Bottom"

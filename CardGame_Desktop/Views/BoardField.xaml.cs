@@ -1,4 +1,5 @@
 ﻿using CardGame_Desktop.ViewModels;
+using CardGame_Game.BoardTable;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,24 +16,20 @@ using System.Windows.Shapes;
 namespace CardGame_Desktop.Views
 {
     /// <summary>
-    /// Interaction logic for PlayerDecks.xaml
+    /// Interaction logic for BoardField.xaml
     /// </summary>
-    public partial class PlayerDecks : UserControl
+    public partial class BoardField : UserControl
     {
-        public PlayerViewModel Player
+        public FieldViewModel Field
         {
-            get { return (PlayerViewModel)GetValue(PlayerProperty); }
-            set { SetValue(PlayerProperty, value); }
+            get { return (FieldViewModel)GetValue(FieldProperty); }
+            set { SetValue(FieldProperty, value); }
         }
 
-        public static readonly DependencyProperty PlayerProperty =
-            DependencyProperty.Register("Player", typeof(PlayerViewModel), typeof(PlayerDecks),
-                new FrameworkPropertyMetadata(null));
+        public static readonly DependencyProperty FieldProperty =
+            DependencyProperty.Register("Field", typeof(FieldViewModel), typeof(BoardField), new PropertyMetadata(null));
 
-
-
-
-        public PlayerDecks()
+        public BoardField()
         {
             InitializeComponent();
         }

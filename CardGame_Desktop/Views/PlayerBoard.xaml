@@ -4,21 +4,50 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CardGame_Desktop.Views"
+             xmlns:view="clr-namespace:CardGame_Desktop.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary>
-                    <Style TargetType="{x:Type Border}" x:Key="field">
-                        <Setter Property="BorderThickness" Value="1"/>
-                        <Setter Property="BorderBrush" Value="Black"/>
-                    </Style>
-                </ResourceDictionary>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
-    <Grid MaxWidth="500">
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="root">
+
+    <Grid HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.3*"/>
+            <ColumnDefinition/>
+            <ColumnDefinition  Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Border BorderBrush="Blue"
+                    BorderThickness="2"
+                    Padding="5"
+                    Margin="0,10">
+        <ItemsControl ItemsSource="{Binding ElementName=root, Path=BoardSide.LandCards}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <Button Width="100"
+                    Height="50"
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Command="{Binding SelectToAttackPlayerCommand}"
+                    Content="{Binding ElementName=root, Path=BoardSide.Owner.Name}"/>
+        </Grid>
+
+        <Grid MaxWidth="500"
+          Grid.Column="1">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
@@ -32,83 +61,56 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-
-        <Border Grid.Column="0"
+        <view:BoardField Grid.Column="0"
                     Grid.Row="0"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="1"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[0]}"/>
+        <view:BoardField Grid.Column="1"
                     Grid.Row="0"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="2"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[1]}"/>
+        <view:BoardField Grid.Column="2"
                     Grid.Row="0"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="3"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[2]}"/>
+        <view:BoardField Grid.Column="3"
                     Grid.Row="0"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="4"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[3]}"/>
+        <view:BoardField Grid.Column="4"
                     Grid.Row="0"
-                    Style="{StaticResource field}">
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[4]}"/>
 
-        </Border>
 
-        <Border Grid.Column="0"
+        <view:BoardField Grid.Column="0"
                     Grid.Row="1"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="1"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[5]}"/>
+        <view:BoardField Grid.Column="1"
                     Grid.Row="1"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="2"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[6]}"/>
+        <view:BoardField Grid.Column="2"
                     Grid.Row="1"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="3"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[7]}"/>
+        <view:BoardField Grid.Column="3"
                     Grid.Row="1"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="4"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[8]}"/>
+        <view:BoardField Grid.Column="4"
                     Grid.Row="1"
-                    Style="{StaticResource field}">
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[9]}"/>
 
-        </Border>
 
-        <Border Grid.Column="0"
+        <view:BoardField Grid.Column="0"
                     Grid.Row="2"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="1"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[10]}"/>
+        <view:BoardField Grid.Column="1"
                     Grid.Row="2"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="2"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[11]}"/>
+        <view:BoardField Grid.Column="2"
                     Grid.Row="2"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="3"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[12]}"/>
+        <view:BoardField Grid.Column="3"
                     Grid.Row="2"
-                    Style="{StaticResource field}">
-
-        </Border>
-        <Border Grid.Column="4"
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[13]}"/>
+        <view:BoardField Grid.Column="4"
                     Grid.Row="2"
-                    Style="{StaticResource field}">
+                         Field="{Binding ElementName=root, Path=BoardSide.Fields[14]}"/>
+        </Grid>
 
-        </Border>
     </Grid>
 </UserControl>

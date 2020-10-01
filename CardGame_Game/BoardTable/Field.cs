@@ -9,7 +9,7 @@ namespace CardGame_Game.BoardTable
         public int X { get; }
         public int Y { get; }
 
-        public GameCard Card { get; set; }
+        public GameUnitCard Card { get; set; }
 
         public Field(int x, int y)
         {

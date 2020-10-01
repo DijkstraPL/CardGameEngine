@@ -7,7 +7,7 @@ namespace CardGame_Game.Cards.Interfaces
     public interface IAttacker
     {
         int? BaseAttack { get; }
-        List<int> AttackCalculators { get; }
+        List<(Func<bool> conditon, int value)> AttackCalculators { get; }
         int? FinalAttack { get; }
     }
 }

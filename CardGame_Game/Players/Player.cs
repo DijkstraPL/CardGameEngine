@@ -5,6 +5,7 @@ using CardGame_Game.Cards;
 using CardGame_Game.Cards.Enums;
 using CardGame_Game.Game;
 using CardGame_Game.Game.Interfaces;
+using CardGame_Game.GameEvents.Interfaces;
 using CardGame_Game.Helpers;
 using CardGame_Game.Players.Interfaces;
 using System;
@@ -16,24 +17,27 @@ namespace CardGame_Game.Players
     public abstract class Player : IPlayer
     {
         public string Name { get; }
-
+        public IGameEventsContainer GameEventsContainer { get; }
         public Stack<GameCard> LandDeck { get; private set; }
         public Stack<GameCard> Deck { get; private set; }
+        public Stack<GameCard> Graveyard { get; } = new Stack<GameCard>();
         public IList<GameCard> Hand { get; private set; } = new List<GameCard>();
 
         public CardColor PlayerColor { get; protected set; }
         public int Energy { get; private set; }
+        public int HitPoints { get; set; } = 20;
 
         public bool CardTaken { get; private set; } = false;
         public IBoardSide BoardSide { get; set; }
 
         public bool IsLandCardPlayed { get; set; }
 
+
         private readonly Stack<Card> _landDeck;
         private readonly GameCardFactory _gameCardFactory;
         private readonly Stack<Card> _deck;
 
-        public Player(string name, Stack<Card> deck, Stack<Card> landDeck, GameCardFactory gameCardFactory)
+        public Player(string name, Stack<Card> deck, Stack<Card> landDeck, GameCardFactory gameCardFactory, IGameEventsContainer gameEventsContainer)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException(nameof(name));
@@ -42,6 +46,7 @@ namespace CardGame_Game.Players
             _deck = deck ?? throw new ArgumentNullException(nameof(deck));
             _landDeck = landDeck ?? throw new ArgumentNullException(nameof(landDeck));
             _gameCardFactory = gameCardFactory ?? throw new ArgumentNullException(nameof(gameCardFactory));
+            GameEventsContainer = gameEventsContainer;
         }
 
         public void PrepareForGame()
@@ -102,6 +107,11 @@ namespace CardGame_Game.Players
         {
             if (PlayerColor == cardColor)
                 Energy += value;
+        }
+
+        public void AddToGraveyard(GameCard card)
+        {
+            Graveyard.Push(card);
         }
     }
 }

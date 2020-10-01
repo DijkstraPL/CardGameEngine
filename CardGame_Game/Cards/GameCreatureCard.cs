@@ -19,10 +19,9 @@ namespace CardGame_Game.Cards
 
         public override void Play(IGame game, IPlayer player, InvocationData invocationData)
         {
-            player.Hand.Remove(this);
-           // player.BoardSide.Add(this);
+            base.Play(game, player, invocationData);
+            invocationData.Field.Card = this;
             this.CardState = Enums.CardState.OnField;
-            player.IsLandCardPlayed = true;
         }
     }
 

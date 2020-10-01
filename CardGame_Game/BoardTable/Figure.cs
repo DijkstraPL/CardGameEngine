@@ -46,7 +46,7 @@ namespace CardGame_Game.BoardTable
 
         private int GetHealthValue()
         {
-            int health = Card.Health ?? 0;
+            int health = Card.BaseHealth ?? 0;
             health += _healthCommands.Sum(ac => ac());
             return health;
         }

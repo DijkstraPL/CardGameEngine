@@ -9,7 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800"
         xmlns:cards="clr-namespace:CardGame_Game.Cards;assembly=CardGame_Game"
              x:Name="root">
-    <Grid>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto">
         <ItemsControl ItemsSource="{Binding ElementName=root, Path=Player.Hand, Mode=OneWay}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -74,7 +74,7 @@
                                            FontWeight="Bold"/>
                                 <TextBlock Grid.Column="2"
                                        HorizontalAlignment="Center"
-                                Text="{Binding Health, StringFormat='H{0}'}"
+                                Text="{Binding FinalHealth, StringFormat='H{0}'}"
                                            FontSize="16"
                                            FontWeight="Bold"/>
                             </Grid>
@@ -83,5 +83,5 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

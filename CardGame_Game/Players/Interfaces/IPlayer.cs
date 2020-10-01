@@ -14,6 +14,7 @@ namespace CardGame_Game.Players.Interfaces
         string Name { get; }
         CardColor PlayerColor { get;  }
         int Energy { get; }
+        int HitPoints { get; set; }
         bool CardTaken { get; }
 
         IBoardSide BoardSide { get; set; }
@@ -34,5 +35,6 @@ namespace CardGame_Game.Players.Interfaces
 
         void SetStartingHand();
         void IncreaseEnergy(CardColor cardColor, int value);
+        void AddToGraveyard(GameCard card);
     }
 }

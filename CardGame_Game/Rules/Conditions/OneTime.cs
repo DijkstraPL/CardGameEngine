@@ -8,25 +8,27 @@ using System.Text;
 namespace CardGame_Game.Rules.Conditions
 {
     /// <summary>
-    /// Owner({'SELF'/'ENEMY'})
+    /// Times({amount})
     /// </summary>
     [Export(Name, typeof(ICondition))]
-    public class Owner : ICondition
+    public class Times : ICondition
     {
-        public const string Name = "Owner";
+        public const string Name = "Times";
         string ICondition.Name => Name;
 
+        private int _counter = 0;
+
         [ImportingConstructor]
-        public Owner()
+        public Times()
         {
         }
 
         public bool Validate(GameEventArgs gameEventArgs, params string[] args)
         {
-            if (args[0] == "SELF")
+            if (int.TryParse(args[0], out int maxTimes) && _counter < maxTimes)
             {
-                var owner = gameEventArgs.SourceCard.Owner;
-                return owner == gameEventArgs.Player;
+                _counter++;
+                return true;
             }
             return false;
         }

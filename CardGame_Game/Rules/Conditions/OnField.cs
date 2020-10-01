@@ -10,6 +10,9 @@ using System.Text;
 
 namespace CardGame_Game.Rules.Conditions
 {
+    /// <summary>
+    /// OnField({'SELF'/'TARGET'})
+    /// </summary>
     [Export(Name, typeof(ICondition))]
     public class OnField : ICondition
     {

@@ -7,9 +7,9 @@ using System.Text;
 namespace CardGame_Game.Rules.When
 {
     [Export(Name, typeof(IEventSource))]
-    public class TargetSelected : IEventSource
+    public class PlayerInitialized : IEventSource
     {
-        public const string Name = "TargetSelected";
+        public const string Name = "PlayerInitialized";
         string IEventSource.Name => Name;
     }
 }

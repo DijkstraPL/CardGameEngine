@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CardGame_Desktop.ViewModels;
+using CardGame_Game.BoardTable;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -18,6 +20,16 @@ namespace CardGame_Desktop.Views
     /// </summary>
     public partial class PlayerBoard : UserControl
     {
+        public BoardSideViewModel BoardSide
+        {
+            get { return (BoardSideViewModel)GetValue(BoardSideProperty); }
+            set { SetValue(BoardSideProperty, value); }
+        }
+
+        public static readonly DependencyProperty BoardSideProperty =
+            DependencyProperty.Register("BoardSide", typeof(BoardSideViewModel), typeof(PlayerBoard), new PropertyMetadata(null));
+
+
         public PlayerBoard()
         {
             InitializeComponent();

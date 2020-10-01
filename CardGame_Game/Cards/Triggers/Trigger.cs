@@ -20,8 +20,7 @@ namespace CardGame_Game.Cards.Triggers
         private IList<(ICondition condition, string[] args)> _conditions = new List<(ICondition condition, string[] args)>();
         public IEnumerable<(ICondition condition, string[] args)> Conditions => _conditions;
 
-        private IList<(IEffect effect, string[] args)> _effects = new List<(IEffect effect, string[] args)>();
-        public IEnumerable<(IEffect effect, string[] args)> Effects => _effects;
+        public (IEffect effect, IEnumerable<(ICondition, string[])> conditions, string[] args) Effect { get; private set; }
 
         private readonly IGameEventsContainer _gameEventsContainer;
         private readonly GameCard _gameCard;
@@ -51,16 +50,13 @@ namespace CardGame_Game.Cards.Triggers
                         try
                         {
                             if (_conditions.All(c => c.condition.Validate(a, c.args)))
-                                _effects.ToList().ForEach(e =>
+                                try
                                 {
-                                    try
-                                    {
-                                        e.effect.Invoke(a, e.args);
-                                    }
-                                    catch
-                                    {
-                                    }
-                                });
+                                    Effect.effect.Invoke(a, Effect.conditions, Effect.args);
+                                }
+                                catch
+                                {
+                                }
                         }
                         catch
                         {
@@ -95,15 +91,31 @@ namespace CardGame_Game.Cards.Triggers
 
         private void SetEffects(string effectData)
         {
-            var splittedEffectData = effectData?.Split(';');
-            foreach (var effectString in splittedEffectData)
+            var splittedEffectData = effectData?.Split("->");
+            string effectString;
+
+            List<(ICondition condition, string[] args)> conditions = new List<(ICondition condition, string[] args)>();
+            if (splittedEffectData.Length == 2)
             {
-                var effectName = effectString.Substring(0, effectString.IndexOf('('));
-                var effect = GetEffect(effectName);
-                var effectArgs = effectString.EverythingBetween("(", ")").First().Split(',');
-                var finalArgs = effectArgs.ToList().Select(c => c.Replace("\'", string.Empty)).ToArray();
-                _effects.Add((effect, finalArgs));
+                var splittedConditionData = splittedEffectData[0]?.Split(';');
+                effectString = splittedEffectData[1];
+                foreach (var conditionString in splittedConditionData)
+                {
+                    var conditionName = conditionString.Substring(0, conditionString.IndexOf('('));
+                    var condition = GetCondition(conditionName);
+                    var conditionArgs = conditionString.EverythingBetween("(", ")").First().Split(',');
+                    var finalConditionArgs = conditionArgs.ToList().Select(c => c.Replace("\'", string.Empty)).ToArray();
+                    conditions.Add((condition, finalConditionArgs));
+                }
             }
+            else
+                effectString = splittedEffectData[0];
+
+            var effectName = effectString.Substring(0, effectString.IndexOf('('));
+            var effect = GetEffect(effectName);
+            var effectArgs = effectString.EverythingBetween("(", ")").First().Split(',');
+            var finalArgs = effectArgs.ToList().Select(c => c.Replace("\'", string.Empty)).ToArray();
+            Effect =(effect, conditions, finalArgs);
         }
 
         private IEventSource GetWhen(string whenName)

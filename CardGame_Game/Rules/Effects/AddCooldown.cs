@@ -9,6 +9,9 @@ using System.Text;
 
 namespace CardGame_Game.Rules.Effects
 {
+    /// <summary>
+    /// AddCooldown({'TARGET'/'SELF'},{Amount})
+    /// </summary>
     [Export(Name, typeof(IEffect))]
     public class AddCooldown : IEffect
     {
@@ -20,7 +23,7 @@ namespace CardGame_Game.Rules.Effects
         {
         }
 
-        public void Invoke(GameEventArgs gameEventArgs, params string[] args)
+        public void Invoke(GameEventArgs gameEventArgs, IEnumerable<(ICondition condition, string[] args)> conditions, params string[] args)
         {
             if (args[0] == "TARGET" && 
                 Int32.TryParse(args[1], out int value) && 

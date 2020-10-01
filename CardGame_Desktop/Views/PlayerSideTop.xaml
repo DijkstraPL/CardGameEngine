@@ -20,11 +20,16 @@
         </Grid.ColumnDefinitions>
  
         <view:PlayerData Player="{Binding ElementName=root, Path=Player}"
-                             VerticalAlignment="Stretch"/>
+                             VerticalAlignment="Stretch"                         
+                         IsEnabled="{Binding IsPlayer2}"/>
         <view:PlayerHand Player="{Binding  ElementName=root, Path=Player}"
-                                    Grid.Column="1"/>
+                                    Grid.Column="1"                         
+                         IsEnabled="{Binding IsPlayer2}"/>
         <view:PlayerBoard Grid.Row="1"
-                              Grid.Column="1"/>
-        <view:PlayerDecks Grid.Column="2"/>
+                              Grid.Column="1"
+                          BoardSide="{Binding ElementName=root, Path=Player.BoardSide}"/>
+        <view:PlayerDecks Grid.Column="2"
+                          Player="{Binding  ElementName=root, Path=Player}"                          
+                         IsEnabled="{Binding IsPlayer2}"/>
     </Grid>
 </UserControl>

@@ -21,13 +21,18 @@
  
         <view:PlayerData Player="{Binding ElementName=root, Path=Player}"
                              VerticalAlignment="Stretch"
-                         Grid.Row="1"/>
+                         Grid.Row="1"
+                         IsEnabled="{Binding IsPlayer1}"/>
         <view:PlayerHand Player="{Binding  ElementName=root, Path=Player}"
                                     Grid.Column="1"
-                         Grid.Row="1"/>
+                         Grid.Row="1"
+                         IsEnabled="{Binding IsPlayer1}"/>
         <view:PlayerBoard Grid.Row="0"
-                              Grid.Column="1"/>
+                              Grid.Column="1"
+                          BoardSide="{Binding ElementName=root, Path=Player.BoardSide}"/>
         <view:PlayerDecks Grid.Column="2"
-                          Grid.Row="1"/>
+                          Grid.Row="1"
+                          Player="{Binding  ElementName=root, Path=Player}"
+                         IsEnabled="{Binding IsPlayer1}"/>
     </Grid>
 </UserControl>
