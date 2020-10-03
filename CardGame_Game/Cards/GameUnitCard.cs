@@ -27,15 +27,15 @@ namespace CardGame_Game.Cards
         }
 
         public int? BaseHealth { get; }
-        public List<int> HealthCalculators { get; } = new List<int>();
+        public List<(Func<bool> conditon, int value)> HealthCalculators { get; } = new List<(Func<bool> conditon, int value)>();
         public int? FinalHealth
         {
             get
             {
-                var finalHealth = BaseHealth == null ? null : BaseHealth + HealthCalculators.Sum();
+                var finalHealth = BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
                 if (finalHealth <= 0)
                     Dead();
-                return BaseHealth == null ? null : BaseHealth + HealthCalculators.Sum();
+                return BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
             }
         }
 
@@ -61,9 +61,12 @@ namespace CardGame_Game.Cards
 
         private void Dead()
         {
-            CardState = Enums.CardState.OnGraveyard;
-            Owner.BoardSide.Kill(this);
-            Owner.AddToGraveyard(this);
+            if (CardState == Enums.CardState.OnField)
+            {
+                CardState = Enums.CardState.OnGraveyard;
+                Owner.BoardSide.Kill(this);
+                Owner.AddToGraveyard(this);
+            }
         }
     }
 

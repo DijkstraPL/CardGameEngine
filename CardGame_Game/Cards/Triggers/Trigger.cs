@@ -44,7 +44,7 @@ namespace CardGame_Game.Cards.Triggers
             {
                 var gameEvent = _gameEventsContainer.GameEvents.FirstOrDefault(ge => ge.name == eventSource.Name);
                 if (gameEvent.gameEvent != null)
-                    gameEvent.gameEvent.Add(a =>
+                    gameEvent.gameEvent.Add(_gameCard, a =>
                     {
                         a.SourceCard = _gameCard;
                         try
@@ -78,7 +78,7 @@ namespace CardGame_Game.Cards.Triggers
 
         private void SetConditions(string conditionData)
         {
-            var splittedConditionData = conditionData?.Split(';');
+            var splittedConditionData = conditionData?.Split(';') ?? new string[0];
             foreach (var conditionString in splittedConditionData)
             {
                 var conditionName = conditionString.Substring(0, conditionString.IndexOf('('));

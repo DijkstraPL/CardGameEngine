@@ -106,10 +106,13 @@ namespace CardGame_Game.Game
             if (CurrentPlayer.Energy >= card.Cost &&
                 CurrentPlayer.Hand.Any(h => h == card) &&
                 card.CanBePlayed(this, CurrentPlayer, invocationData))
-                    card.Play(this, CurrentPlayer, invocationData);
+            {
+                card.Play(this, CurrentPlayer, invocationData);
+                GameEventsContainer.CardPlayedEvent.Raise(card, new GameEventArgs { Game = this, Player = CurrentPlayer, SourceCard = card });
+            }
         }
 
-        public bool IsGameFinished() 
+        public bool IsGameFinished()
             => CurrentPlayer.HitPoints <= 0 || NextPlayer.HitPoints <= 0;
 
         private void SetPlayerOrder()

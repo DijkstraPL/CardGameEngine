@@ -1,4 +1,5 @@
-﻿using CardGame_Game.Game;
+﻿using CardGame_Game.Cards;
+using CardGame_Game.Game;
 using System;
 
 namespace CardGame_Game.GameEvents
@@ -13,7 +14,7 @@ namespace CardGame_Game.GameEvents
     {
         public abstract string Name { get; }
 
-        public abstract void Add(Action<GameEventArgs> action);
+        public abstract void Add(GameCard sourceCard, Action<GameEventArgs> action);
         public abstract void Raise(object source, GameEventArgs gameEventArgs);
     }
 }

@@ -7,13 +7,17 @@ namespace CardGame_Game.GameEvents.Interfaces
     public interface IGameEventsContainer
     {
         GameStartingEvent GameStartingEvent { get; }
+        PlayerInitializedEvent PlayerInitializedEvent { get; }
         GameStartedEvent GameStartedEvent { get; }
+
         TurnStartingEvent TurnStartingEvent { get; }
         TurnStartedEvent TurnStartedEvent { get; }
+        CardPlayedEvent CardPlayedEvent { get; }
         TurnFinishedEvent TurnFinishedEvent { get; }
+
+        UnitBeingAttackingEvent UnitBeingAttackingEvent { get; }
         UnitKilledEvent UnitKilledEvent { get; }
         SpellCastingEvent SpellCastingEvent { get; }
-        PlayerInitializedEvent PlayerInitializedEvent { get; }
         List<(string name, GameEvent gameEvent)> GameEvents { get; }
     }
 }

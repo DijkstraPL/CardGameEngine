@@ -1,4 +1,5 @@
-﻿using CardGame_Game.Game;
+﻿using CardGame_Game.Cards;
+using CardGame_Game.Game;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,7 +17,7 @@ namespace CardGame_Game.GameEvents
             TurnStarting?.Invoke(source, gameEventArgs);
         }
 
-        public override void Add(Action<GameEventArgs> action)
+        public override void Add(GameCard sourceCard, Action<GameEventArgs> action)
         {
             TurnStarting += new EventHandler<GameEventArgs>((s, a) => action(a));
         }

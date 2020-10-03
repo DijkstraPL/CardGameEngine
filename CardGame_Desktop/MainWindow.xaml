@@ -11,6 +11,8 @@
         Title="MainWindow" Height="450" Width="800"
         MinHeight="700" MinWidth="1300"
         DataContext="{StaticResource MainWindowViewModel}">
+    <Grid HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -28,5 +30,39 @@
         <view:PlayerSideBottom Player="{Binding Player1}"
                          Grid.Row="2"/>
 
+
+
+
+    </Grid>
+
+        <ItemsControl ItemsSource="{Binding AttackTargets, UpdateSourceTrigger=PropertyChanged}" 
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Canvas>
+                    <Line X1="{Binding Source.X}"
+                          X2="{Binding Target.X}"
+                          Y1="{Binding Source.Y}"
+                          Y2="{Binding Target.Y}"
+                          StrokeThickness="2"
+                          Stroke="Black"/>
+                    <Ellipse Canvas.Left="{Binding Target.X}"
+                             Canvas.Top="{Binding Target.Y}"
+                             Width="10"
+                             Margin="-5,-5,0,0"
+                             Height="10"
+                             StrokeThickness="2"
+                             Stroke="Black"/>
+                    </Canvas>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </Window>

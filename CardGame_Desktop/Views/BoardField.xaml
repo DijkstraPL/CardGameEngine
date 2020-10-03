@@ -23,7 +23,8 @@
         <Button HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         Command="{Binding FieldClickedCommand}"
-        CommandParameter="{Binding ElementName=root, Path=Field}">
+        CommandParameter="{Binding ElementName=root, Path=Field}"
+                x:Name="fieldButton">
             <Grid VerticalAlignment="Stretch"
                   HorizontalAlignment="Stretch">
                 <Grid.RowDefinitions>

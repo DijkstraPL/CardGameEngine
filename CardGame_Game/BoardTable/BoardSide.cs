@@ -118,10 +118,16 @@ namespace CardGame_Game.BoardTable
                 }
                 else if (field.Card.AttackTarget != null)
                 {
-                    field.Card.AttackTarget.HealthCalculators.Add(-field.Card.FinalAttack ?? 0);
-                    field.Card.HealthCalculators.Add(-field.Card.AttackTarget.FinalAttack / 2 ?? 0);
+                    game.GameEventsContainer.UnitBeingAttackingEvent.Raise(this,
+                        new GameEventArgs { Game = game, Player = player, SourceCard = field.Card.AttackTarget, Targets = new List<GameCard> { field.Card } });
+            
+                    if(field.Card != null && field.Card.FinalHealth > 0)
+                    {
+                        field.Card.AttackTarget.HealthCalculators.Add((() => true, -field.Card.FinalAttack ?? 0));
+                        field.Card.HealthCalculators.Add((() => true, -field.Card.AttackTarget.FinalAttack / 2 ?? 0));
 
-                    field.Card.AttackTarget = null;
+                        field.Card.AttackTarget = null;
+                    }
                 }
             }
         }

@@ -6,20 +6,20 @@ using System.Text;
 
 namespace CardGame_Game.GameEvents
 {
-    public class SpellCastingEvent : GameEvent
+    public class CardPlayedEvent : GameEvent
     {
-        public override string Name => "SpellCasting";
+        public override string Name => "CardPlayed";
 
-        public event EventHandler<GameEventArgs> SpellCasting;
+        public event EventHandler<GameEventArgs> CardPlayed;
 
         public override void Raise(object source, GameEventArgs gameEventArgs)
         {
-            SpellCasting?.Invoke(source, gameEventArgs);
+            CardPlayed?.Invoke(source, gameEventArgs);
         }
 
         public override void Add(GameCard sourceCard, Action<GameEventArgs> action)
         {
-            SpellCasting += new EventHandler<GameEventArgs>((s, a) =>
+            CardPlayed += new EventHandler<GameEventArgs>((s, a) =>
             {
                 if (sourceCard == a.SourceCard)
                     action(a);

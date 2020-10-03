@@ -12,9 +12,10 @@ namespace CardGame_Game.Players.Interfaces
     public interface IPlayer
     {
         string Name { get; }
-        CardColor PlayerColor { get;  }
+        CardColor PlayerColor { get; }
         int Energy { get; }
         int HitPoints { get; set; }
+        int MaxHitPoints { get; set; }
         bool CardTaken { get; }
 
         IBoardSide BoardSide { get; set; }

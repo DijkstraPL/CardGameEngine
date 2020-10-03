@@ -1,4 +1,5 @@
-﻿using CardGame_Game.Game;
+﻿using CardGame_Game.Cards;
+using CardGame_Game.Game;
 using System;
 
 namespace CardGame_Game.GameEvents
@@ -14,7 +15,7 @@ namespace CardGame_Game.GameEvents
             TurnFinished?.Invoke(source, gameEventArgs);
         }
 
-        public override void Add(Action<GameEventArgs> action)
+        public override void Add(GameCard sourceCard, Action<GameEventArgs> action)
         {
             TurnFinished += new EventHandler<GameEventArgs>((s, a) => action(a));
         }

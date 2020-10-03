@@ -13,8 +13,10 @@ namespace CardGame_Game.GameEvents
 
         public TurnStartingEvent TurnStartingEvent { get; }
         public TurnStartedEvent TurnStartedEvent { get; }
+        public CardPlayedEvent CardPlayedEvent { get; }
         public TurnFinishedEvent TurnFinishedEvent { get; }
 
+        public UnitBeingAttackingEvent UnitBeingAttackingEvent { get; }
         public UnitKilledEvent UnitKilledEvent { get; }
         public SpellCastingEvent SpellCastingEvent { get; }
 
@@ -29,8 +31,10 @@ namespace CardGame_Game.GameEvents
 
             TurnStartingEvent = new TurnStartingEvent();
             TurnStartedEvent = new TurnStartedEvent();
+            CardPlayedEvent = new CardPlayedEvent();
             TurnFinishedEvent = new TurnFinishedEvent();
 
+            UnitBeingAttackingEvent = new UnitBeingAttackingEvent();
             UnitKilledEvent = new UnitKilledEvent();
             SpellCastingEvent = new SpellCastingEvent();
 
@@ -40,8 +44,10 @@ namespace CardGame_Game.GameEvents
 
             GameEvents.Add((TurnStartingEvent.Name, TurnStartingEvent));
             GameEvents.Add((TurnStartedEvent.Name, TurnStartedEvent));
+            GameEvents.Add((CardPlayedEvent.Name, CardPlayedEvent));
             GameEvents.Add((TurnFinishedEvent.Name, TurnFinishedEvent));
 
+            GameEvents.Add((UnitBeingAttackingEvent.Name, UnitBeingAttackingEvent));
             GameEvents.Add((UnitKilledEvent.Name, UnitKilledEvent));
             GameEvents.Add((SpellCastingEvent.Name, SpellCastingEvent));
         }

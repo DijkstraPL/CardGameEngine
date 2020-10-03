@@ -20,7 +20,7 @@ namespace CardGame_Game.Players
         public BluePlayer(string name, Stack<Card> deck, Stack<Card> landDeck, GameCardFactory gameCardFactory, IGameEventsContainer gameEventsContainer) : base(name, deck, landDeck, gameCardFactory, gameEventsContainer)
         {
             PlayerColor = CardColor.Blue;
-            GameEventsContainer.UnitKilledEvent.Add(gea =>
+            GameEventsContainer.UnitKilledEvent.Add(null, gea =>
             {
                 if (gea.SourceCard.Owner != this)
                     Morale++;
