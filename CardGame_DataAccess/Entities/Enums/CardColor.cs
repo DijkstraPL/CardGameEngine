@@ -2,7 +2,7 @@
 {
     public enum CardColor
     {
-        White = 1,
+        Blue = 1,
         Red,
         Green
     }

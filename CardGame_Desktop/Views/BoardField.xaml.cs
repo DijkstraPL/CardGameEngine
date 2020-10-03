@@ -34,6 +34,7 @@ namespace CardGame_Desktop.Views
             InitializeComponent();
 
             Loaded += BoardField_Loaded;
+            Application.Current.MainWindow.SizeChanged += BoardField_SizeChanged;
         }
 
         private void BoardField_Loaded(object sender, RoutedEventArgs e)
@@ -43,12 +44,7 @@ namespace CardGame_Desktop.Views
             Field.XCoord = relativePoint.X + fieldButton.ActualWidth / 2;
             Field.YCoord = relativePoint.Y + fieldButton.ActualHeight / 2;
         }
-
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
-        }
-
+        
         private void BoardField_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             var relativePoint = fieldButton.TransformToAncestor(Application.Current.MainWindow).Transform(new Point(0, 0));

@@ -17,7 +17,7 @@ namespace CardGame_Game.Cards
         public GameUnitCard AttackTarget { get; set; }
         public bool AttackPlayer { get; set; }
 
-        public int? BaseCooldown { get; }
+        public int? BaseCooldown { get; set; }
 
         private int? _cooldown;
         public int? Cooldown
@@ -39,8 +39,8 @@ namespace CardGame_Game.Cards
             }
         }
 
-        public GameUnitCard(IPlayer owner, Card card, int id, string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
-            : base(owner, card, id, name, description, cost, invocationTarget)
+        public GameUnitCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
+            : base(owner, card, name, description, cost, invocationTarget)
         {
             BaseAttack = attack;
             BaseCooldown = cooldown;

@@ -15,11 +15,11 @@ namespace CardGame_DataAccess.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.0")
+                .HasAnnotation("ProductVersion", "3.1.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("CardGame_Data.Entities.Card", b =>
+            modelBuilder.Entity("CardGame_DataAccess.Entities.Card", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -38,13 +38,13 @@ namespace CardGame_DataAccess.Migrations
                     b.Property<int?>("Cooldown")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CostBlue")
+                        .HasColumnType("int");
+
                     b.Property<int?>("CostGreen")
                         .HasColumnType("int");
 
                     b.Property<int?>("CostRed")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CostWhite")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
@@ -55,6 +55,9 @@ namespace CardGame_DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Health")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InvocationTarget")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsPublic")
@@ -74,7 +77,7 @@ namespace CardGame_DataAccess.Migrations
                     b.Property<int>("Rarity")
                         .HasColumnType("int");
 
-                    b.Property<int>("Set")
+                    b.Property<int>("SetId")
                         .HasColumnType("int");
 
                     b.Property<int?>("SubTypeId")
@@ -87,12 +90,32 @@ namespace CardGame_DataAccess.Migrations
 
                     b.HasIndex("CardTypeId");
 
+                    b.HasIndex("SetId");
+
                     b.HasIndex("SubTypeId");
 
                     b.ToTable("CardGame_Cards");
                 });
 
-            modelBuilder.Entity("CardGame_Data.Entities.CardRule", b =>
+            modelBuilder.Entity("CardGame_DataAccess.Entities.CardDeck", b =>
+                {
+                    b.Property<int>("CardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DeckId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.HasKey("CardId", "DeckId");
+
+                    b.HasIndex("DeckId");
+
+                    b.ToTable("CardGame_CardDecks");
+                });
+
+            modelBuilder.Entity("CardGame_DataAccess.Entities.CardRule", b =>
                 {
                     b.Property<int>("CardId")
                         .HasColumnType("int");
@@ -107,7 +130,7 @@ namespace CardGame_DataAccess.Migrations
                     b.ToTable("CardGame_CardRules");
                 });
 
-            modelBuilder.Entity("CardGame_Data.Entities.CardType", b =>
+            modelBuilder.Entity("CardGame_DataAccess.Entities.CardType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -124,7 +147,23 @@ namespace CardGame_DataAccess.Migrations
                     b.ToTable("CardGame_CardTypes");
                 });
 
-            modelBuilder.Entity("CardGame_Data.Entities.Rule", b =>
+            modelBuilder.Entity("CardGame_DataAccess.Entities.Deck", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(70)")
+                        .HasMaxLength(70);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CardGame_Decks");
+                });
+
+            modelBuilder.Entity("CardGame_DataAccess.Entities.Rule", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -144,12 +183,32 @@ namespace CardGame_DataAccess.Migrations
                         .HasColumnType("nvarchar(1000)")
                         .HasMaxLength(1000);
 
+                    b.Property<string>("When")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("CardGame_Rules");
                 });
 
-            modelBuilder.Entity("CardGame_Data.Entities.Subtype", b =>
+            modelBuilder.Entity("CardGame_DataAccess.Entities.Set", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1000)")
+                        .HasMaxLength(1000);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CardGame_Sets");
+                });
+
+            modelBuilder.Entity("CardGame_DataAccess.Entities.Subtype", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -166,28 +225,49 @@ namespace CardGame_DataAccess.Migrations
                     b.ToTable("CardGame_Subtypes");
                 });
 
-            modelBuilder.Entity("CardGame_Data.Entities.Card", b =>
+            modelBuilder.Entity("CardGame_DataAccess.Entities.Card", b =>
                 {
-                    b.HasOne("CardGame_Data.Entities.CardType", "CardType")
+                    b.HasOne("CardGame_DataAccess.Entities.CardType", "CardType")
                         .WithMany()
                         .HasForeignKey("CardTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CardGame_Data.Entities.Subtype", "SubType")
+                    b.HasOne("CardGame_DataAccess.Entities.Set", "Set")
+                        .WithMany()
+                        .HasForeignKey("SetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CardGame_DataAccess.Entities.Subtype", "SubType")
                         .WithMany()
                         .HasForeignKey("SubTypeId");
                 });
 
-            modelBuilder.Entity("CardGame_Data.Entities.CardRule", b =>
+            modelBuilder.Entity("CardGame_DataAccess.Entities.CardDeck", b =>
                 {
-                    b.HasOne("CardGame_Data.Entities.Card", "Card")
+                    b.HasOne("CardGame_DataAccess.Entities.Card", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CardGame_DataAccess.Entities.Deck", "Deck")
+                        .WithMany("Cards")
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CardGame_DataAccess.Entities.CardRule", b =>
+                {
+                    b.HasOne("CardGame_DataAccess.Entities.Card", "Card")
                         .WithMany("Rules")
                         .HasForeignKey("CardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CardGame_Data.Entities.Rule", "Rule")
+                    b.HasOne("CardGame_DataAccess.Entities.Rule", "Rule")
                         .WithMany()
                         .HasForeignKey("RuleId")
                         .OnDelete(DeleteBehavior.Cascade)

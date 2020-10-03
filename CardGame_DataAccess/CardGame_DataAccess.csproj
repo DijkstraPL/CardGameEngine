@@ -11,17 +11,23 @@
     <Compile Remove="Migrations\20191229225400_NullAvailableForSubType.Designer.cs" />
     <Compile Remove="Migrations\20191229230203_RuleIdShouldBeAddedOnlyOnce.cs" />
     <Compile Remove="Migrations\20191229230203_RuleIdShouldBeAddedOnlyOnce.Designer.cs" />
+    <Compile Remove="Migrations\20201003174817_InvocationTarget.cs" />
+    <Compile Remove="Migrations\20201003174817_InvocationTarget.Designer.cs" />
+    <Compile Remove="Migrations\20201003181050_Decks.cs" />
+    <Compile Remove="Migrations\20201003181050_Decks.Designer.cs" />
+    <Compile Remove="Migrations\20201003195509_ImplicitOperator.cs" />
+    <Compile Remove="Migrations\20201003195509_ImplicitOperator.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.0">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.0">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

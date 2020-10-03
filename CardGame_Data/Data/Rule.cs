@@ -2,7 +2,6 @@
 {
     public class Rule
     {
-        public int Id { get; set; }
         public string When { get; set; }
         public string Condition { get; set; }
         public string Effect { get; set; }

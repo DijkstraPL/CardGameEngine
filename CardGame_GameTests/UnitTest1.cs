@@ -1,18 +1,16 @@
+using CardGame_DataAccess.DataInitializations;
 using NUnit.Framework;
+using System.Threading.Tasks;
 
 namespace CardGame_GameTests
 {
     public class Tests
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
         [Test]
-        public void Test1()
+        [Explicit]
+        public async Task PopulateDatabase()
         {
-            Assert.Pass();
+            await Startup.CreateData();
         }
     }
 }

@@ -115,9 +115,19 @@ namespace CardGame_Game.BoardTable
                 {
                     game.NextPlayer.HitPoints -= field.Card.FinalAttack ?? 0;
                     field.Card.AttackPlayer = false;
+
+                    game.GameEventsContainer.UnitAttackedEvent.Raise(this, 
+                        new GameEventArgs { Game = game, Player = player, SourceCard = field.Card });
                 }
                 else if (field.Card.AttackTarget != null)
                 {
+                    var targetField = game.NextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card == field.Card.AttackTarget);
+                    if (targetField == null)
+                        return;
+                    if (field.Y - 1 > targetField.Y ||
+                        field.Y + 1 < targetField.Y)
+                        return;
+
                     game.GameEventsContainer.UnitBeingAttackingEvent.Raise(this,
                         new GameEventArgs { Game = game, Player = player, SourceCard = field.Card.AttackTarget, Targets = new List<GameCard> { field.Card } });
             
@@ -128,6 +138,9 @@ namespace CardGame_Game.BoardTable
 
                         field.Card.AttackTarget = null;
                     }
+
+                    game.GameEventsContainer.UnitAttackedEvent.Raise(this,
+                        new GameEventArgs { Game = game, Player = player, SourceCard = field.Card, Targets = new List<GameCard> { field.Card.AttackTarget } });
                 }
             }
         }

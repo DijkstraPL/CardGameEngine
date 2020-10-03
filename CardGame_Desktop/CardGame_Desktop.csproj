@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CardGame_DataAccess\CardGame_DataAccess.csproj" />
     <ProjectReference Include="..\CardGame_Game\CardGame_Game.csproj" />
   </ItemGroup>
 

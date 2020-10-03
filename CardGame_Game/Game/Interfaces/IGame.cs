@@ -10,6 +10,8 @@ namespace CardGame_Game.Game.Interfaces
 {
     public interface IGame
     {
+        int TurnCounter { get; }
+
         IPlayer CurrentPlayer { get; }
         IPlayer NextPlayer { get;  }
         IBoard Board { get; }

@@ -10,6 +10,7 @@ namespace CardGame_Desktop.ViewModels
     public class FieldViewModel : Notifier
     {
         public Field Field { get; }
+        public BoardSideViewModel BoardSideViewModel { get; }
         public IPlayer Owner { get; }
 
         private double _xCoord;
@@ -28,10 +29,11 @@ namespace CardGame_Desktop.ViewModels
 
         public GameCard Card => Field.Card;
 
-        public FieldViewModel(IPlayer owner, Field field)
+        public FieldViewModel(IPlayer owner, Field field, BoardSideViewModel boardSideViewModel)
         {
             Owner = owner;
             Field = field;
+            BoardSideViewModel = boardSideViewModel;
         }
 
         internal void Refresh()

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CardGame_DataAccess.Entities
+﻿namespace CardGame_DataAccess.Entities
 {
     public class CardRule
     {

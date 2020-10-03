@@ -1,5 +1,8 @@
-﻿using CardGame_Data.Entities.Enums;
+﻿using CardGame_DataAccess.Entities.Enums;
+using Data = CardGame_Data.Data;
 using System.Collections.Generic;
+using Microsoft.VisualBasic;
+using System.Linq;
 
 namespace CardGame_DataAccess.Entities
 {
@@ -21,7 +24,7 @@ namespace CardGame_DataAccess.Entities
         public int? Cooldown { get; set; }
         public int? Health { get; set; }
         public int? CostGreen { get; set; }
-        public int? CostWhite { get; set; }
+        public int? CostBlue { get; set; }
         public int? CostRed { get; set; }
         public Rarity Rarity { get; set; }
         public CardColor Color { get; set; }
@@ -29,9 +32,39 @@ namespace CardGame_DataAccess.Entities
         public int SetId { get; set; }
         public Set Set { get; set; }
 
+        public InvocationTarget InvocationTarget { get; set; }
+
         public Card()
         {
             Rules = new HashSet<CardRule>();
+        }
+
+        public static implicit operator Data.Card(Card card)
+        {
+            var dataCard = new Data.Card
+            {
+                Name = card.Name,
+                CostBlue = card.CostBlue,
+                Cooldown = card.Cooldown,
+                Kind = (Data.Enums.Kind)card.Kind,
+                InvocationTarget = (Data.Enums.InvocationTarget)card.InvocationTarget,
+                Rarity = (Data.Enums.Rarity)card.Rarity,
+                Description = card.Description,
+                Color = (Data.Enums.CardColor)card.Color,
+                Number = card.Number,
+                Flavour = card.Flavour,
+                CardType = card.CardType,
+                Set = card.Set,
+                SubType = card.SubType,
+                Attack = card.Attack,
+                CostGreen = card.CostGreen,
+                CostRed = card.CostRed,
+                Health = card.Health,
+                Trait = card.Trait
+            };
+            foreach (var rule in card.Rules)
+                dataCard.Rules.Add(rule.Rule);
+            return dataCard;
         }
     }
 }

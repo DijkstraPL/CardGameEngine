@@ -1,5 +1,7 @@
 ﻿using CardGame_Data.Data;
 using CardGame_Data.Data.Enums;
+using CardGame_DataAccess.Factories;
+using CardGame_DataAccess.Repositories;
 using CardGame_Game.BoardTable;
 using CardGame_Game.Cards;
 using CardGame_Game.Game;
@@ -68,8 +70,14 @@ namespace CardGame_Desktop.ViewModels
         private IList<LineViewModel> _attackTargets = new ObservableCollection<LineViewModel>();
         public IEnumerable<LineViewModel> AttackTargets => _attackTargets;
 
+        private readonly DeckRepository _deckRepository;
+
         public MainWindowViewModel()
         {
+            var dbContextFactory = new CardGameDbContextFactory();
+            var dbContext = dbContextFactory.CreateDbContext(new string[0]);
+            _deckRepository = new DeckRepository(dbContext);
+
             var gameEventsContainer = new GameEventsContainer();
 
             var player1 = SetUpPlayer1(gameEventsContainer);
@@ -189,6 +197,7 @@ namespace CardGame_Desktop.ViewModels
                     TargetField.Card.SetAttackTarget();
                     IsMovementMode = false;
                     TargetField = null;
+                    SetAttackTargets();
                 }
             });
 
@@ -222,6 +231,12 @@ namespace CardGame_Desktop.ViewModels
                     if (attackTargetField != null)
                         _attackTargets.Add(new LineViewModel(new Point(field.XCoord, field.YCoord), new Point(attackTargetField.XCoord, attackTargetField.YCoord)));
                 }
+                else if (field.Field.Card?.AttackPlayer ?? false)
+                {
+                    var boardSideViewModel = Player1.BoardSide == field.BoardSideViewModel ? Player2.BoardSide : Player1.BoardSide;
+                    _attackTargets.Add(new LineViewModel(new Point(field.XCoord, field.YCoord), 
+                        new Point(boardSideViewModel.XCoord, boardSideViewModel.YCoord)));
+                }
             }
             OnPropertyChanged(nameof(AttackTargets));
         }
@@ -238,366 +253,363 @@ namespace CardGame_Desktop.ViewModels
 
         private BluePlayer SetUpPlayer1(GameEventsContainer gameEventsContainer)
         {
+            var decks = _deckRepository.GetDecks().GetAwaiter().GetResult();
+            var deck = decks.Where(d => d.Name == "Init1");
             var landDeck = new Stack<Card>();
-            for (int i = 0; i < 9; i++)
-                landDeck.Push(CreateKathedralCity());
-            for (int i = 0; i < 6; i++)
-                landDeck.Push(CreateBlacksmithGuild());
-            var deck = new Stack<Card>();
-            for (int i = 0; i < 20; i++)
-                deck.Push(CreateVillager());
-            for (int i = 0; i < 10; i++)
-                deck.Push(CreatePriestOfTheDeadSun());
-            for (int i = 0; i < 10; i++)
-                deck.Push(CreateHasteBlessing());
+            var landCards = deck.SelectMany(d => d.Cards).Where(cd => cd.Card.Kind == CardGame_DataAccess.Entities.Enums.Kind.Land);
+            foreach (var landCard in landCards)
+                for (int i = 0; i < landCard.Amount; i++)
+                    landDeck.Push(landCard.Card);
+            var cardDeck = new Stack<Card>();
+            var cards = deck.SelectMany(d => d.Cards).Where(cd => cd.Card.Kind != CardGame_DataAccess.Entities.Enums.Kind.Land);
+            foreach (var card in cards)
+                for (int i = 0; i < card.Amount; i++)
+                    cardDeck.Push(card.Card);
 
-            var player1 = new BluePlayer("Johan", deck, landDeck, new GameCardFactory(), gameEventsContainer);
+            var player1 = new BluePlayer("Johan", cardDeck, landDeck, new GameCardFactory(), gameEventsContainer);
             return player1;
         }
         private BluePlayer SetUpPlayer2(GameEventsContainer gameEventsContainer)
         {
+            var decks = _deckRepository.GetDecks().GetAwaiter().GetResult();
+            var deck = decks.Where(d => d.Name == "Init2");
             var landDeck = new Stack<Card>();
-            for (int i = 0; i < 3; i++)
-                landDeck.Push(CreateThroneHall());
-            for (int i = 0; i < 6; i++)
-                landDeck.Push(CreateKathedralCity());
-            for (int i = 0; i < 6; i++)
-                landDeck.Push(CreateWatchTower());
-            var deck = new Stack<Card>();
-            for (int i = 0; i < 20; i++)
-                deck.Push(CreateVillager());
-            for (int i = 0; i < 10; i++)
-                deck.Push(CreateSpearman());
-            for (int i = 0; i < 10; i++)
-                deck.Push(CreateHasteBlessing());
+            var landCards = deck.SelectMany(d => d.Cards).Where(cd => cd.Card.Kind == CardGame_DataAccess.Entities.Enums.Kind.Land);
+            foreach (var landCard in landCards)
+                for (int i = 0; i < landCard.Amount; i++)
+                    landDeck.Push(landCard.Card);
+            var cardDeck = new Stack<Card>();
+            var cards = deck.SelectMany(d => d.Cards).Where(cd => cd.Card.Kind != CardGame_DataAccess.Entities.Enums.Kind.Land);
+            foreach (var card in cards)
+                for (int i = 0; i < card.Amount; i++)
+                    cardDeck.Push(card.Card);
 
-            var player2 = new BluePlayer("Michael", deck, landDeck, new GameCardFactory(), gameEventsContainer);
+            var player2 = new BluePlayer("Michael",cardDeck, landDeck, new GameCardFactory(), gameEventsContainer);
             return player2;
         }
 
-        private Card CreateKathedralCity()
-        {
-            var card = new Card
-            {
-                Id = 1,
-                Name = "Kathedral city",
-                CostBlue = 0,
-                Cooldown = 1,
-                Kind = Kind.Land,
-                InvocationTarget = InvocationTarget.None,
-                Rarity = Rarity.Brown,
-                Description = "Gives 1 basic energy.",
-                Color = CardColor.Blue,
-                Number = 61,
-                Flavour = "Miasto z góry lepiej się prezentuje, ludzie wydają się ładniejsi, a najgorsi wyglądają niemalże na dobrych.",
-                CardType = new CardType { Id = 1, Name = "Land" },
-                CardTypeId = 1,
-                Set = new Set { Id = 1, Name = "The Big Bang" },
-                SetId = 1,
-            };
+        //private Card CreateKathedralCity()
+        //{
+        //    var card = new Card
+        //    {
+        //        Name = "Kathedral city",
+        //        CostBlue = 0,
+        //        Cooldown = 1,
+        //        Kind = Kind.Land,
+        //        InvocationTarget = InvocationTarget.None,
+        //        Rarity = Rarity.Brown,
+        //        Description = "Gives 1 basic energy.",
+        //        Color = CardColor.Blue,
+        //        Number = 61,
+        //        Flavour = "Miasto z góry lepiej się prezentuje, ludzie wydają się ładniejsi, a najgorsi wyglądają niemalże na dobrych.",
+        //        CardType = new CardType {  Name = "Land" },
+        //        CardTypeId = 1,
+        //        Set = new Set { Id = 1, Name = "The Big Bang" },
+        //        SetId = 1,
+        //    };
 
-            var rule = new Rule
-            {
-                Id = 1,
-                When = "TurnStarted",
-                Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
-                Effect = "AddEnergy('BLUE',1)",
-                Description = "Gives 1 basic energy."
-            };
-            card.Rules.Add(rule);
+        //    var rule = new Rule
+        //    {
+        //        Id = 1,
+        //        When = "TurnStarted",
+        //        Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
+        //        Effect = "AddEnergy('BLUE',1)",
+        //        Description = "Gives 1 basic energy."
+        //    };
+        //    card.Rules.Add(rule);
 
-            return card;
-        }
+        //    return card;
+        //}
 
-        private Card CreateThroneHall()
-        {
-            var card = new Card
-            {
-                Id = 2,
-                Name = "Throne hall",
-                CostBlue = 2,
-                Cooldown = 2,
-                Kind = Kind.Land,
-                InvocationTarget = InvocationTarget.None,
-                Rarity = Rarity.Gold,
-                Description = "Gives 3 temporary energy.",
-                Color = CardColor.Blue,
-                Number = 69,
-                Flavour = "W grze o tron zwycięża się albo umiera. Nie ma ziemi niczyjej.",
-                CardType = new CardType { Id = 1, Name = "Land" },
-                CardTypeId = 1,
-                Set = new Set { Id = 1, Name = "The Big Bang" },
-                SetId = 1,
-            };
+        //private Card CreateThroneHall()
+        //{
+        //    var card = new Card
+        //    {
+        //        Id = 2,
+        //        Name = "Throne hall",
+        //        CostBlue = 2,
+        //        Cooldown = 2,
+        //        Kind = Kind.Land,
+        //        InvocationTarget = InvocationTarget.None,
+        //        Rarity = Rarity.Gold,
+        //        Description = "Gives 3 temporary energy.",
+        //        Color = CardColor.Blue,
+        //        Number = 69,
+        //        Flavour = "W grze o tron zwycięża się albo umiera. Nie ma ziemi niczyjej.",
+        //        CardType = new CardType { Id = 1, Name = "Land" },
+        //        CardTypeId = 1,
+        //        Set = new Set { Id = 1, Name = "The Big Bang" },
+        //        SetId = 1,
+        //    };
 
-            var rule = new Rule
-            {
-                Id = 2,
-                When = "TurnStarted",
-                Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
-                Effect = "AddEnergy('BLUE',3)",
-                Description = "Gives 3 temporary energy."
-            };
-            card.Rules.Add(rule);
+        //    var rule = new Rule
+        //    {
+        //        Id = 2,
+        //        When = "TurnStarted",
+        //        Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
+        //        Effect = "AddEnergy('BLUE',3)",
+        //        Description = "Gives 3 temporary energy."
+        //    };
+        //    card.Rules.Add(rule);
 
-            return card;
-        }
+        //    return card;
+        //}
 
-        private Card CreateVillager()
-        {
-            var card = new Card
-            {
-                Id = 3,
-                Name = "Villager",
-                CostBlue = 1,
-                Cooldown = 2,
-                Kind = Kind.Creature,
-                InvocationTarget = InvocationTarget.OwnEmptyField,
-                Rarity = Rarity.Brown,
-                Description = "Morale 2+: +1 attack",
-                Color = CardColor.Blue,
-                Number = 1,
-                Flavour = "Na wojnie wszystko jest możliwe. Wojna miesza, zrównuje, chłop czy filozof - wszyscy są do umierania.",
-                CardType = new CardType { Id = 2, Name = "Human" },
-                CardTypeId = 2,
-                Set = new Set { Id = 1, Name = "The Big Bang" },
-                SetId = 1,
-                Health = 2,
-                Attack = 2,
-            };
+        //private Card CreateVillager()
+        //{
+        //    var card = new Card
+        //    {
+        //        Id = 3,
+        //        Name = "Villager",
+        //        CostBlue = 1,
+        //        Cooldown = 2,
+        //        Kind = Kind.Creature,
+        //        InvocationTarget = InvocationTarget.OwnEmptyField,
+        //        Rarity = Rarity.Brown,
+        //        Description = "Morale 2+: +1 attack",
+        //        Color = CardColor.Blue,
+        //        Number = 1,
+        //        Flavour = "Na wojnie wszystko jest możliwe. Wojna miesza, zrównuje, chłop czy filozof - wszyscy są do umierania.",
+        //        CardType = new CardType { Id = 2, Name = "Human" },
+        //        CardTypeId = 2,
+        //        Set = new Set { Id = 1, Name = "The Big Bang" },
+        //        SetId = 1,
+        //        Health = 2,
+        //        Attack = 2,
+        //    };
 
-            var rule = new Rule
-            {
-                Id = 3,
-                When = "PlayerInitialized",
-                Condition = "Owner('SELF');Times(1)",
-                Effect = "Morale('SELF',2)->AddAttack('SELF',1,'INFINITE')",
-                Description = "Morale 2+: +1 attack"
-            };
-            card.Rules.Add(rule);
+        //    var rule = new Rule
+        //    {
+        //        Id = 3,
+        //        When = "PlayerInitialized",
+        //        Condition = "Owner('SELF');Times(1)",
+        //        Effect = "Morale('SELF',2)->AddAttack('SELF',1,'INFINITE')",
+        //        Description = "Morale 2+: +1 attack"
+        //    };
+        //    card.Rules.Add(rule);
 
-            return card;
-        }
+        //    return card;
+        //}
 
-        private Card CreatePriestOfTheDeadSun()
-        {
-            var card = new Card
-            {
-                Id = 3,
-                Name = "Priest of the dead sun",
-                CostBlue = 1,
-                Cooldown = 2,
-                Kind = Kind.Creature,
-                InvocationTarget = InvocationTarget.OwnEmptyField,
-                Rarity = Rarity.Brown,
-                Description = "When appear on battlefield increase neighbour creatures life by 1 and heals 2 hero hit points.",
-                Color = CardColor.Blue,
-                Number = 3,
-                Flavour = "Ludzie potrzebują wiary w bogów, choćby dlatego, że tak trudno jest wierzyć w ludzi.",
-                CardType = new CardType { Id = 2, Name = "Human" },
-                CardTypeId = 2,
-                Set = new Set { Id = 1, Name = "The Big Bang" },
-                SubType = new Subtype { Id = 2, Name = "Priest" },
-                SubTypeId = 4,
-                SetId = 1,
-                Health = 2,
-                Attack = 1,
-            };
+        //private Card CreatePriestOfTheDeadSun()
+        //{
+        //    var card = new Card
+        //    {
+        //        Id = 3,
+        //        Name = "Priest of the dead sun",
+        //        CostBlue = 1,
+        //        Cooldown = 2,
+        //        Kind = Kind.Creature,
+        //        InvocationTarget = InvocationTarget.OwnEmptyField,
+        //        Rarity = Rarity.Brown,
+        //        Description = "When appear on battlefield increase neighbour creatures life by 1 and heals 2 hero hit points.",
+        //        Color = CardColor.Blue,
+        //        Number = 3,
+        //        Flavour = "Ludzie potrzebują wiary w bogów, choćby dlatego, że tak trudno jest wierzyć w ludzi.",
+        //        CardType = new CardType { Id = 2, Name = "Human" },
+        //        CardTypeId = 2,
+        //        Set = new Set { Id = 1, Name = "The Big Bang" },
+        //        SubType = new Subtype { Id = 2, Name = "Priest" },
+        //        SubTypeId = 4,
+        //        SetId = 1,
+        //        Health = 2,
+        //        Attack = 1,
+        //    };
 
-            var rule1 = new Rule
-            {
-                Id = 5,
-                When = "CardPlayed",
-                Condition = "Owner('SELF');OnField('SELF');Times(1)",
-                Effect = "AddHealth('NEIGHBOURS',1,'INFINITE')",
-                Description = "Increase neighbour creatures life by 1."
-            };
-            card.Rules.Add(rule1);
-
-
-            var rule2 = new Rule
-            {
-                Id = 6,
-                When = "CardPlayed",
-                Condition = "Owner('SELF');OnField('SELF');Times(1)",
-                Effect = "Heal('OWNHERO',2)",
-                Description = "Heals 2 hero hit points."
-            };
-            card.Rules.Add(rule2);
-
-            return card;
-        }
-
-        private Card CreateSpearman()
-        {
-            var card = new Card
-            {
-                Id = 6,
-                Name = "Spearman",
-                CostBlue = 2,
-                Cooldown = 2,
-                Kind = Kind.Creature,
-                InvocationTarget = InvocationTarget.OwnEmptyField,
-                Rarity = Rarity.Brown,
-                Description = "Spiky 2. Morale 2+: +2 health",
-                Color = CardColor.Blue,
-                Number = 10,
-                Flavour = "(…) rzuca się w wir walki i wypruwa wrogom flaki włócznią i mieczem, jak przystało na cywilizowanego człowieka!",
-                CardType = new CardType { Id = 2, Name = "Human" },
-                CardTypeId = 2,
-                Set = new Set { Id = 1, Name = "The Big Bang" },
-                SubType = new Subtype { Id = 4, Name = "Soldier" },
-                SubTypeId = 4,
-                SetId = 1,
-                Health = 2,
-                Attack = 2,
-            };
-
-            var rule1 = new Rule
-            {
-                Id = 3,
-                When = "PlayerInitialized",
-                Condition = "Owner('SELF');Times(1)",
-                Effect = "Morale('SELF',2)->AddHealth('SELF',2,'INFINITE')",
-                Description = "Morale 2+: +2 health"
-            };
-            card.Rules.Add(rule1);
+        //    var rule1 = new Rule
+        //    {
+        //        Id = 5,
+        //        When = "CardPlayed",
+        //        Condition = "Owner('SELF');OnField('SELF');Times(1)",
+        //        Effect = "AddHealth('NEIGHBOURS',1,'INFINITE')",
+        //        Description = "Increase neighbour creatures life by 1."
+        //    };
+        //    card.Rules.Add(rule1);
 
 
-            var rule2 = new Rule
-            {
-                Id = 6,
-                When = "UnitBeingAttacking",
-                Condition = "OnField('SELF')",
-                Effect = "AddHealth('TARGET',-2,'INFINITE')",
-                Description = "Spiky 2"
-            };
-            card.Rules.Add(rule2);
+        //    var rule2 = new Rule
+        //    {
+        //        Id = 6,
+        //        When = "CardPlayed",
+        //        Condition = "Owner('SELF');OnField('SELF');Times(1)",
+        //        Effect = "Heal('OWNHERO',2)",
+        //        Description = "Heals 2 hero hit points."
+        //    };
+        //    card.Rules.Add(rule2);
 
-            return card;
-        }
+        //    return card;
+        //}
 
-        private Card CreateHasteBlessing()
-        {
-            var card = new Card
-            {
-                Id = 4,
-                Name = "Haste blessing",
-                CostBlue = 1,
-                Kind = Kind.Spell,
-                InvocationTarget = InvocationTarget.OwnUnit | InvocationTarget.EnemyUnit,
-                Rarity = Rarity.Brown,
-                Description = "Decrease creature cooldown by 1.",
-                Color = CardColor.Blue,
-                Number = 1,
-                Flavour = "Nic nie jest bardziej niebezpieczne niż wróg, który nie ma nic do stracenia.",
-                CardType = new CardType { Id = 3, Name = "Spell" },
-                CardTypeId = 3,
-                SubType = new Subtype { Id = 1, Name = "Transformation" },
-                SubTypeId = 3,
-                Set = new Set { Id = 1, Name = "The Big Bang" },
-                SetId = 1,
-            };
+        //private Card CreateSpearman()
+        //{
+        //    var card = new Card
+        //    {
+        //        Id = 6,
+        //        Name = "Spearman",
+        //        CostBlue = 2,
+        //        Cooldown = 2,
+        //        Kind = Kind.Creature,
+        //        InvocationTarget = InvocationTarget.OwnEmptyField,
+        //        Rarity = Rarity.Brown,
+        //        Description = "Spiky 2. Morale 2+: +2 health",
+        //        Color = CardColor.Blue,
+        //        Number = 10,
+        //        Flavour = "(…) rzuca się w wir walki i wypruwa wrogom flaki włócznią i mieczem, jak przystało na cywilizowanego człowieka!",
+        //        CardType = new CardType { Id = 2, Name = "Human" },
+        //        CardTypeId = 2,
+        //        Set = new Set { Id = 1, Name = "The Big Bang" },
+        //        SubType = new Subtype { Id = 4, Name = "Soldier" },
+        //        SubTypeId = 4,
+        //        SetId = 1,
+        //        Health = 2,
+        //        Attack = 2,
+        //    };
 
-            var rule = new Rule
-            {
-                Id = 4,
-                When = "SpellCasting",
-                Condition = "OnField('TARGET')",
-                Effect = "AddCooldown('TARGET',-1)",
-                Description = "Decrease creature cooldown by 1."
-            };
-            card.Rules.Add(rule);
+        //    var rule1 = new Rule
+        //    {
+        //        Id = 3,
+        //        When = "PlayerInitialized",
+        //        Condition = "Owner('SELF');Times(1)",
+        //        Effect = "Morale('SELF',2)->AddHealth('SELF',2,'INFINITE')",
+        //        Description = "Morale 2+: +2 health"
+        //    };
+        //    card.Rules.Add(rule1);
 
-            return card;
-        }
 
-        private Card CreateWatchTower()
-        {
-            var card = new Card
-            {
-                Id = 1,
-                Name = "Watch tower",
-                CostBlue = 1,
-                Cooldown = 1,
-                Kind = Kind.Land,
-                InvocationTarget = InvocationTarget.None,
-                Rarity = Rarity.Silver,
-                Description = "Gives 1 basic energy. The same turn you play it you can play another land card.",
-                Color = CardColor.Blue,
-                Number = 68,
-                Flavour = "Mocny jak wieża bądź, co się nie zegnie, Chociaż się wicher na jej szczyty wali.",
-                CardType = new CardType { Id = 1, Name = "Land" },
-                CardTypeId = 1,
-                Set = new Set { Id = 1, Name = "The Big Bang" },
-                SetId = 1,
-            };
+        //    var rule2 = new Rule
+        //    {
+        //        Id = 6,
+        //        When = "UnitBeingAttacking",
+        //        Condition = "OnField('SELF')",
+        //        Effect = "AddHealth('TARGET',-2,'INFINITE')",
+        //        Description = "Spiky 2"
+        //    };
+        //    card.Rules.Add(rule2);
 
-            var rule1 = new Rule
-            {
-                Id = 1,
-                When = "TurnStarted",
-                Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
-                Effect = "AddEnergy('BLUE',1)",
-                Description = "Gives 1 basic energy."
-            };
-            card.Rules.Add(rule1);
+        //    return card;
+        //}
 
-            var rule2 = new Rule
-            {
-                Id = 2,
-                When = "CardPlayed",
-                Condition = "Owner('SELF');OnField('SELF')",
-                Effect = "SetLandCardPlayedFlag('OWNHERO','FALSE')",
-                Description = "The same turn you play it you can play another land card."
-            };
-            card.Rules.Add(rule2);
+        //private Card CreateHasteBlessing()
+        //{
+        //    var card = new Card
+        //    {
+        //        Id = 4,
+        //        Name = "Haste blessing",
+        //        CostBlue = 1,
+        //        Kind = Kind.Spell,
+        //        InvocationTarget = InvocationTarget.OwnUnit | InvocationTarget.EnemyUnit,
+        //        Rarity = Rarity.Brown,
+        //        Description = "Decrease creature cooldown by 1.",
+        //        Color = CardColor.Blue,
+        //        Number = 1,
+        //        Flavour = "Nic nie jest bardziej niebezpieczne niż wróg, który nie ma nic do stracenia.",
+        //        CardType = new CardType { Id = 3, Name = "Spell" },
+        //        CardTypeId = 3,
+        //        SubType = new Subtype { Id = 1, Name = "Transformation" },
+        //        SubTypeId = 3,
+        //        Set = new Set { Id = 1, Name = "The Big Bang" },
+        //        SetId = 1,
+        //    };
 
-            return card;
-        }
+        //    var rule = new Rule
+        //    {
+        //        Id = 4,
+        //        When = "SpellCasting",
+        //        Condition = "OnField('TARGET')",
+        //        Effect = "AddCooldown('TARGET',-1)",
+        //        Description = "Decrease creature cooldown by 1."
+        //    };
+        //    card.Rules.Add(rule);
 
-        private Card CreateBlacksmithGuild()
-        {
-            var card = new Card
-            {
-                Id = 1,
-                Name = "Blacksmith guild",
-                CostBlue = 1,
-                Cooldown = 1,
-                Kind = Kind.Land,
-                InvocationTarget = InvocationTarget.None,
-                Rarity = Rarity.Silver,
-                Description = "Gives 1 basic energy. If you have 2 or 3 blacksmith guilds it give 1 additional basic energy, once per turn.",
-                Color = CardColor.Blue,
-                Number = 67,
-                Flavour = "'-Dziadku, sami jesteśmy kowalami swojego losu.\n- Kup sobie najpierw kuźnię.",
-                CardType = new CardType { Id = 1, Name = "Land" },
-                CardTypeId = 1,
-                Set = new Set { Id = 1, Name = "The Big Bang" },
-                SetId = 1,
-            };
+        //    return card;
+        //}
 
-            var rule1 = new Rule
-            {
-                Id = 1,
-                When = "TurnStarted",
-                Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
-                Effect = "AddEnergy('BLUE',1)",
-                Description = "Gives 1 basic energy."
-            };
-            card.Rules.Add(rule1);
+        //private Card CreateWatchTower()
+        //{
+        //    var card = new Card
+        //    {
+        //        Id = 1,
+        //        Name = "Watch tower",
+        //        CostBlue = 1,
+        //        Cooldown = 1,
+        //        Kind = Kind.Land,
+        //        InvocationTarget = InvocationTarget.None,
+        //        Rarity = Rarity.Silver,
+        //        Description = "Gives 1 basic energy. The same turn you play it you can play another land card.",
+        //        Color = CardColor.Blue,
+        //        Number = 68,
+        //        Flavour = "Mocny jak wieża bądź, co się nie zegnie, Chociaż się wicher na jej szczyty wali.",
+        //        CardType = new CardType { Id = 1, Name = "Land" },
+        //        CardTypeId = 1,
+        //        Set = new Set { Id = 1, Name = "The Big Bang" },
+        //        SetId = 1,
+        //    };
 
-            var rule2 = new Rule
-            {
-                Id = 2,
-                When = "TurnStarted",
-                Condition = "Owner('SELF');OnField('SELF');Controls('SELF','Blacksmith guild',2);TimesPerTurn(1)",
-                Effect = "AddEnergy('BLUE',1)",
-                Description = "The same turn you play it you can play another land card."
-            };
-            card.Rules.Add(rule2);
+        //    var rule1 = new Rule
+        //    {
+        //        Id = 1,
+        //        When = "TurnStarted",
+        //        Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
+        //        Effect = "AddEnergy('BLUE',1)",
+        //        Description = "Gives 1 basic energy."
+        //    };
+        //    card.Rules.Add(rule1);
 
-            return card;
-        }
+        //    var rule2 = new Rule
+        //    {
+        //        Id = 2,
+        //        When = "CardPlayed",
+        //        Condition = "Owner('SELF');OnField('SELF')",
+        //        Effect = "SetLandCardPlayedFlag('OWNHERO','FALSE')",
+        //        Description = "The same turn you play it you can play another land card."
+        //    };
+        //    card.Rules.Add(rule2);
+
+        //    return card;
+        //}
+
+        //private Card CreateBlacksmithGuild()
+        //{
+        //    var card = new Card
+        //    {
+        //        Id = 1,
+        //        Name = "Blacksmith guild",
+        //        CostBlue = 1,
+        //        Cooldown = 1,
+        //        Kind = Kind.Land,
+        //        InvocationTarget = InvocationTarget.None,
+        //        Rarity = Rarity.Silver,
+        //        Description = "Gives 1 basic energy. If you have 2 or 3 blacksmith guilds it give 1 additional basic energy, once per turn.",
+        //        Color = CardColor.Blue,
+        //        Number = 67,
+        //        Flavour = "'-Dziadku, sami jesteśmy kowalami swojego losu.\n- Kup sobie najpierw kuźnię.",
+        //        CardType = new CardType { Id = 1, Name = "Land" },
+        //        CardTypeId = 1,
+        //        Set = new Set { Id = 1, Name = "The Big Bang" },
+        //        SetId = 1,
+        //    };
+
+        //    var rule1 = new Rule
+        //    {
+        //        Id = 1,
+        //        When = "TurnStarted",
+        //        Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
+        //        Effect = "AddEnergy('BLUE',1)",
+        //        Description = "Gives 1 basic energy."
+        //    };
+        //    card.Rules.Add(rule1);
+
+        //    var rule2 = new Rule
+        //    {
+        //        Id = 2,
+        //        When = "TurnStarted",
+        //        Condition = "Owner('SELF');OnField('SELF');Controls('SELF','Blacksmith guild',2);TimesPerTurn('Blacksmith guild',1)",
+        //        Effect = "AddEnergy('BLUE',1)",
+        //        Description = "The same turn you play it you can play another land card."
+        //    };
+        //    card.Rules.Add(rule2);
+
+        //    return card;
+        //}
     }
 }

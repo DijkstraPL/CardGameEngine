@@ -8,11 +8,11 @@ namespace CardGame_Game.Cards
 {
     public class GameLandCard : GameCard, ICooldown
     {
-        public int? BaseCooldown { get; }
+        public int? BaseCooldown { get; set; }
         public int? Cooldown { get; set; }
 
-        public GameLandCard(IPlayer owner, Card card, int id, string name, string description, int? cost, InvocationTarget invocationTarget, int? cooldown)
-            : base(owner, card, id, name, description, cost, invocationTarget)
+        public GameLandCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget, int? cooldown)
+            : base(owner, card,  name, description, cost, invocationTarget)
         {
             BaseCooldown = cooldown;
             Cooldown = BaseCooldown;

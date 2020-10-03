@@ -9,8 +9,8 @@ namespace CardGame_Game.Cards
 {
     public class GameSpellCard : GameCard
     {
-        public GameSpellCard(IPlayer owner, Card card,int id, string name, string description, int? cost, InvocationTarget invocationTarget)
-            : base(owner, card,id, name, description, cost, invocationTarget)
+        public GameSpellCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget)
+            : base(owner, card, name, description, cost, invocationTarget)
         {
         }
 

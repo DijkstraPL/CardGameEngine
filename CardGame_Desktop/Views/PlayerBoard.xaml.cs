@@ -33,6 +33,24 @@ namespace CardGame_Desktop.Views
         public PlayerBoard()
         {
             InitializeComponent();
+
+            Loaded += BoardField_Loaded;
+            Application.Current.MainWindow.SizeChanged += BoardField_SizeChanged;
+        }
+
+        private void BoardField_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.SizeChanged += BoardField_SizeChanged;
+            var relativePoint = playerButton.TransformToAncestor(Application.Current.MainWindow).Transform(new Point(0, 0));
+            BoardSide.XCoord = relativePoint.X + playerButton.ActualWidth / 2;
+            BoardSide.YCoord = relativePoint.Y + playerButton.ActualHeight / 2;
+        }
+
+        private void BoardField_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var relativePoint = playerButton.TransformToAncestor(Application.Current.MainWindow).Transform(new Point(0, 0));
+            BoardSide.XCoord = relativePoint.X + playerButton.ActualWidth / 2;
+            BoardSide.YCoord = relativePoint.Y + playerButton.ActualHeight / 2;
         }
     }
 }

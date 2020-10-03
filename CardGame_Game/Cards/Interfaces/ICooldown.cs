@@ -6,7 +6,7 @@ namespace CardGame_Game.Cards.Interfaces
 {
     public interface ICooldown
     {
-        public int? BaseCooldown { get; }
+        public int? BaseCooldown { get; set; }
         public int? Cooldown { get; set; }
     }
 }

@@ -17,11 +17,11 @@ namespace CardGame_Game.GameEvents
         public TurnFinishedEvent TurnFinishedEvent { get; }
 
         public UnitBeingAttackingEvent UnitBeingAttackingEvent { get; }
+        public UnitAttackedEvent UnitAttackedEvent { get; }
         public UnitKilledEvent UnitKilledEvent { get; }
         public SpellCastingEvent SpellCastingEvent { get; }
 
         public List<(string name, GameEvent gameEvent)> GameEvents { get; } = new List<(string name, GameEvent gameEvent)>();
-
 
         public GameEventsContainer()
         {
@@ -35,6 +35,7 @@ namespace CardGame_Game.GameEvents
             TurnFinishedEvent = new TurnFinishedEvent();
 
             UnitBeingAttackingEvent = new UnitBeingAttackingEvent();
+            UnitAttackedEvent = new UnitAttackedEvent();
             UnitKilledEvent = new UnitKilledEvent();
             SpellCastingEvent = new SpellCastingEvent();
 
@@ -48,6 +49,7 @@ namespace CardGame_Game.GameEvents
             GameEvents.Add((TurnFinishedEvent.Name, TurnFinishedEvent));
 
             GameEvents.Add((UnitBeingAttackingEvent.Name, UnitBeingAttackingEvent));
+            GameEvents.Add((UnitAttackedEvent.Name, UnitAttackedEvent));
             GameEvents.Add((UnitKilledEvent.Name, UnitKilledEvent));
             GameEvents.Add((SpellCastingEvent.Name, SpellCastingEvent));
         }

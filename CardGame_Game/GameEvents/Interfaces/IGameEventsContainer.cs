@@ -16,6 +16,7 @@ namespace CardGame_Game.GameEvents.Interfaces
         TurnFinishedEvent TurnFinishedEvent { get; }
 
         UnitBeingAttackingEvent UnitBeingAttackingEvent { get; }
+        UnitAttackedEvent UnitAttackedEvent { get; }
         UnitKilledEvent UnitKilledEvent { get; }
         SpellCastingEvent SpellCastingEvent { get; }
         List<(string name, GameEvent gameEvent)> GameEvents { get; }

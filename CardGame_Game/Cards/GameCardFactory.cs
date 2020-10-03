@@ -34,19 +34,19 @@ namespace CardGame_Game.Cards
 
         private GameCard CreateSpellCard(IPlayer owner, Card card)
         {
-            var spellCard = new GameSpellCard(owner, card, card.Id, card.Name, card.Description, card.CostBlue, card.InvocationTarget);
+            var spellCard = new GameSpellCard(owner, card, card.Name, card.Description, card.CostBlue, card.InvocationTarget);
             return spellCard;
         }
 
         private GameCard CreateCreatureCard(IPlayer owner, Card card)
         {
-            var creatureCard = new GameCreatureCard(owner, card, card.Id, card.Name, card.Description, card.CostBlue, card.InvocationTarget, card.Attack, card.Cooldown, card.Health);
+            var creatureCard = new GameCreatureCard(owner, card, card.Name, card.Description, card.CostBlue, card.InvocationTarget, card.Attack, card.Cooldown, card.Health);
             return creatureCard;
         }
 
         private GameCard CreateLandCard(IPlayer owner, Card card)
         {
-            var landCard = new GameLandCard(owner, card, card.Id, card.Name, card.Description, card.CostBlue, card.InvocationTarget, card.Cooldown);
+            var landCard = new GameLandCard(owner, card, card.Name, card.Description, card.CostBlue, card.InvocationTarget, card.Cooldown);
             return landCard;
         }
 

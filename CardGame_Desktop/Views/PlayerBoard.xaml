@@ -41,6 +41,7 @@
             <Button Width="100"
                     Height="50"
                     Grid.Column="1"
+                    x:Name="playerButton"
                     HorizontalAlignment="Right"
                     Command="{Binding SelectToAttackPlayerCommand}"
                     Content="{Binding ElementName=root, Path=BoardSide.Owner.Name}"/>

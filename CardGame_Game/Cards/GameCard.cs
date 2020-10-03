@@ -12,7 +12,6 @@ namespace CardGame_Game.Cards
 {
     public abstract class GameCard 
     {
-        public int Id { get; }
         public string Name { get; }
         public string Description { get; }
         public int? Cost { get; }
@@ -24,11 +23,10 @@ namespace CardGame_Game.Cards
         protected readonly Card _card;
         private readonly IList<Trigger> _triggers = new List<Trigger>();
 
-        public GameCard(IPlayer owner, Card card, int id, string name, string description, int? cost, InvocationTarget invocationTarget)
+        public GameCard(IPlayer owner, Card card,  string name, string description, int? cost, InvocationTarget invocationTarget)
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             _card = card ?? throw new System.ArgumentNullException(nameof(card));
-            Id = id;
             Name = name;
             Description = description;
             Cost = cost;

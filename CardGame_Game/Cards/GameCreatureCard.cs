@@ -7,8 +7,8 @@ namespace CardGame_Game.Cards
 {
     public class GameCreatureCard: GameUnitCard
     {
-        public GameCreatureCard(IPlayer owner, Card card, int id, string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
-            : base(owner ,card, id, name, description, cost, invocationTarget, attack, cooldown, health)
+        public GameCreatureCard(IPlayer owner, Card card,  string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
+            : base(owner ,card,  name, description, cost, invocationTarget, attack, cooldown, health)
         {
         }
 
