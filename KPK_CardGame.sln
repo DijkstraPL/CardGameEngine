@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_Console", "CardGame_Console\CardGame_Console.csproj", "{482A140D-615B-4EAF-A7CD-8FC26FE6F28F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_Game", "CardGame_Game\CardGame_Game.csproj", "{5613D44F-1924-41DF-8112-6B25DFD3DCFE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_Data", "CardGame_Data\CardGame_Data.csproj", "{12583C96-26E5-412D-B74D-10F084D127BE}"
@@ -15,16 +13,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_GameTests", "CardG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardGame_Desktop", "CardGame_Desktop\CardGame_Desktop.csproj", "{253B89B0-2E16-4529-9CC2-5B7C763931B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardGame_Server", "CardGame_Server\CardGame_Server.csproj", "{6C2FB519-8524-4B5D-92F2-7386D2062922}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardGame_Client", "CardGame_Client\CardGame_Client.csproj", "{E108AAB1-D7E8-4F8F-B515-26581621CF2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{482A140D-615B-4EAF-A7CD-8FC26FE6F28F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{482A140D-615B-4EAF-A7CD-8FC26FE6F28F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{482A140D-615B-4EAF-A7CD-8FC26FE6F28F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{482A140D-615B-4EAF-A7CD-8FC26FE6F28F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5613D44F-1924-41DF-8112-6B25DFD3DCFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5613D44F-1924-41DF-8112-6B25DFD3DCFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5613D44F-1924-41DF-8112-6B25DFD3DCFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +43,14 @@ Global
 		{253B89B0-2E16-4529-9CC2-5B7C763931B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{253B89B0-2E16-4529-9CC2-5B7C763931B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{253B89B0-2E16-4529-9CC2-5B7C763931B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C2FB519-8524-4B5D-92F2-7386D2062922}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C2FB519-8524-4B5D-92F2-7386D2062922}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C2FB519-8524-4B5D-92F2-7386D2062922}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C2FB519-8524-4B5D-92F2-7386D2062922}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E108AAB1-D7E8-4F8F-B515-26581621CF2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E108AAB1-D7E8-4F8F-B515-26581621CF2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E108AAB1-D7E8-4F8F-B515-26581621CF2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E108AAB1-D7E8-4F8F-B515-26581621CF2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,19 +9,30 @@ using CardGame_Game.GameEvents;
 using CardGame_Game.Helpers;
 using CardGame_Game.Players;
 using CardGame_Game.Players.Interfaces;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace CardGame_Desktop.ViewModels
 {
     public class MainWindowViewModel : Notifier
     {
+        private string _connectionStatus;
+        public string ConnectionStatus
+        {
+            get => _connectionStatus;
+            set => SetProperty(ref _connectionStatus, value);
+        }
+        public ICommand ConnectCommand { get; }
+
         public PlayerViewModel Player1 { get; set; }
         public PlayerViewModel Player2 { get; set; }
         private PlayerViewModel _currentPlayer;
@@ -71,9 +82,70 @@ namespace CardGame_Desktop.ViewModels
         public IEnumerable<LineViewModel> AttackTargets => _attackTargets;
 
         private readonly DeckRepository _deckRepository;
+        private readonly HubConnection _connection;
 
         public MainWindowViewModel()
         {
+            _connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:44382/TestHub")
+                .Build();
+            _connection.Closed += async (error) =>
+            {
+                await Task.Delay(new Random().Next(0, 5) * 1000);
+                await _connection.StartAsync();
+            };
+
+            ConnectCommand = new RelayCommand(async action =>
+            {
+                _connection.On<string>("Connected",
+                                       (connectionid) =>
+                                       {
+                                           //MessageBox.Show(connectionid);
+                                           ConnectionStatus = connectionid;
+                                       });
+
+                _connection.On<string>("Posted",
+                                       (value) =>
+                                       {
+                                           ConnectionStatus += " " + value;
+
+                                           //Dispatcher.BeginInvoke((Action)(() =>
+
+                                           //{
+                                           //    messagesList.Items.Add(value);
+                                           //}));
+                                       });
+
+                _connection.On<string>("Greetings",
+                    (value) =>
+                    {
+                        ConnectionStatus += " " + value;
+                    });
+                try
+                {
+                    await _connection.StartAsync();
+                    ConnectionStatus += " Connection started";
+                    //messagesList.Items.Add("Connection started");
+                    //btnConnect.IsEnabled = false;
+                    //sendButton.IsEnabled = true;
+                }
+                catch (Exception ex)
+                {
+                    ConnectionStatus += " " + ex.Message;
+                    //messagesList.Items.Add(ex.Message);
+                }
+
+                if (_connection.State == HubConnectionState.Connected)
+                    await _connection.SendAsync("Greetings", Guid.NewGuid());
+            });
+
+
+
+
+
+
+
+
             var dbContextFactory = new CardGameDbContextFactory();
             var dbContext = dbContextFactory.CreateDbContext(new string[0]);
             _deckRepository = new DeckRepository(dbContext);
@@ -229,13 +301,13 @@ namespace CardGame_Desktop.ViewModels
 
                     var attackTargetField = nextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card == field.Field.Card?.AttackTarget);
                     if (attackTargetField != null)
-                        _attackTargets.Add(new LineViewModel(new Point(field.XCoord, field.YCoord), new Point(attackTargetField.XCoord, attackTargetField.YCoord)));
+                        _attackTargets.Add(new LineViewModel(new Point(field.XCoord, field.YCoord), new Point(attackTargetField.XCoord, attackTargetField.YCoord), field, attackTargetField));
                 }
                 else if (field.Field.Card?.AttackPlayer ?? false)
                 {
                     var boardSideViewModel = Player1.BoardSide == field.BoardSideViewModel ? Player2.BoardSide : Player1.BoardSide;
-                    _attackTargets.Add(new LineViewModel(new Point(field.XCoord, field.YCoord), 
-                        new Point(boardSideViewModel.XCoord, boardSideViewModel.YCoord)));
+                    _attackTargets.Add(new LineViewModel(new Point(field.XCoord, field.YCoord),
+                        new Point(boardSideViewModel.XCoord, boardSideViewModel.YCoord), field, null));
                 }
             }
             OnPropertyChanged(nameof(AttackTargets));
@@ -284,9 +356,10 @@ namespace CardGame_Desktop.ViewModels
                 for (int i = 0; i < card.Amount; i++)
                     cardDeck.Push(card.Card);
 
-            var player2 = new BluePlayer("Michael",cardDeck, landDeck, new GameCardFactory(), gameEventsContainer);
+            var player2 = new BluePlayer("Michael", cardDeck, landDeck, new GameCardFactory(), gameEventsContainer);
             return player2;
         }
+
 
         //private Card CreateKathedralCity()
         //{

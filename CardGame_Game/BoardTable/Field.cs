@@ -1,6 +1,7 @@
 ﻿using CardGame_Game.BoardTable.Interfaces;
 using CardGame_Game.Cards;
 using CardGame_Game.Cards.Interfaces;
+using System;
 
 namespace CardGame_Game.BoardTable
 {
@@ -15,6 +16,12 @@ namespace CardGame_Game.BoardTable
         {
             X = x;
             Y = y;
+        }
+
+        public bool CanAttack(Field targetField)
+        {
+            return Y - 1 <= targetField.Y &&
+                       targetField.Y <= Y + 1;
         }
     }
 }

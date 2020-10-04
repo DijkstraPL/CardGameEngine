@@ -1,4 +1,5 @@
 ﻿using CardGame_DataAccess.Entities;
+using CardGame_DataAccess.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CardGame_DataAccess.Repositories
 {
-    public class DeckRepository : IDisposable
+    public class DeckRepository : IDisposable, IDeckRepository
     {
         private readonly CardGameDbContext _cardGameDbContext;
 

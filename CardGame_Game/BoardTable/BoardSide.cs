@@ -66,6 +66,16 @@ namespace CardGame_Game.BoardTable
              );
         }
 
+        public IEnumerable<Field> GetNeighbourFieldsCross(Field field)
+        {
+            return Fields.Where(f =>
+             f.X == field.X + 1 && f.Y == field.Y ||
+             f.X == field.X - 1 && f.Y == field.Y ||
+             f.X == field.X && f.Y == field.Y + 1 ||
+             f.X == field.X && f.Y == field.Y - 1
+             );
+        }
+
         public void AddLandCard(GameLandCard card)
         {
             LandCards.Add(card);
@@ -95,7 +105,7 @@ namespace CardGame_Game.BoardTable
         {
             if(player.Energy > 0 && 
                 target.Card == null &&
-                GetNeighbourFields(start).Contains(target))
+                GetNeighbourFieldsCross(start).Contains(target))
             {
                 player.IncreaseEnergy(player.PlayerColor, -1);
                 var card = start.Card;
@@ -124,8 +134,7 @@ namespace CardGame_Game.BoardTable
                     var targetField = game.NextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card == field.Card.AttackTarget);
                     if (targetField == null)
                         return;
-                    if (field.Y - 1 > targetField.Y ||
-                        field.Y + 1 < targetField.Y)
+                    if (!field.CanAttack(targetField))
                         return;
 
                     game.GameEventsContainer.UnitBeingAttackingEvent.Raise(this,

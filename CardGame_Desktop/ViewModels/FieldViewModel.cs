@@ -11,6 +11,7 @@ namespace CardGame_Desktop.ViewModels
     {
         public Field Field { get; }
         public BoardSideViewModel BoardSideViewModel { get; }
+
         public IPlayer Owner { get; }
 
         private double _xCoord;

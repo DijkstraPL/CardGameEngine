@@ -13,27 +13,43 @@
         DataContext="{StaticResource MainWindowViewModel}">
     <Grid HorizontalAlignment="Stretch"
           VerticalAlignment="Stretch">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="5"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <view:PlayerSideTop Player="{Binding Player2}"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <view:PlayerSideTop Player="{Binding Player2}"/>
 
 
-        <Separator Grid.Row="1" 
+            <Separator Grid.Row="1" 
                        Grid.ColumnSpan="3"/>
 
 
-        <view:PlayerSideBottom Player="{Binding Player1}"
+            <view:PlayerSideBottom Player="{Binding Player1}"
                          Grid.Row="2"/>
 
 
+            <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Height="10"
+                        Grid.Row="3"
+                    Panel.ZIndex="5">
+                <Button Content="C" 
+                    Width="20"
+                    Height="20" 
+                    Command="{Binding ConnectCommand}"
+                    VerticalAlignment="Top"/>
+                <TextBlock Text="Connection id:" 
+                   FontSize="10"  Panel.ZIndex="5"/>
+                <TextBlock Text="{Binding ConnectionStatus}" 
+                   FontSize="10"  Panel.ZIndex="5"/>
+            </StackPanel>
 
-
-    </Grid>
+        </Grid>
 
         <ItemsControl ItemsSource="{Binding AttackTargets, UpdateSourceTrigger=PropertyChanged}" 
                       HorizontalAlignment="Stretch"
@@ -47,13 +63,23 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Canvas>
-                    <Line X1="{Binding Source.X}"
+                        <Line X1="{Binding Source.X}"
                           X2="{Binding Target.X}"
                           Y1="{Binding Source.Y}"
                           Y2="{Binding Target.Y}"
-                          StrokeThickness="2"
-                          Stroke="Black"/>
-                    <Ellipse Canvas.Left="{Binding Target.X}"
+                          StrokeThickness="2">
+                            <Line.Style>
+                                <Style TargetType="{x:Type Line}">
+                                    <Setter Property="Stroke" Value="Black"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CanAttack}" Value="False">
+                                            <Setter Property="Stroke" Value="Red"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Line.Style>
+                        </Line>
+                        <Ellipse Canvas.Left="{Binding Target.X}"
                              Canvas.Top="{Binding Target.Y}"
                              Width="10"
                              Margin="-5,-5,0,0"
@@ -64,5 +90,6 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
     </Grid>
 </Window>
