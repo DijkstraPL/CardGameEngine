@@ -8,14 +8,13 @@ using System.Linq;
 
 namespace CardGame_Game.Cards
 {
-    public abstract class GameUnitCard : GameCard, ICooldown, IAttacker
+    public abstract class GameUnitCard : GameCard, ICooldown, IAttacker, IHealthy
     {
         public int? BaseAttack { get; }
         public List<(Func<bool> conditon, int value)> AttackCalculators { get; } = new List<(Func<bool> conditon, int value)>();
         public int? FinalAttack => BaseAttack == null ? null : BaseAttack + AttackCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
 
-        public GameUnitCard AttackTarget { get; set; }
-        public bool AttackPlayer { get; set; }
+        public IHealthy AttackTarget { get; set; }
 
         public int? BaseCooldown { get; set; }
 
@@ -48,15 +47,9 @@ namespace CardGame_Game.Cards
             BaseHealth = health;
         }
 
-        public void SetAttackTarget(GameUnitCard attackTarget)
+        public void SetAttackTarget(IHealthy attackTarget)
         {
             AttackTarget = attackTarget;
-            AttackPlayer = false;
-        }
-        public void SetAttackTarget()
-        {
-            AttackPlayer = true;
-            AttackTarget = null;
         }
 
         private void Dead()

@@ -121,15 +121,14 @@ namespace CardGame_Game.BoardTable
                 if (field.Card == null || field.Card.Cooldown > 0)
                     continue;
 
-                if (field.Card.AttackPlayer)
+                if (field.Card.AttackTarget is IPlayer)
                 {
-                    game.NextPlayer.HitPoints -= field.Card.FinalAttack ?? 0;
-                    field.Card.AttackPlayer = false;
+                    game.NextPlayer.HealthCalculators.Add((() => true,  -field.Card.FinalAttack ?? 0));
 
                     game.GameEventsContainer.UnitAttackedEvent.Raise(this, 
                         new GameEventArgs { Game = game, Player = player, SourceCard = field.Card });
                 }
-                else if (field.Card.AttackTarget != null)
+                else if (field.Card.AttackTarget is GameUnitCard attackTarget)
                 {
                     var targetField = game.NextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card == field.Card.AttackTarget);
                     if (targetField == null)
@@ -138,18 +137,18 @@ namespace CardGame_Game.BoardTable
                         return;
 
                     game.GameEventsContainer.UnitBeingAttackingEvent.Raise(this,
-                        new GameEventArgs { Game = game, Player = player, SourceCard = field.Card.AttackTarget, Targets = new List<GameCard> { field.Card } });
+                        new GameEventArgs { Game = game, Player = player, SourceCard = attackTarget, Targets = new List<GameCard> { field.Card } });
             
                     if(field.Card != null && field.Card.FinalHealth > 0)
                     {
                         field.Card.AttackTarget.HealthCalculators.Add((() => true, -field.Card.FinalAttack ?? 0));
-                        field.Card.HealthCalculators.Add((() => true, -field.Card.AttackTarget.FinalAttack / 2 ?? 0));
+                        field.Card.HealthCalculators.Add((() => true, -attackTarget.FinalAttack / 2 ?? 0));
 
                         field.Card.AttackTarget = null;
                     }
 
                     game.GameEventsContainer.UnitAttackedEvent.Raise(this,
-                        new GameEventArgs { Game = game, Player = player, SourceCard = field.Card, Targets = new List<GameCard> { field.Card.AttackTarget } });
+                        new GameEventArgs { Game = game, Player = player, SourceCard = field.Card, Targets = new List<GameCard> { attackTarget } });
                 }
             }
         }

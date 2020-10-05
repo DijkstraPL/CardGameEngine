@@ -9,5 +9,7 @@ namespace CardGame_Game.Cards.Interfaces
         int? BaseAttack { get; }
         List<(Func<bool> conditon, int value)> AttackCalculators { get; }
         int? FinalAttack { get; }
+
+        public IHealthy AttackTarget { get; set; }
     }
 }

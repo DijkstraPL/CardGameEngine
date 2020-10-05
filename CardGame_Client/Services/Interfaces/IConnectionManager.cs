@@ -2,6 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using CardGame_Data.GameData;
 
 namespace CardGame_Client.Services.Interfaces
 {
@@ -14,5 +15,6 @@ namespace CardGame_Client.Services.Interfaces
         event EventHandler<string> NewMessageAppeared;
 
         Task Connect();
+        void AddMessage(string message);
     }
 }

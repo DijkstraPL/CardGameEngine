@@ -113,7 +113,7 @@ namespace CardGame_Game.Game
         }
 
         public bool IsGameFinished()
-            => CurrentPlayer.HitPoints <= 0 || NextPlayer.HitPoints <= 0;
+            => CurrentPlayer.FinalHealth <= 0 || NextPlayer.FinalHealth <= 0;
 
         private void SetPlayerOrder()
         {

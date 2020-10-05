@@ -1,4 +1,5 @@
 ﻿using CardGame_Client.Services.Interfaces;
+using CardGame_Data.GameData;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
@@ -45,10 +46,11 @@ namespace CardGame_Client.Services
             {
                 NewMessageAppeared?.Invoke(this, message);
             });
-            Connection.On<string>("GameStarted", (game) =>
-            {
-                NewMessageAppeared?.Invoke(this, "Game started");
-            });
+        }
+
+        public void AddMessage(string message)
+        {
+            NewMessageAppeared?.Invoke(this, message);
         }
 
 

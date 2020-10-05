@@ -266,7 +266,7 @@ namespace CardGame_Desktop.ViewModels
             {
                 if (IsMovementMode && TargetField != null)
                 {
-                    TargetField.Card.SetAttackTarget();
+                    TargetField.Card.SetAttackTarget(CurrentPlayer == Player1 ? Player2.Player : Player1.Player);
                     IsMovementMode = false;
                     TargetField = null;
                     SetAttackTargets();
@@ -295,7 +295,7 @@ namespace CardGame_Desktop.ViewModels
             _attackTargets.Clear();
             foreach (var field in CurrentPlayer.BoardSide.Fields)
             {
-                if (field.Field.Card?.AttackTarget != null)
+                if (field.Field.Card?.AttackTarget != null && field.Field.Card?.AttackTarget is GameUnitCard)
                 {
                     PlayerViewModel nextPlayer = CurrentPlayer == Player1 ? Player2 : Player1;
 
@@ -303,7 +303,7 @@ namespace CardGame_Desktop.ViewModels
                     if (attackTargetField != null)
                         _attackTargets.Add(new LineViewModel(new Point(field.XCoord, field.YCoord), new Point(attackTargetField.XCoord, attackTargetField.YCoord), field, attackTargetField));
                 }
-                else if (field.Field.Card?.AttackPlayer ?? false)
+                else if (field.Field.Card?.AttackTarget is IPlayer)
                 {
                     var boardSideViewModel = Player1.BoardSide == field.BoardSideViewModel ? Player2.BoardSide : Player1.BoardSide;
                     _attackTargets.Add(new LineViewModel(new Point(field.XCoord, field.YCoord),

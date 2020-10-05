@@ -3,6 +3,7 @@ using CardGame_Data.Data.Enums;
 using CardGame_Game.BoardTable.Interfaces;
 using CardGame_Game.Cards;
 using CardGame_Game.Cards.Enums;
+using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Game;
 using CardGame_Game.Game.Interfaces;
 using CardGame_Game.GameEvents.Interfaces;
@@ -26,12 +27,27 @@ namespace CardGame_Game.Players
         public CardColor PlayerColor { get; protected set; }
         public int Energy { get; private set; }
 
-        public int HitPoints { get; set; } 
-        public int MaxHitPoints { get; set; } = 20;
+        //public int HitPoints { get; set; } 
+        //public int MaxHitPoints { get; set; } = 20;
         public bool CardTaken { get; private set; } = false;
         public IBoardSide BoardSide { get; set; }
 
         public bool IsLandCardPlayed { get; set; }
+
+        public int? BaseHealth { get; private set; } = 20;
+        public List<(Func<bool> conditon, int value)> HealthCalculators { get; } = new List<(Func<bool> conditon, int value)>();
+        public int? FinalHealth
+        {
+            get
+            {
+                var finalHealth = BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
+                if (finalHealth <= 0)
+                    IsLoser = true; 
+                return BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
+            }
+        }
+
+        public bool IsLoser { get; private set; }
 
         private readonly Stack<Card> _landDeck;
         private readonly GameCardFactory _gameCardFactory;
@@ -47,8 +63,6 @@ namespace CardGame_Game.Players
             _landDeck = landDeck ?? throw new ArgumentNullException(nameof(landDeck));
             _gameCardFactory = gameCardFactory ?? throw new ArgumentNullException(nameof(gameCardFactory));
             GameEventsContainer = gameEventsContainer;
-
-            HitPoints = MaxHitPoints;
         }
 
         public void PrepareForGame()

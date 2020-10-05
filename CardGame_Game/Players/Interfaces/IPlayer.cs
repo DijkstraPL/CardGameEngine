@@ -9,21 +9,23 @@ using System.Collections.Generic;
 
 namespace CardGame_Game.Players.Interfaces
 {
-    public interface IPlayer
+    public interface IPlayer : IHealthy
     {
         string Name { get; }
         CardColor PlayerColor { get; }
         int Energy { get; }
-        int HitPoints { get; set; }
-        int MaxHitPoints { get; set; }
+        //int HitPoints { get; set; }
+        //int MaxHitPoints { get; set; }
         bool CardTaken { get; }
 
         IBoardSide BoardSide { get; set; }
 
+        bool IsLoser { get; }
+
         Stack<GameCard> LandDeck { get; }
         Stack<GameCard> Deck { get; }
+        Stack<GameCard> Graveyard { get; }
         IList<GameCard> Hand { get; }
-
         bool IsLandCardPlayed { get; set; }
 
         void PrepareForGame();

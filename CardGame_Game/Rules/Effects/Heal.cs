@@ -26,10 +26,10 @@ namespace CardGame_Game.Rules.Effects
             if (args[0] == "OWNHERO" &&
                 Int32.TryParse(args[1], out int value))
             {
-                if (gameEventArgs.Player.HitPoints + value > gameEventArgs.Player.MaxHitPoints)
-                    gameEventArgs.Player.HitPoints = gameEventArgs.Player.MaxHitPoints;
+                if (gameEventArgs.Player.FinalHealth + value > gameEventArgs.Player.BaseHealth)
+                    gameEventArgs.Player.HealthCalculators.Clear();
                 else
-                    gameEventArgs.Player.HitPoints += value;
+                    gameEventArgs.Player.HealthCalculators.Add((() => true, value));
             }
         }
     }

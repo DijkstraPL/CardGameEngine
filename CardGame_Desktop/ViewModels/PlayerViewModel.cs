@@ -17,7 +17,7 @@ namespace CardGame_Desktop.ViewModels
         public string Name => Player.Name;
         public int Energy => Player.Energy;
         public int? Morale => (Player as BluePlayer)?.Morale;
-        public int HitPoints => Player.HitPoints;
+        public int? HitPoints => Player.FinalHealth;
         public BoardSideViewModel BoardSide { get;  }
 
         public int DeckCardCount => Player.Deck.Count;

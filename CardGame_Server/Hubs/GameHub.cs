@@ -9,6 +9,7 @@ using CardGame_Game.GameEvents.Interfaces;
 using CardGame_Game.Helpers;
 using CardGame_Game.Players;
 using CardGame_Game.Players.Interfaces;
+using CardGame_Server.Mappers.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -29,11 +30,13 @@ namespace CardGame_Server.Hubs
         public static HashSet<(string connectionId, IPlayer player)> Players { get; } = new HashSet<(string connectionId, IPlayer player)>();
         private static readonly object _pendingConnectionsLock = new object();
         private static IDeckRepository _deckRepository;
+        private readonly IMapper _mapper;
         private static IGameEventsContainer _gameEventsContainer;
 
-        public GameHub(IDeckRepository deckRepository)
+        public GameHub(IDeckRepository deckRepository, IMapper mapper)
         {
             _deckRepository = deckRepository ?? throw new ArgumentNullException(nameof(deckRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _gameEventsContainer = new GameEventsContainer();
         }
 
@@ -49,7 +52,12 @@ namespace CardGame_Server.Hubs
         public override Task OnDisconnectedAsync(Exception exception)
         {
             lock (_pendingConnectionsLock)
+            {
                 ConnectedIds.Remove(Context.ConnectionId);
+                var playerData = Players.FirstOrDefault(p => p.connectionId == Context.ConnectionId);
+                if (playerData != default)
+                    Players.Remove(playerData);
+            }
             return base.OnDisconnectedAsync(exception);
         }
 
@@ -67,24 +75,27 @@ namespace CardGame_Server.Hubs
 
             await Clients.All.SendAsync("RegisterServerMessage", playerName + " is ready");
 
-            if (ConnectedIds.All(c => c.Value == Status.ReadyToPlay))
+            if (ConnectedIds.Count % 2 == 0 && ConnectedIds.All(c => c.Value == Status.ReadyToPlay))
                 await StartGame();
-        }
-
-        public async Task StartGame()
-        {
-            if (ConnectedIds.All(c => c.Value == Status.ReadyToPlay))
-            {
-                var gameManager = new GameManager(_gameEventsContainer);
-                gameManager.GameInit(Players.First().player, Players.Last().player);
-                gameManager.StartGame();
-                await Clients.All.SendAsync("GameStarted", gameManager.Game);
-            }
+            else
+                await Clients.All.SendAsync("RegisterServerMessage", "Waiting for other player");
         }
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
+        }
+
+        private async Task StartGame()
+        {
+            var gameManager = new GameManager(_gameEventsContainer);
+            gameManager.GameInit(Players.First().player, Players.Last().player);
+            gameManager.StartGame();
+
+            await Clients.Client(Players.First().connectionId)
+                .SendAsync("GameStarted", _mapper.MapGame(gameManager.Game, isCurrentPlayer: gameManager.Game.CurrentPlayer == Players.First().player));
+            await Clients.Client(Players.Last().connectionId)
+                .SendAsync("GameStarted", _mapper.MapGame(gameManager.Game, isCurrentPlayer: gameManager.Game.CurrentPlayer == Players.Last().player));
         }
     }
 

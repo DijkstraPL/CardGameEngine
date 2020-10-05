@@ -30,6 +30,7 @@ namespace CardGame_Client
             containerRegistry.RegisterSingleton<IConnectionManager, ConnectionManager>();
             containerRegistry.RegisterSingleton<IDecksProvider, DecksProvider>();
             containerRegistry.RegisterSingleton<IClientGameManager, ClientGameManager>();
+            containerRegistry.RegisterInstance<IContainerProvider>(Container);
         }
 
 
@@ -39,6 +40,7 @@ namespace CardGame_Client
 
             IRegionManager regionManager = Container.Resolve<IRegionManager>();
             regionManager.RegisterViewWithRegion(Data.RegionNames.Main, typeof(WaitingLobbyView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.Main, typeof(GameView));
         }
     }
 }
