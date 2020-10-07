@@ -26,5 +26,10 @@
         <ContentControl
                 x:Name="Window"
                 prism:RegionManager.RegionName="{x:Static data:RegionNames.Main}"/>
+
+
+        <ListBox ItemsSource="{Binding Messages}"
+                 HorizontalAlignment="Right"
+                 VerticalAlignment="Center"/>
     </Grid>
 </Window>

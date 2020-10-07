@@ -60,10 +60,5 @@
                 Grid.Row="3"
                 Command="{Binding StartGameCommand}"
                     Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisibleConverter}}"/>
-
-        <ListBox ItemsSource="{Binding Messages}"
-                 HorizontalAlignment="Right"
-                 VerticalAlignment="Bottom"
-                 Grid.Row="4"/>
     </Grid>
 </UserControl>

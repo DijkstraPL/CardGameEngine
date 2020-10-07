@@ -13,7 +13,7 @@ namespace CardGame_Game.Game
 
     public class Game : IGame
     {
-        public int TurnCounter { get; private set; }
+        public int TurnCounter { get; private set; } = 1;
         public IBoard Board { get; }
 
         public IPlayer CurrentPlayer { get; private set; }
@@ -89,16 +89,18 @@ namespace CardGame_Game.Game
             GameEventsContainer.TurnStartedEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
         }
 
-        public void GetCardFromDeck()
+        public bool GetCardFromDeck()
         {
             if (!CurrentPlayer.CardTaken)
-                CurrentPlayer.GetCardFromDeck();
+                return CurrentPlayer.GetCardFromDeck();
+            return false;
         }
 
-        public void GetCardFromLandDeck()
+        public bool GetCardFromLandDeck()
         {
             if (!CurrentPlayer.CardTaken)
-                CurrentPlayer.GetCardFromLandDeck();
+                return CurrentPlayer.GetCardFromLandDeck();
+            return false;
         }
 
         public void PlayCard(GameCard card, InvocationData invocationData)

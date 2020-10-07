@@ -24,9 +24,6 @@ namespace CardGame_Client.ViewModels
             set => SetProperty(ref _connectionStatus, value);
         }
 
-        private IList<string> _messages = new ObservableCollection<string>();
-        public IEnumerable<string> Messages => _messages;
-
         private bool _isConnected;
         public bool IsConnected
         {
@@ -67,10 +64,6 @@ namespace CardGame_Client.ViewModels
             {
                 ConnectionStatus = _connectionManager.ConnectionStatus;
                 IsConnected = _connectionManager.Connection.State == HubConnectionState.Connected;
-            };
-            _connectionManager.NewMessageAppeared += (s, e) =>
-            {
-                _messages.Add(e);
             };
 
             ConnectCommand = new DelegateCommand(() => _connectionManager.Connect());

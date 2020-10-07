@@ -86,20 +86,36 @@ namespace CardGame_Game.Players
             IsLandCardPlayed = false;
         }
 
-        public void GetCardFromDeck()
+        public bool GetCardFromDeck()
         {
-            CardTaken = true;
-            var card = Deck.Pop();
-            card.CardState = CardState.InHand;
-            Hand.Add(card);
+            try
+            {
+                CardTaken = true;
+                var card = Deck.Pop();
+                card.CardState = CardState.InHand;
+                Hand.Add(card);
+                return true;
+            }
+            catch 
+            {
+                return false;
+            }
         }
 
-        public void GetCardFromLandDeck()
+        public bool GetCardFromLandDeck()
         {
-            CardTaken = true;
-            var card = LandDeck.Pop();
-            card.CardState = CardState.InHand;
-            Hand.Add(card);
+            try
+            {
+                CardTaken = true;
+                var card = LandDeck.Pop();
+                card.CardState = CardState.InHand;
+                Hand.Add(card);
+                return true;
+            }
+            catch 
+            {
+                return false;
+            }
         }
 
         public void SetStartingHand()

@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="CardGame_Client.Views.Player.PlayerDecksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CardGame_Client.Views.Player"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="root">
+    <StackPanel Orientation="Horizontal">
+        <Border Width="120" 
+                Height="160">
+            <Button HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch" 
+                    Command="{Binding GetCardFromDeckCommand}">
+                <StackPanel >
+                    <TextBlock Text="Deck"/>
+                    <TextBlock Text="{Binding DeckCardCount}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Border>
+        <Border Width="120" 
+                Height="160">
+            <Button HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch" 
+                    Command="{Binding GetCardFromLandDeckCommand}">
+                <StackPanel >
+                    <TextBlock Text="Land Deck"/>
+                    <TextBlock Text="{Binding LandDeckCardCount}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Border>
+        <Border Width="120" 
+                Height="160">
+            <Button HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch" 
+                    IsEnabled="False">
+                <StackPanel >
+                    <TextBlock Text="Graveyard"/>
+                    <TextBlock Text="{Binding GraveyardCardCount}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Border>
+    </StackPanel>
+</UserControl>
+

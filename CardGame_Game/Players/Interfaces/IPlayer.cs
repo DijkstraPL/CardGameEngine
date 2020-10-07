@@ -33,8 +33,8 @@ namespace CardGame_Game.Players.Interfaces
 
         void EndTurn();
 
-        void GetCardFromDeck();
-        void GetCardFromLandDeck();
+        bool GetCardFromDeck();
+        bool GetCardFromLandDeck();
 
         void SetStartingHand();
         void IncreaseEnergy(CardColor cardColor, int value);

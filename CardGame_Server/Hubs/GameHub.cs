@@ -1,15 +1,9 @@
-﻿using CardGame_Data.Data;
-using CardGame_DataAccess.Repositories.Interfaces;
-using CardGame_Game.BoardTable;
-using CardGame_Game.BoardTable.Interfaces;
-using CardGame_Game.Cards;
-using CardGame_Game.Game;
+﻿using CardGame_DataAccess.Repositories.Interfaces;
 using CardGame_Game.GameEvents;
 using CardGame_Game.GameEvents.Interfaces;
-using CardGame_Game.Helpers;
-using CardGame_Game.Players;
 using CardGame_Game.Players.Interfaces;
 using CardGame_Server.Mappers.Interfaces;
+using CardGame_Server.Services;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -32,6 +26,7 @@ namespace CardGame_Server.Hubs
         private static IDeckRepository _deckRepository;
         private readonly IMapper _mapper;
         private static IGameEventsContainer _gameEventsContainer;
+        private static GameManager _gameManager;
 
         public GameHub(IDeckRepository deckRepository, IMapper mapper)
         {
@@ -81,6 +76,53 @@ namespace CardGame_Server.Hubs
                 await Clients.All.SendAsync("RegisterServerMessage", "Waiting for other player");
         }
 
+        public async Task DrawLandCard()
+        {
+            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
+            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+                return;
+            if (_gameManager.Game.GetCardFromLandDeck())
+            {
+                await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " took land card");
+                await Clients.Client(Players.First().connectionId)
+                    .SendAsync("LandCardTaken", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
+                await Clients.Client(Players.Last().connectionId)
+                    .SendAsync("LandCardTaken", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+            }
+            else
+                await Clients.Caller.SendAsync("RegisterServerMessage", "Can't take a card");
+        }
+
+        public async Task DrawCard()
+        {
+            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
+            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+                return;
+            if (_gameManager.Game.GetCardFromDeck())
+            {
+                await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " took card");
+                await Clients.Client(Players.First().connectionId)
+                    .SendAsync("CardTaken", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
+                await Clients.Client(Players.Last().connectionId)
+                    .SendAsync("CardTaken", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+            }
+            else
+                await Clients.Caller.SendAsync("RegisterServerMessage", "Can't take a card");
+        }
+        public async Task FinishTurn()
+        {
+            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
+            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+                return;
+            _gameManager.Game.FinishTurn();
+
+            await Clients.All.SendAsync("RegisterServerMessage", $"Turn {_gameManager.Game.TurnCounter} started");
+            await Clients.Client(Players.First().connectionId)
+                .SendAsync("TurnStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
+            await Clients.Client(Players.Last().connectionId)
+                .SendAsync("TurnStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+        }
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -88,74 +130,17 @@ namespace CardGame_Server.Hubs
 
         private async Task StartGame()
         {
-            var gameManager = new GameManager(_gameEventsContainer);
-            gameManager.GameInit(Players.First().player, Players.Last().player);
-            gameManager.StartGame();
+            _gameManager = new GameManager(_gameEventsContainer);
+            _gameManager.GameInit(Players.First().player, Players.Last().player);
+            _gameManager.StartGame();
 
             await Clients.Client(Players.First().connectionId)
-                .SendAsync("GameStarted", _mapper.MapGame(gameManager.Game, isCurrentPlayer: gameManager.Game.CurrentPlayer == Players.First().player));
+                .SendAsync("GameStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
             await Clients.Client(Players.Last().connectionId)
-                .SendAsync("GameStarted", _mapper.MapGame(gameManager.Game, isCurrentPlayer: gameManager.Game.CurrentPlayer == Players.Last().player));
-        }
-    }
+                .SendAsync("GameStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
 
-    public class PlayerManager
-    {
-        private readonly IDeckRepository _deckRepository;
-        private readonly IGameEventsContainer _gameEventsContainer;
-
-        public PlayerManager(IDeckRepository deckRepository, IGameEventsContainer gameEventsContainer)
-        {
-            _deckRepository = deckRepository ?? throw new ArgumentNullException(nameof(deckRepository));
-            _gameEventsContainer = gameEventsContainer ?? throw new ArgumentNullException(nameof(gameEventsContainer));
-        }
-
-        public async Task<IPlayer> GetPlayer(string playerName, string deckName)
-        {
-            var decks = await _deckRepository.GetDecks();
-            var deck = decks.FirstOrDefault(d => d.Name == deckName);
-
-            var landDeck = new Stack<Card>();
-            var landCards = deck.Cards.Where(cd => cd.Card.Kind == CardGame_DataAccess.Entities.Enums.Kind.Land);
-            foreach (var landCard in landCards)
-                for (int i = 0; i < landCard.Amount; i++)
-                    landDeck.Push(landCard.Card);
-            var cardDeck = new Stack<Card>();
-            var cards = deck.Cards.Where(cd => cd.Card.Kind != CardGame_DataAccess.Entities.Enums.Kind.Land);
-            foreach (var card in cards)
-                for (int i = 0; i < card.Amount; i++)
-                    cardDeck.Push(card.Card);
-
-            return new BluePlayer(playerName, cardDeck, landDeck, new GameCardFactory(), _gameEventsContainer);
-        }
-    }
-
-    public class GameManager
-    {
-        private IPlayer _firstPlayer;
-        private IPlayer _secondPlayer;
-        private IGameEventsContainer _gameEventsContainer;
-        private IBoard _board;
-        public Game Game { get; private set; }
-
-        public GameManager(IGameEventsContainer gameEventsContainer)
-        {
-            _gameEventsContainer = gameEventsContainer ?? throw new ArgumentNullException(nameof(gameEventsContainer));
-        }
-
-        public void GameInit(IPlayer firstPlayer, IPlayer secondPlayer)
-        {
-            _firstPlayer = firstPlayer ?? throw new ArgumentNullException(nameof(firstPlayer));
-            _secondPlayer = secondPlayer ?? throw new ArgumentNullException(nameof(secondPlayer));
-
-            _board = new Board(_gameEventsContainer);
-
-            Game = new Game(_firstPlayer, _secondPlayer, _board, new RandomHelper(), _gameEventsContainer);
-        }
-
-        public void StartGame()
-        {
-            Game.StartGame();
+            await Clients.All.SendAsync("RegisterServerMessage", $"Game started");
+            await Clients.All.SendAsync("RegisterServerMessage", $"Turn {_gameManager.Game.TurnCounter} started");
         }
     }
 }

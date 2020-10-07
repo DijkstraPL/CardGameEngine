@@ -1,6 +1,9 @@
 ﻿using CardGame_Client.Services;
 using CardGame_Client.Services.Interfaces;
+using CardGame_Client.ViewModels;
 using CardGame_Client.Views;
+using CardGame_Client.Views.Player;
+using CardGame_Client.Views.Enemy;
 using CommonServiceLocator;
 using Prism.Ioc;
 using Prism.Regions;
@@ -41,6 +44,16 @@ namespace CardGame_Client
             IRegionManager regionManager = Container.Resolve<IRegionManager>();
             regionManager.RegisterViewWithRegion(Data.RegionNames.Main, typeof(WaitingLobbyView));
             regionManager.RegisterViewWithRegion(Data.RegionNames.Main, typeof(GameView));
+
+            regionManager.RegisterViewWithRegion(Data.RegionNames.PlayerSide, typeof(PlayerSideView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.PlayerData, typeof(PlayerDataView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.PlayerHand, typeof(PlayerHandView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.PlayerDecks, typeof(PlayerDecksView));
+
+            regionManager.RegisterViewWithRegion(Data.RegionNames.EnemySide, typeof(EnemySideView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.EnemyData, typeof(EnemyDataView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.EnemyHand, typeof(EnemyHandView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.EnemyDecks,typeof(EnemyDecksView));
         }
     }
 }

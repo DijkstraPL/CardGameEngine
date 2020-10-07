@@ -20,8 +20,8 @@ namespace CardGame_Game.Game.Interfaces
 
         void StartGame();
         void FinishTurn();
-        void GetCardFromDeck();
-        void GetCardFromLandDeck();
+        bool GetCardFromDeck();
+        bool GetCardFromLandDeck();
         void PlayCard(GameCard card, InvocationData invocationData);
     }
 }

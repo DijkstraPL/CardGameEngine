@@ -6,7 +6,15 @@ namespace CardGame_Client.Services.Interfaces
 {
     public interface IClientGameManager
     {
-        event EventHandler<GameData> GameStarted;
+        public GameData GameData { get; }
+
+        event EventHandler<GameData> GameStarted; 
+        event EventHandler<GameData> CardTaken;
+        event EventHandler<GameData> TurnStarted;
+
         Task SetReady(string playerName, string deckName);
+        Task FinishTurn();
+        Task DrawLandCard();
+        Task DrawCard();
     }
 }

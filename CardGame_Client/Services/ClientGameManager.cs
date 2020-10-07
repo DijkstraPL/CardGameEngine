@@ -10,9 +10,13 @@ namespace CardGame_Client.Services
 {
     public class ClientGameManager : Service, IClientGameManager
     {
+        public GameData GameData { get; private set; }
+
         private readonly IConnectionManager _connectionManager;
 
         public event EventHandler<GameData> GameStarted;
+        public event EventHandler<GameData> CardTaken;
+        public event EventHandler<GameData> TurnStarted;
 
         public ClientGameManager(IConnectionManager connectionManager)
         {
@@ -20,8 +24,24 @@ namespace CardGame_Client.Services
 
             _connectionManager.Connection.On<GameData>("GameStarted", (game) =>
             {
-                _connectionManager.AddMessage("Game started");
+                GameData = game;
                 GameStarted?.Invoke(this, game);
+            });
+
+            _connectionManager.Connection.On<GameData>("LandCardTaken", (game) =>
+            {
+                GameData = game;
+                CardTaken?.Invoke(this, game);
+            });
+            _connectionManager.Connection.On<GameData>("CardTaken", (game) =>
+            {
+                GameData = game;
+                CardTaken?.Invoke(this, game);
+            });
+            _connectionManager.Connection.On<GameData>("TurnStarted", (game) =>
+            {
+                GameData = game;
+                TurnStarted?.Invoke(this, game);
             });
         }
 
@@ -30,6 +50,19 @@ namespace CardGame_Client.Services
             await _connectionManager.Connection.SendAsync("SetReady", playerName, deckName);
         }
 
+        public async Task FinishTurn()
+        {
+            await _connectionManager.Connection.SendAsync("FinishTurn");
+        }
 
+        public async Task DrawLandCard()
+        {
+            await _connectionManager.Connection.SendAsync("DrawLandCard");
+        }
+
+        public async Task DrawCard()
+        {
+            await _connectionManager.Connection.SendAsync("DrawCard");
+        }
     }
 }
