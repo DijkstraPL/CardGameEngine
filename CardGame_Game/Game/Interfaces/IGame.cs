@@ -22,6 +22,6 @@ namespace CardGame_Game.Game.Interfaces
         void FinishTurn();
         bool GetCardFromDeck();
         bool GetCardFromLandDeck();
-        void PlayCard(GameCard card, InvocationData invocationData);
+        bool PlayCard(GameCard card, InvocationData invocationData);
     }
 }

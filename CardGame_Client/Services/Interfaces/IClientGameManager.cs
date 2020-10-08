@@ -10,11 +10,13 @@ namespace CardGame_Client.Services.Interfaces
 
         event EventHandler<GameData> GameStarted; 
         event EventHandler<GameData> CardTaken;
-        event EventHandler<GameData> TurnStarted;
+        event EventHandler<GameData> TurnStarted; 
+        event EventHandler<GameData> CardPlayed;
 
         Task SetReady(string playerName, string deckName);
         Task FinishTurn();
         Task DrawLandCard();
         Task DrawCard();
+        Task PlayCard(CardData cardData);
     }
 }

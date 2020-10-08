@@ -10,8 +10,10 @@ using System.Collections.Generic;
 
 namespace CardGame_Game.Cards
 {
-    public abstract class GameCard 
+    public abstract class GameCard
     {
+        public Guid Identifier { get; }
+
         public string Name { get; }
         public string Description { get; }
         public int? Cost { get; }
@@ -25,6 +27,8 @@ namespace CardGame_Game.Cards
 
         public GameCard(IPlayer owner, Card card,  string name, string description, int? cost, InvocationTarget invocationTarget)
         {
+            Identifier = Guid.NewGuid();
+
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             _card = card ?? throw new System.ArgumentNullException(nameof(card));
             Name = name;

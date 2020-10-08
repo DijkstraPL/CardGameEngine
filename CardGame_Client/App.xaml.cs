@@ -49,11 +49,13 @@ namespace CardGame_Client
             regionManager.RegisterViewWithRegion(Data.RegionNames.PlayerData, typeof(PlayerDataView));
             regionManager.RegisterViewWithRegion(Data.RegionNames.PlayerHand, typeof(PlayerHandView));
             regionManager.RegisterViewWithRegion(Data.RegionNames.PlayerDecks, typeof(PlayerDecksView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.PlayerBoardSide, typeof(PlayerBoardView));
 
             regionManager.RegisterViewWithRegion(Data.RegionNames.EnemySide, typeof(EnemySideView));
             regionManager.RegisterViewWithRegion(Data.RegionNames.EnemyData, typeof(EnemyDataView));
             regionManager.RegisterViewWithRegion(Data.RegionNames.EnemyHand, typeof(EnemyHandView));
             regionManager.RegisterViewWithRegion(Data.RegionNames.EnemyDecks,typeof(EnemyDecksView));
+            regionManager.RegisterViewWithRegion(Data.RegionNames.EnemyBoardSide, typeof(EnemyBoardView));
         }
     }
 }

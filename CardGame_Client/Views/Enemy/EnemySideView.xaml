@@ -31,6 +31,10 @@
                 x:Name="enemyHand"
                 prism:RegionManager.RegionName="{x:Static data:RegionNames.EnemyHand}"/>
 
+        <ContentControl Grid.Row="1"
+                        Grid.Column="1"                        
+                x:Name="enemyBoardSide"
+                prism:RegionManager.RegionName="{x:Static data:RegionNames.EnemyBoardSide}"/>
         <ContentControl Grid.Row="0"
                         Grid.Column="2"                        
                 x:Name="playerDecks"

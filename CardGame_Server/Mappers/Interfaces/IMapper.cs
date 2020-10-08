@@ -10,12 +10,6 @@ namespace CardGame_Server.Mappers.Interfaces
 {
     public interface IMapper
     {
-        BoardData MapBoard(IBoard board);
-        BoardSideData MapBoardSide(IBoardSide boardSite);
-        CardData MapCard(GameCard card);
-        FieldData MapField(Field field);
         GameData MapGame(IGame game, bool isCurrentPlayer);
-        PlayerData MapPlayer(IPlayer player, bool setHand);
-        AttackTargetData MapTarget(IHealthy attackTarget);
     }
 }

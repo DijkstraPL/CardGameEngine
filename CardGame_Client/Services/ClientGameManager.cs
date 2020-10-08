@@ -17,6 +17,7 @@ namespace CardGame_Client.Services
         public event EventHandler<GameData> GameStarted;
         public event EventHandler<GameData> CardTaken;
         public event EventHandler<GameData> TurnStarted;
+        public event EventHandler<GameData> CardPlayed;
 
         public ClientGameManager(IConnectionManager connectionManager)
         {
@@ -43,6 +44,11 @@ namespace CardGame_Client.Services
                 GameData = game;
                 TurnStarted?.Invoke(this, game);
             });
+            _connectionManager.Connection.On<GameData>("CardPlayed", (game) =>
+            {
+                GameData = game;
+                CardPlayed?.Invoke(this, game);
+            });
         }
 
         public async Task SetReady(string playerName, string deckName)
@@ -63,6 +69,11 @@ namespace CardGame_Client.Services
         public async Task DrawCard()
         {
             await _connectionManager.Connection.SendAsync("DrawCard");
+        }
+
+        public async Task PlayCard(CardData cardData)
+        {
+            await _connectionManager.Connection.SendAsync("PlayCard", cardData);
         }
     }
 }

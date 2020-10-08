@@ -1,4 +1,6 @@
-﻿using CardGame_DataAccess.Repositories.Interfaces;
+﻿using CardGame_Data.GameData;
+using CardGame_DataAccess.Repositories.Interfaces;
+using CardGame_Game.Cards;
 using CardGame_Game.GameEvents;
 using CardGame_Game.GameEvents.Interfaces;
 using CardGame_Game.Players.Interfaces;
@@ -123,6 +125,25 @@ namespace CardGame_Server.Hubs
                 .SendAsync("TurnStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
         }
 
+        public async Task PlayCard(CardData cardData)
+        {
+            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
+            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+                return;
+            var card = _gameManager.Game.CurrentPlayer.Hand.FirstOrDefault(c => c.Identifier == cardData.Identifier);
+            if(_gameManager.Game.PlayCard(card, null))
+            {
+                await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " play " + cardData.Name);
+
+                await Clients.Client(Players.First().connectionId)
+                    .SendAsync("CardPlayed", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
+                await Clients.Client(Players.Last().connectionId)
+                    .SendAsync("CardPlayed", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+            }
+            else
+                await Clients.Caller.SendAsync("RegisterServerMessage", "Can't play a card");
+        }
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -141,6 +162,7 @@ namespace CardGame_Server.Hubs
 
             await Clients.All.SendAsync("RegisterServerMessage", $"Game started");
             await Clients.All.SendAsync("RegisterServerMessage", $"Turn {_gameManager.Game.TurnCounter} started");
+            await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " has first move");
         }
     }
 }

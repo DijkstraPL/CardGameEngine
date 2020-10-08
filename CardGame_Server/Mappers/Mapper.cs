@@ -31,10 +31,11 @@ namespace CardGame_Server.Mappers
                 NextPlayer = MapPlayer(game.NextPlayer, setHand: !isCurrentPlayer),
                 TurnCounter = game.TurnCounter
             };
+
             return gameData;
         }
 
-        public PlayerData MapPlayer(IPlayer player, bool setHand)
+        private PlayerData MapPlayer(IPlayer player, bool setHand)
         {
             if (player == null)
                 return null;
@@ -59,7 +60,7 @@ namespace CardGame_Server.Mappers
             return playerData;
         }
 
-        public BoardData MapBoard(IBoard board)
+        private BoardData MapBoard(IBoard board)
         {
             if (board == null)
                 return null;
@@ -73,20 +74,21 @@ namespace CardGame_Server.Mappers
             return boardData;
         }
 
-        public BoardSideData MapBoardSide(IBoardSide boardSite)
+        private BoardSideData MapBoardSide(IBoardSide boardSide)
         {
-            if (boardSite == null)
+            if (boardSide == null)
                 return null;
 
             var boardSideData = new BoardSideData
             {
-                Fields = boardSite.Fields.Select(f => MapField(f)).ToList()
+                Fields = boardSide.Fields.Select(f => MapField(f)).ToList(),
+                LandCards = boardSide.LandCards.Select(l => MapCard(l)).ToList()
             };
 
             return boardSideData;
         }
 
-        public FieldData MapField(Field field)
+        private FieldData MapField(Field field)
         {
             if (field == null)
                 return null;
@@ -95,12 +97,14 @@ namespace CardGame_Server.Mappers
             {
                 X = field.X,
                 Y = field.Y,
-                UnitCard = MapCard(field.Card)
             };
+            if (field.Card != null)
+                fieldData.UnitCard = MapCard(field.Card);
+
             return fieldData;
         }
 
-        public CardData MapCard(GameCard card)
+        private CardData MapCard(GameCard card)
         {
             if (card == null)
                 return null;
@@ -124,17 +128,18 @@ namespace CardGame_Server.Mappers
                 cardData.Cooldown = cooldown.Cooldown;
             }
 
+            cardData.Identifier = card.Identifier;
             cardData.CardState = (CardState)card.CardState;
             cardData.Cost = card.Cost;
             cardData.Description = card.Description;
             cardData.InvocationTarget = card.InvocationTarget;
             cardData.Name = card.Name;
-            cardData.Owner = MapPlayer(card.Owner, setHand: false);
+            cardData.OwnerName = card.Owner.Name;
 
             return cardData;
         }
 
-        public AttackTargetData MapTarget(IHealthy attackTarget)
+        private AttackTargetData MapTarget(IHealthy attackTarget)
         {
             if (attackTarget == null)
                 return null;

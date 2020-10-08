@@ -103,7 +103,7 @@ namespace CardGame_Game.Game
             return false;
         }
 
-        public void PlayCard(GameCard card, InvocationData invocationData)
+        public bool PlayCard(GameCard card, InvocationData invocationData)
         {
             if (CurrentPlayer.Energy >= card.Cost &&
                 CurrentPlayer.Hand.Any(h => h == card) &&
@@ -111,7 +111,9 @@ namespace CardGame_Game.Game
             {
                 card.Play(this, CurrentPlayer, invocationData);
                 GameEventsContainer.CardPlayedEvent.Raise(card, new GameEventArgs { Game = this, Player = CurrentPlayer, SourceCard = card });
+                return true;
             }
+            return false;
         }
 
         public bool IsGameFinished()

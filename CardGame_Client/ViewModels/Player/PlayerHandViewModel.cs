@@ -29,10 +29,21 @@ namespace CardGame_Client.ViewModels.Player
             _clientGameManager = clientGameManager ?? throw new ArgumentNullException(nameof(clientGameManager));
             _clientGameManager.CardTaken += OnCardTaken;
             _clientGameManager.TurnStarted += OnTurnStarted;
+            _clientGameManager.CardPlayed += OnCardPlayed;
 
             SetHand(_clientGameManager.GameData);
 
-            PlayCardCommand = new DelegateCommand<CardData>(cardData => { });
+            PlayCardCommand = new DelegateCommand<CardData>(PlayCard);
+        }
+
+        private void PlayCard(CardData cardData)
+        {
+            _clientGameManager.PlayCard(cardData);
+        }
+
+        private void OnCardPlayed(object sender, GameData gameData)
+        {
+            SetHand(gameData);
         }
 
         private void OnTurnStarted(object sender, GameData gameData)

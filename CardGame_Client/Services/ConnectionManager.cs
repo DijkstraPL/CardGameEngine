@@ -36,7 +36,8 @@ namespace CardGame_Client.Services
             Connection.Closed += async (error) =>
             {
                 ConnectionStatus = error?.Message;
-                await Connection.StartAsync();
+                AddMessage(error?.Message);
+                //await Connection.StartAsync();
             };
             Connection.On<string>("Connected", (connectionid) =>
             {

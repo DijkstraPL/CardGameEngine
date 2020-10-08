@@ -15,7 +15,7 @@ namespace CardGame_Data.GameData
         public InvocationTarget InvocationTarget { get; set; }
         public CardState CardState { get; set; }
 
-        public PlayerData Owner { get; set; }
+        public string OwnerName { get; set; }
 
         public int? BaseCooldown { get; set; }
         public int? Cooldown { get; set; }
