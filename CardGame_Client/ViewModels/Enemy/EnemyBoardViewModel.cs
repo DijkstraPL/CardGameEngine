@@ -26,12 +26,14 @@ namespace CardGame_Client.ViewModels.Enemy
         public ICommand SelectToAttackPlayerCommand { get; }
 
         private readonly IClientGameManager _clientGameManager;
+        private readonly ICardGameManagement _cardGameManagement;
         private GameData _gameData;
         private PlayerData _player;
 
-        public EnemyBoardViewModel(IClientGameManager clientGameManager)
+        public EnemyBoardViewModel(IClientGameManager clientGameManager, ICardGameManagement cardGameManagement)
         {
             _clientGameManager = clientGameManager ?? throw new ArgumentNullException(nameof(clientGameManager));
+            _cardGameManagement = cardGameManagement ?? throw new ArgumentNullException(nameof(cardGameManagement));
             _clientGameManager.CardTaken += OnCardTaken;
             _clientGameManager.TurnStarted += OnTurnStarted;
             _clientGameManager.CardPlayed += OnCardPlayed;
@@ -75,11 +77,11 @@ namespace CardGame_Client.ViewModels.Enemy
         private void SetFields(GameData gameData)
         {
             _gameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
-            _player = _gameData.IsControllingCurrentPlayer ? _gameData.CurrentPlayer : _gameData.NextPlayer;
+            _player = _gameData.IsControllingCurrentPlayer ? _gameData.NextPlayer : _gameData.CurrentPlayer;
 
             _fields.Clear();
             foreach (var field in _player.BoardSide.Fields)
-                _fields.Add(new BoardFieldViewModel(field));
+                _fields.Add(new BoardFieldViewModel(field, isEnemyField: true, _cardGameManagement));
         }
     }
 }

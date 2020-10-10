@@ -71,9 +71,14 @@ namespace CardGame_Client.Services
             await _connectionManager.Connection.SendAsync("DrawCard");
         }
 
-        public async Task PlayCard(CardData cardData)
+        public async Task PlayCard(CardData cardData, SelectionTargetData selectionTargetData)
         {
-            await _connectionManager.Connection.SendAsync("PlayCard", cardData);
+            await _connectionManager.Connection.SendAsync("PlayCard", cardData, selectionTargetData);
+        }
+
+        public async Task SetAttackTarget(CardData attackSource, CardData attackTarget)
+        {
+            await _connectionManager.Connection.SendAsync("SetAttackTarget", attackSource, attackTarget);
         }
     }
 }

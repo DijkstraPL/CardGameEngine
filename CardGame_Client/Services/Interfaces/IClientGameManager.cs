@@ -17,6 +17,7 @@ namespace CardGame_Client.Services.Interfaces
         Task FinishTurn();
         Task DrawLandCard();
         Task DrawCard();
-        Task PlayCard(CardData cardData);
+        Task PlayCard(CardData cardData, SelectionTargetData selectionTargetData);
+        Task SetAttackTarget(CardData attackSource, CardData attackTarget);
     }
 }

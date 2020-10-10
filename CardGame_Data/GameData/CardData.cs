@@ -14,6 +14,7 @@ namespace CardGame_Data.GameData
         public int? Cost { get; set; }
         public InvocationTarget InvocationTarget { get; set; }
         public CardState CardState { get; set; }
+        public Kind Kind { get; set; }
 
         public string OwnerName { get; set; }
 

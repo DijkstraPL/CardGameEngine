@@ -7,25 +7,25 @@ namespace CardGame_Data.Data.Enums
     [Flags]
     public enum InvocationTarget
     {
-        None =            0 << 0,
+        None =            0,
                           
-        OwnLands =        1 << 0,
-        OwnLand =         2 << 0,
-        EnemyLands =      3 << 0,
-        EnemyLand =       4 << 0,
+        OwnLands =        1 << 0, // 1
+        OwnLand =         1 << 1, // 2
+        EnemyLands =      1 << 2, // 4
+        EnemyLand =       1 << 3, // 8
                           
-        OwnEmptyField =   5 << 0,
-        OwnUnit =         6 << 0,
-        OwnStructure =    7 << 0,
-        OwnCreature =     8 << 0,
-        OwnHero =         9 << 0,
-        OwnTakenField =   10 << 0,
+        OwnEmptyField =   1 << 4, // 16
+        OwnUnit =         1 << 5, // 32
+        OwnStructure =    1 << 6, // 64
+        OwnCreature =     1 << 7, // 128
+        OwnHero =         1 << 8, // 256
+        OwnTakenField =   1 << 9, // 514
 
-        EnemyEmptyField = 11 << 0,
-        EnemyUnit =       12 << 0,
-        EnemyStructure =  13 << 0,
-        EnemyCreature =   14 << 0,
-        EnemyHero =       15 << 0,
-        EnemyTakenField = 16 << 0,
+        EnemyEmptyField = 1 << 10, // 1024
+        EnemyUnit =       1 << 11, // 2048
+        EnemyStructure =  1 << 12, // 4096
+        EnemyCreature =   1 << 13, // 8192
+        EnemyHero =       1 << 14, // 16384
+        EnemyTakenField = 1 << 15, // 32768
     }
 }

@@ -1,5 +1,6 @@
 ﻿using CardGame_Data.GameData;
 using CardGame_DataAccess.Repositories.Interfaces;
+using CardGame_Game.BoardTable;
 using CardGame_Game.Cards;
 using CardGame_Game.GameEvents;
 using CardGame_Game.GameEvents.Interfaces;
@@ -125,13 +126,25 @@ namespace CardGame_Server.Hubs
                 .SendAsync("TurnStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
         }
 
-        public async Task PlayCard(CardData cardData)
+        public async Task PlayCard(CardData cardData, SelectionTargetData selectionTarget)
         {
             var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
             if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
                 return;
             var card = _gameManager.Game.CurrentPlayer.Hand.FirstOrDefault(c => c.Identifier == cardData.Identifier);
-            if(_gameManager.Game.PlayCard(card, null))
+            var enemyFields = _gameManager.Game.NextPlayer.BoardSide.Fields;
+            var currentPlayerFields = _gameManager.Game.CurrentPlayer.BoardSide.Fields;
+            Field field = null;
+            if (selectionTarget?.TargetEnemyField != null)
+                 field = enemyFields.FirstOrDefault(f =>
+                f.X == selectionTarget.TargetEnemyField.X &&
+                f.Y == selectionTarget.TargetEnemyField.Y);
+            if (selectionTarget?.TargetOwnField != null)
+                field = currentPlayerFields.FirstOrDefault(f =>
+               f.X == selectionTarget.TargetOwnField.X &&
+               f.Y == selectionTarget.TargetOwnField.Y);
+
+            if (_gameManager.Game.PlayCard(card, new InvocationData { Field = field }))
             {
                 await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " play " + cardData.Name);
 
@@ -142,6 +155,25 @@ namespace CardGame_Server.Hubs
             }
             else
                 await Clients.Caller.SendAsync("RegisterServerMessage", "Can't play a card");
+        }
+
+        public async Task SetAttackTarget(CardData sourceCardData, CardData targetCardData)
+        {
+            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
+            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+                return;
+
+            var sourceField = _gameManager.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
+            var targetField = _gameManager.Game.NextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == targetCardData.Identifier);
+            if(sourceField != null && targetField != null)
+            {
+                sourceField.Card.SetAttackTarget(targetField.Card);
+
+                await Clients.Client(Players.First().connectionId)
+                    .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
+                await Clients.Client(Players.Last().connectionId)
+                    .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+            }
         }
 
         protected override void Dispose(bool disposing)

@@ -21,7 +21,7 @@
     <Border Style="{StaticResource field}">
         <Button HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
-        Command="{Binding FieldClickedCommand}"
+        Command="{Binding FieldSelectedCommand}"
                 x:Name="fieldButton">
             <Grid VerticalAlignment="Stretch"
                   HorizontalAlignment="Stretch">

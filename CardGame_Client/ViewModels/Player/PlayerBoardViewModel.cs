@@ -29,12 +29,14 @@ namespace CardGame_Client.ViewModels.Player
         public ICommand SelectToAttackPlayerCommand { get; }
 
         private readonly IClientGameManager _clientGameManager;
+        private readonly ICardGameManagement _cardGameManagement;
         private GameData _gameData;
         private PlayerData _player;
 
-        public PlayerBoardViewModel(IClientGameManager clientGameManager)
+        public PlayerBoardViewModel(IClientGameManager clientGameManager, ICardGameManagement cardGameManagement)
         {
             _clientGameManager = clientGameManager ?? throw new ArgumentNullException(nameof(clientGameManager));
+            _cardGameManagement = cardGameManagement ?? throw new ArgumentNullException(nameof(cardGameManagement));
             _clientGameManager.CardTaken += OnCardTaken;
             _clientGameManager.TurnStarted += OnTurnStarted;
             _clientGameManager.CardPlayed += OnCardPlayed;
@@ -82,7 +84,7 @@ namespace CardGame_Client.ViewModels.Player
 
             _fields.Clear();
             foreach (var field in _player.BoardSide.Fields)
-                _fields.Add(new BoardFieldViewModel(field));
+                _fields.Add(new BoardFieldViewModel(field, isEnemyField: false, _cardGameManagement));
         }
     }
 }

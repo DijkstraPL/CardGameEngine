@@ -15,18 +15,20 @@ namespace CardGame_Client.ViewModels.Player
         public ICollection<CardData> Hand
         {
             get => _hand;
-                private set => SetProperty(ref _hand , value); 
+            private set => SetProperty(ref _hand, value);
         }
 
         public ICommand PlayCardCommand { get; }
 
         private readonly IClientGameManager _clientGameManager;
+        private readonly ICardGameManagement _cardGameManagement;
         private GameData _gameData;
         private PlayerData _player;
 
-        public PlayerHandViewModel(IClientGameManager clientGameManager)
+        public PlayerHandViewModel(IClientGameManager clientGameManager, ICardGameManagement cardGameManagement)
         {
             _clientGameManager = clientGameManager ?? throw new ArgumentNullException(nameof(clientGameManager));
+            _cardGameManagement = cardGameManagement ?? throw new ArgumentNullException(nameof(cardGameManagement));
             _clientGameManager.CardTaken += OnCardTaken;
             _clientGameManager.TurnStarted += OnTurnStarted;
             _clientGameManager.CardPlayed += OnCardPlayed;
@@ -38,7 +40,13 @@ namespace CardGame_Client.ViewModels.Player
 
         private void PlayCard(CardData cardData)
         {
-            _clientGameManager.PlayCard(cardData);
+            if (_cardGameManagement.HasTarget(cardData))
+            {
+                _clientGameManager.PlayCard(cardData, _cardGameManagement.SelectionTargetData);
+                _cardGameManagement.ClearTargets();
+            }
+            else
+                _cardGameManagement.SetTarget(cardData);
         }
 
         private void OnCardPlayed(object sender, GameData gameData)

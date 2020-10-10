@@ -1,6 +1,10 @@
-﻿using CardGame_Data.GameData;
+﻿using CardGame_Client.Events;
+using CardGame_Client.Services.Interfaces;
+using CardGame_Data.GameData;
+using Prism.Commands;
 using Prism.Mvvm;
 using System;
+using System.Windows.Input;
 
 namespace CardGame_Client.ViewModels
 {
@@ -41,12 +45,19 @@ namespace CardGame_Client.ViewModels
             set => SetProperty(ref _containsCard, value);
         }
 
-        private FieldData _field;
+        public ICommand FieldSelectedCommand { get;  }
 
-        public BoardFieldViewModel(FieldData field)
+        public event EventHandler<FieldSelectorEventArgs> FieldClicked;
+
+        private FieldData _field;
+        private readonly bool _isEnemyField;
+        private readonly ICardGameManagement _cardGameManagement;
+
+        public BoardFieldViewModel(FieldData field, bool isEnemyField, ICardGameManagement cardGameManagement)
         {
             _field = field ?? throw new ArgumentNullException(nameof(field));
-
+            _isEnemyField = isEnemyField;
+            _cardGameManagement = cardGameManagement ?? throw new ArgumentNullException(nameof(cardGameManagement));
             ContainsCard = _field.UnitCard != null;
             if (ContainsCard)
             {
@@ -55,6 +66,13 @@ namespace CardGame_Client.ViewModels
                 Cooldown = _field.UnitCard.Cooldown;
                 FinalHealth = _field.UnitCard.FinalHealth;
             }
+
+            FieldClicked += _cardGameManagement.OnFieldSelected;
+            
+            FieldSelectedCommand = new DelegateCommand(() =>
+            {
+                FieldClicked?.Invoke(this, new FieldSelectorEventArgs(_field, _isEnemyField));
+            });
         }
     }
 }

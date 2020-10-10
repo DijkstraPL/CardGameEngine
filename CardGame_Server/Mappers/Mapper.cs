@@ -128,6 +128,7 @@ namespace CardGame_Server.Mappers
                 cardData.Cooldown = cooldown.Cooldown;
             }
 
+            cardData.Kind = card.Kind;
             cardData.Identifier = card.Identifier;
             cardData.CardState = (CardState)card.CardState;
             cardData.Cost = card.Cost;

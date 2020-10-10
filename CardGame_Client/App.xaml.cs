@@ -33,6 +33,7 @@ namespace CardGame_Client
             containerRegistry.RegisterSingleton<IConnectionManager, ConnectionManager>();
             containerRegistry.RegisterSingleton<IDecksProvider, DecksProvider>();
             containerRegistry.RegisterSingleton<IClientGameManager, ClientGameManager>();
+            containerRegistry.RegisterSingleton<ICardGameManagement, CardGameManagement>();
             containerRegistry.RegisterInstance<IContainerProvider>(Container);
         }
 
