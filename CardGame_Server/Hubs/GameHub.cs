@@ -176,6 +176,25 @@ namespace CardGame_Server.Hubs
             }
         }
 
+        public async Task SetPlayerAsAttackTarget(CardData sourceCardData, PlayerData targetPlayerData)
+        {
+            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
+            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+                return;
+            var sourceField = _gameManager.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
+            var targetPlayer = _gameManager.Game.NextPlayer;
+
+            if(sourceField != null && targetPlayer.Name == targetPlayerData?.Name)
+            {
+                sourceField.Card.SetAttackTarget(targetPlayer);
+
+                await Clients.Client(Players.First().connectionId)
+                    .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
+                await Clients.Client(Players.Last().connectionId)
+                    .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

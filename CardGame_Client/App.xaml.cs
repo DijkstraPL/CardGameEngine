@@ -34,6 +34,7 @@ namespace CardGame_Client
             containerRegistry.RegisterSingleton<IDecksProvider, DecksProvider>();
             containerRegistry.RegisterSingleton<IClientGameManager, ClientGameManager>();
             containerRegistry.RegisterSingleton<ICardGameManagement, CardGameManagement>();
+            containerRegistry.RegisterSingleton<ITargetSelectionManagement, TargetSelectionManagement>();
             containerRegistry.RegisterInstance<IContainerProvider>(Container);
         }
 

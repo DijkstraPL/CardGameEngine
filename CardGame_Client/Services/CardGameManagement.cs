@@ -56,7 +56,7 @@ namespace CardGame_Client.Services
                     return SelectionTargetData?.TargetOwnField != null &&
                         SelectionTargetData.TargetOwnField.UnitCard == null;
                 case InvocationTarget.OwnUnit:
-                    return SelectionTargetData?.TargetOwnField?.UnitCard != null && 
+                    return SelectionTargetData?.TargetOwnField?.UnitCard != null &&
                         (SelectionTargetData.TargetOwnField.UnitCard.Kind == Kind.Creature ||
                         SelectionTargetData.TargetOwnField.UnitCard.Kind == Kind.Structure);
                 case InvocationTarget.OwnStructure:
@@ -70,13 +70,13 @@ namespace CardGame_Client.Services
                 case InvocationTarget.EnemyEmptyField:
                     throw new NotImplementedException();
                 case InvocationTarget.EnemyUnit:
-                    return SelectionTargetData?.TargetEnemyField?.UnitCard != null && 
+                    return SelectionTargetData?.TargetEnemyField?.UnitCard != null &&
                         (SelectionTargetData.TargetEnemyField.UnitCard.Kind == Kind.Creature ||
                         SelectionTargetData.TargetEnemyField.UnitCard.Kind == Kind.Structure);
                 case InvocationTarget.EnemyStructure:
                     throw new NotImplementedException();
                 case InvocationTarget.EnemyCreature:
-                    return SelectionTargetData?.TargetEnemyField?.UnitCard != null && 
+                    return SelectionTargetData?.TargetEnemyField?.UnitCard != null &&
                         SelectionTargetData.TargetEnemyField.UnitCard.Kind == Kind.Creature;
                 case InvocationTarget.EnemyHero:
                     throw new NotImplementedException();
@@ -121,6 +121,16 @@ namespace CardGame_Client.Services
                     _attackSource = null;
                     _attackTarget = null;
                 }
+            }
+        }
+
+        public void OnPlayerSelected(PlayerData playerData)
+        {
+            if (playerData != null && _attackSource != null)
+            {
+                _clientGameManager.SetAttackTarget(_attackSource, playerData);
+                _attackSource = null;
+                _attackTarget = null;
             }
         }
 

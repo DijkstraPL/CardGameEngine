@@ -14,6 +14,7 @@ namespace CardGame_Client.Services.Interfaces
         bool HasTarget(CardData cardData);
         void SetTarget(CardData cardData);
         void OnFieldSelected(object sender, FieldSelectorEventArgs e);
+        void OnPlayerSelected(PlayerData playerData);
         void ClearTargets();
     }
 }

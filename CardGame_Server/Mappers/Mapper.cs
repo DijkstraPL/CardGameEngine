@@ -147,10 +147,10 @@ namespace CardGame_Server.Mappers
 
             var attackTargetData = new AttackTargetData();
 
-            if (attackTargetData is IPlayer player)
-                attackTargetData.PlayerTarget = MapPlayer(player, setHand: false);
+            if (attackTarget is IPlayer player)
+                attackTargetData.PlayerTargetName = player.Name;
             else if (attackTarget is GameCard gameCard)
-                attackTargetData.CardTarget = MapCard(gameCard);
+                attackTargetData.CardTargetIdentifier = gameCard.Identifier;
 
             return attackTargetData;
         }

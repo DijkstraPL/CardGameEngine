@@ -4,6 +4,7 @@ using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 
 namespace CardGame_Client.ViewModels
@@ -13,13 +14,30 @@ namespace CardGame_Client.ViewModels
         private readonly IList<CardData> _hand = new ObservableCollection<CardData>();
         public IEnumerable<CardData> Hand => _hand;
 
-        private readonly IClientGameManager _clientGameManager;
+        private IList<LineViewModel> _lines = new ObservableCollection<LineViewModel>();
+        public IEnumerable<LineViewModel> Lines => _lines;
 
-        public GameViewModel(IClientGameManager clientGameManager)
+        private readonly IClientGameManager _clientGameManager;
+        private readonly ITargetSelectionManagement _targetSelectionManagement;
+
+        public GameViewModel(IClientGameManager clientGameManager, ITargetSelectionManagement targetSelectionManagement)
         {
             _clientGameManager = clientGameManager ?? throw new ArgumentNullException(nameof(clientGameManager));
-
+            _targetSelectionManagement = targetSelectionManagement ?? throw new ArgumentNullException(nameof(targetSelectionManagement));
             _clientGameManager.GameStarted += OnGameStarted;
+
+            _targetSelectionManagement.SetGameViewModel(this);
+        }
+
+        internal void ClearLines()
+        {
+            _lines.Clear();
+        }
+
+        internal void SetLine(BoardFieldViewModel source, LineViewModel lineViewModel)
+        {
+            _lines.Add(lineViewModel);
+            RaisePropertyChanged(nameof(Lines));
         }
 
         private void OnGameStarted(object sender, GameData gameData)

@@ -31,7 +31,7 @@
                 prism:RegionManager.RegionName="{x:Static data:RegionNames.PlayerSide}"/>          
         </Grid>
 
-        <!--<ItemsControl ItemsSource="{Binding AttackTargets, UpdateSourceTrigger=PropertyChanged}" 
+        <ItemsControl ItemsSource="{Binding Lines, NotifyOnSourceUpdated=True}" 
                       HorizontalAlignment="Stretch"
                       VerticalAlignment="Stretch">
             <ItemsControl.ItemsPanel>
@@ -43,10 +43,10 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Canvas>
-                        <Line X1="{Binding Source.X}"
-                          X2="{Binding Target.X}"
-                          Y1="{Binding Source.Y}"
-                          Y2="{Binding Target.Y}"
+                        <Line X1="{Binding AttackSourceField.XCoord}"
+                          X2="{Binding AttackTargetField.XCoord}"
+                          Y1="{Binding AttackSourceField.YCoord}"
+                          Y2="{Binding AttackTargetField.YCoord}"
                           StrokeThickness="2">
                             <Line.Style>
                                 <Style TargetType="{x:Type Line}">
@@ -59,8 +59,8 @@
                                 </Style>
                             </Line.Style>
                         </Line>
-                        <Ellipse Canvas.Left="{Binding Target.X}"
-                             Canvas.Top="{Binding Target.Y}"
+                        <Ellipse Canvas.Left="{Binding AttackTargetField.XCoord}"
+                             Canvas.Top="{Binding AttackTargetField.YCoord}"
                              Width="10"
                              Margin="-5,-5,0,0"
                              Height="10"
@@ -69,7 +69,7 @@
                     </Canvas>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-        </ItemsControl>-->
+        </ItemsControl>
 
     </Grid>
 </UserControl>

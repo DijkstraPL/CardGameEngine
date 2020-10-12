@@ -55,7 +55,7 @@
         <Grid MaxWidth="500"
           Grid.Column="1">
 
-            <ItemsControl ItemsSource="{Binding Fields}">
+            <ItemsControl ItemsSource="{Binding OrderedFields}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="5" Rows="3"/>
