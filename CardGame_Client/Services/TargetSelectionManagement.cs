@@ -124,5 +124,22 @@ namespace CardGame_Client.Services
             return sourceField.Y - 1 <= targetField.Y &&
                        targetField.Y <= sourceField.Y + 1;
         }
+
+        public bool CanMove(CardData attackSource, FieldData targetField)
+        {
+            var fields = _playerBoardViewModel.PlayerName == attackSource.OwnerName ? _playerBoardViewModel.Fields : _enemyBoardViewModel.Fields;
+
+            var sourceField = fields.FirstOrDefault(f => f.Field.UnitCard == attackSource);
+
+            if(sourceField != null && targetField != null && targetField.UnitCard == null)
+            {
+                return targetField.X == sourceField.Field.X + 1 && targetField.Y == sourceField.Field.Y ||
+                      targetField.X == sourceField.Field.X - 1 && targetField.Y == sourceField.Field.Y ||
+                      targetField.Y == sourceField.Field.Y + 1 && targetField.X == sourceField.Field.X ||
+                      targetField.Y == sourceField.Field.Y - 1 && targetField.X == sourceField.Field.X;
+            }
+
+            return false;
+        }
     }
 }

@@ -22,6 +22,7 @@ namespace CardGame_Game.Cards
         public CardState CardState { get; set; } = CardState.InDeck;
         public IPlayer Owner { get; }
         public Kind Kind { get; }
+        public Trait Trait { get; }
 
         protected readonly Card _card;
         private readonly IList<Trigger> _triggers = new List<Trigger>();
@@ -37,6 +38,7 @@ namespace CardGame_Game.Cards
             Cost = cost;
             InvocationTarget = invocationTarget;
             Kind = card.Kind;
+            Trait = card.Trait;
         }
 
         public virtual bool CanBePlayed(IGame game, IPlayer player, InvocationData invocationData)

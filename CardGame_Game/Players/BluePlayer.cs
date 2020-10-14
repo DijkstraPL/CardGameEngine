@@ -29,6 +29,13 @@ namespace CardGame_Game.Players
             });
         }
 
+        public override void OnCardMove()
+        {
+        }
 
+        public override bool CanMove()
+        {
+            return true;
+        }
     }
 }

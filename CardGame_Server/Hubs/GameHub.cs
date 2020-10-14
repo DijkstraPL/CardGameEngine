@@ -28,14 +28,13 @@ namespace CardGame_Server.Hubs
         private static readonly object _pendingConnectionsLock = new object();
         private static IDeckRepository _deckRepository;
         private readonly IMapper _mapper;
-        private static IGameEventsContainer _gameEventsContainer;
+        private static IGameEventsContainer _gameEventsContainer = new GameEventsContainer();
         private static GameManager _gameManager;
 
         public GameHub(IDeckRepository deckRepository, IMapper mapper)
         {
             _deckRepository = deckRepository ?? throw new ArgumentNullException(nameof(deckRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _gameEventsContainer = new GameEventsContainer();
         }
 
         public override Task OnConnectedAsync()
@@ -192,6 +191,25 @@ namespace CardGame_Server.Hubs
                     .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
                 await Clients.Client(Players.Last().connectionId)
                     .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+            }
+        }
+
+        public async Task Move(CardData sourceCardData, FieldData fieldData)
+        {
+            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
+            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+                return;
+
+            var sourceField = _gameManager.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
+            var targetField = _gameManager.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.X == fieldData.X && f.Y == fieldData.Y);
+            if (sourceField != null && targetField != null)
+            {
+                _gameManager.Game.CurrentPlayer.BoardSide.Move(_gameManager.Game.CurrentPlayer, sourceField, targetField);
+
+                await Clients.Client(Players.First().connectionId)
+                    .SendAsync("CardMoved", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
+                await Clients.Client(Players.Last().connectionId)
+                    .SendAsync("CardMoved", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
             }
         }
 

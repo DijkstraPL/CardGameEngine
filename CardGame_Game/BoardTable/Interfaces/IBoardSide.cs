@@ -12,6 +12,7 @@ namespace CardGame_Game.BoardTable.Interfaces
     {
         IList<GameLandCard> LandCards { get; }
         IReadOnlyList<Field> Fields { get; }
+        IBoardSide EnemyBoardSide { get; set; }
 
         IEnumerable<Field> GetNeighbourFields(Field field);
         void AddLandCard(GameLandCard card);

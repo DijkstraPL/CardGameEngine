@@ -1,4 +1,5 @@
-﻿using CardGame_Game.BoardTable.Interfaces;
+﻿using CardGame_Data.Data.Enums;
+using CardGame_Game.BoardTable.Interfaces;
 using CardGame_Game.Cards;
 using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Cards.Triggers;
@@ -20,6 +21,7 @@ namespace CardGame_Game.BoardTable
     {
         public IReadOnlyList<Field> Fields { get; }
         public IList<GameLandCard> LandCards { get; } = new List<GameLandCard>();
+        public IBoardSide EnemyBoardSide { get; set; }
 
         private readonly IGameEventsContainer _gameEventsContainer;
 
@@ -92,25 +94,32 @@ namespace CardGame_Game.BoardTable
 
             foreach (var field in Fields)
             {
-                if(field.Card != null)
+                if (field.Card != null)
                 {
                     if (field.Card.Cooldown == 0)
                         field.Card.Cooldown = field.Card.BaseCooldown;
                     field.Card.Cooldown--;
+
+                    field.Card.Contrattacked = false;
+                    if (field.Card is IMovable movableCard)
+                        movableCard.Moved = false;
                 }
             }
         }
 
         public void Move(IPlayer player, Field start, Field target)
         {
-            if(player.Energy > 0 && 
+            if (player.CanMove() &&
                 target.Card == null &&
-                GetNeighbourFieldsCross(start).Contains(target))
+                GetNeighbourFieldsCross(start).Contains(target) &&
+                start.Card is IMovable movableCard &&
+                !movableCard.Moved)
             {
-                player.IncreaseEnergy(player.PlayerColor, -1);
+                player.OnCardMove();
                 var card = start.Card;
                 target.Card = card;
                 start.Card = null;
+                movableCard.Moved = true;
             }
         }
 
@@ -123,34 +132,48 @@ namespace CardGame_Game.BoardTable
 
                 if (field.Card.AttackTarget is IPlayer)
                 {
-                    game.NextPlayer.HealthCalculators.Add((() => true,  -field.Card.FinalAttack ?? 0));
-
-                    game.GameEventsContainer.UnitAttackedEvent.Raise(this, 
-                        new GameEventArgs { Game = game, Player = player, SourceCard = field.Card });
+                    AttackPlayer(game, player, field);
                 }
                 else if (field.Card.AttackTarget is GameUnitCard attackTarget)
                 {
                     var targetField = game.NextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card == field.Card.AttackTarget);
                     if (targetField == null)
-                        return;
-                    if (!field.CanAttack(targetField))
-                        return;
+                        continue;
+                    if (!field.CanAttack(targetField, EnemyBoardSide.Fields))
+                        continue;
 
-                    game.GameEventsContainer.UnitBeingAttackingEvent.Raise(this,
-                        new GameEventArgs { Game = game, Player = player, SourceCard = attackTarget, Targets = new List<GameCard> { field.Card } });
-            
-                    if(field.Card != null && field.Card.FinalHealth > 0)
-                    {
-                        field.Card.AttackTarget.HealthCalculators.Add((() => true, -field.Card.FinalAttack ?? 0));
-                        field.Card.HealthCalculators.Add((() => true, -attackTarget.FinalAttack / 2 ?? 0));
-
-                        field.Card.AttackTarget = null;
-                    }
-
-                    game.GameEventsContainer.UnitAttackedEvent.Raise(this,
-                        new GameEventArgs { Game = game, Player = player, SourceCard = field.Card, Targets = new List<GameCard> { attackTarget } });
+                    AttackUnit(game, player, field, attackTarget);
                 }
             }
+        }
+
+        private void AttackUnit(IGame game, IPlayer player, Field field, GameUnitCard attackTarget)
+        {
+            game.GameEventsContainer.UnitBeingAttackingEvent.Raise(this,
+                new GameEventArgs { Game = game, Player = player, SourceCard = attackTarget, Targets = new List<GameCard> { field.Card } });
+
+            if (field.Card != null && field.Card.FinalHealth > 0)
+            {
+                field.Card.AttackTarget.HealthCalculators.Add((() => true, -field.Card.FinalAttack ?? 0));
+                if (!field.Card.Trait.HasFlag(Trait.DistanceAttack) && !field.Card.AttackTarget.Contrattacked)
+                {
+                    field.Card.AttackTarget.Contrattacked = true;
+                    field.Card.HealthCalculators.Add((() => true, -attackTarget.FinalAttack / 2 ?? 0));
+                }
+
+                field.Card.AttackTarget = null;
+            }
+
+            game.GameEventsContainer.UnitAttackedEvent.Raise(this,
+                new GameEventArgs { Game = game, Player = player, SourceCard = field.Card, Targets = new List<GameCard> { attackTarget } });
+        }
+
+        private void AttackPlayer(IGame game, IPlayer player, Field field)
+        {
+            game.NextPlayer.HealthCalculators.Add((() => true, -field.Card.FinalAttack ?? 0));
+
+            game.GameEventsContainer.UnitAttackedEvent.Raise(this,
+                new GameEventArgs { Game = game, Player = player, SourceCard = field.Card });
         }
 
         public void Kill(GameUnitCard gameUnitCard)

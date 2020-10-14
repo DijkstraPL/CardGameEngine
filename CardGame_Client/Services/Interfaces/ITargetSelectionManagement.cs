@@ -10,5 +10,6 @@ namespace CardGame_Client.Services.Interfaces
        void SetPlayerBoardViewModel(PlayerBoardViewModel playerBoardViewModel);
        void SetEnemyBoardViewModel(EnemyBoardViewModel enemyBoardViewModel);
        void SetGameViewModel(GameViewModel mainWindowViewModel);
+        bool CanMove(CardData attackSource, FieldData fieldData);
     }
 }

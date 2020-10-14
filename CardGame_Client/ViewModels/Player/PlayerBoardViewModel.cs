@@ -58,6 +58,7 @@ namespace CardGame_Client.ViewModels.Player
             _clientGameManager.CardTaken += OnCardTaken;
             _clientGameManager.TurnStarted += OnTurnStarted;
             _clientGameManager.CardPlayed += OnCardPlayed;
+            _clientGameManager.CardMoved += OnCardMoved;
 
             _gameData = _clientGameManager.GameData ?? throw new ArgumentNullException(nameof(_clientGameManager.GameData));
             _player = _gameData.IsControllingCurrentPlayer ? _gameData.CurrentPlayer : _gameData.NextPlayer;
@@ -67,6 +68,12 @@ namespace CardGame_Client.ViewModels.Player
             SetFields(_clientGameManager.GameData);
 
             _targetSelectionManagement.SetPlayerBoardViewModel(this);
+        }
+
+        private void OnCardMoved(object sender, GameData gameData)
+        {
+            SetLandCards(gameData);
+            SetFields(gameData);
         }
 
         private void OnCardPlayed(object sender, GameData gameData)

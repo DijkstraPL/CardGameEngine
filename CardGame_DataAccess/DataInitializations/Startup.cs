@@ -46,9 +46,12 @@ namespace CardGame_DataAccess.DataInitializations
             var allCards = await _cardRepository.GetCards();
             var allDecks = await _deckRepository.GetDecks();
 
-            if (allDecks.All(d => d.Name != "Init1"))
-                await CreateDeck1(allCards);
-            if (allDecks.All(d => d.Name != "Init2"))
+            if (allDecks.Any(d => d.Name == "Init1"))
+                await _deckRepository.RemoveDeck("Init1");
+            if (allDecks.Any(d => d.Name == "Init2"))
+                await _deckRepository.RemoveDeck("Init2");
+
+            await CreateDeck1(allCards);
                 await CreateDeck2(allCards);
         }
 
@@ -65,31 +68,37 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Kathedral city"),
-                Amount = 6,
+                Amount = 9,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Watch tower"),
-                Amount = 6,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Villager"),
-                Amount = 20,
+                Amount = 16,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Spearman"),
-                Amount = 10,
+                Amount = 8,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Haste blessing"),
-                Amount = 10,
+                Amount = 8,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Wall"),
+                Amount = 8,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -102,13 +111,13 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Kathedral city"),
-                Amount = 9,
+                Amount = 12,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Blacksmith guild"),
-                Amount = 6,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
@@ -119,14 +128,20 @@ namespace CardGame_DataAccess.DataInitializations
             });
             cards.Add(new CardDeck
             {
-                Card = allCards.FirstOrDefault(c => c.Name == "Priest of the dead sun"),
+                Card = allCards.FirstOrDefault(c => c.Name == "Crossbowman"),
                 Amount = 10,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
+                Card = allCards.FirstOrDefault(c => c.Name == "Priest of the dead sun"),
+                Amount = 5,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
                 Card = allCards.FirstOrDefault(c => c.Name == "Haste blessing"),
-                Amount = 10,
+                Amount = 5,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -156,6 +171,69 @@ namespace CardGame_DataAccess.DataInitializations
                 await CreateOldKnight();
             if (cards.All(c => c.Name != "Strength blessing"))
                 await CreateStrengthBlessing();
+            if (cards.All(c => c.Name != "Crossbowman"))
+                await CreateCrossbowman();
+            if (cards.All(c => c.Name != "Wall"))
+                await CreateWall();
+            if (cards.All(c => c.Name != "Higher priest of the dead sun"))
+                await CreateHigherPriestOfTheDeadSun();
+        }
+
+        private static Task CreateHigherPriestOfTheDeadSun()
+        {
+            throw new NotImplementedException();
+        }
+
+        private static async Task CreateWall()
+        {
+            var card = new Card
+            {
+                Name = "Wall",
+                CostBlue = 1,
+                Cooldown = null,
+                Kind = Kind.Structure,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Trait = Trait.Defender,
+                Description = "",
+                Color = CardColor.Blue,
+                Number = 7,
+                Flavour = "Jak to się dzieje, że gdy tylko ktoś zbuduje mur, ktoś inny zaraz chce wiedzieć, co jest po jego drugiej stronie?",
+                Health = 4,
+                Attack = null,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Structure");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Construction");
+
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateCrossbowman()
+        {
+            var card = new Card
+            {
+                Name = "Crossbowman",
+                CostBlue = 1,
+                Cooldown = 3,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Trait= Trait.DistanceAttack,
+                Description = "",
+                Color = CardColor.Blue,
+                Number = 4,
+                Flavour = "Coś brzęknęło - to kusza Cuddy’ego wystrzeliła mu w ręku. Bełt świsnął koło ucha kaprala Nobbsa i wylądował w rzece, gdzie utknął.",
+                Health = 2,
+                Attack = 4,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Soldier");
+          
+            await _cardRepository.CreateCard(card);
         }
 
         private static async Task CreateStrengthBlessing()
@@ -359,7 +437,7 @@ namespace CardGame_DataAccess.DataInitializations
             var rule2 = new Rule
             {
                 When = "UnitBeingAttacking",
-                Condition = "OnField('SELF')",
+                Condition = "OnField('SELF');HasNotTrait('TARGET',1)",
                 Effect = "AddHealth('TARGET',-2,'INFINITE')",
                 Description = "Spiky 2"
             };
@@ -510,6 +588,8 @@ namespace CardGame_DataAccess.DataInitializations
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Transformation" });
             if ((await _subTypeRepository.GetSubTypeWithNameAsync("Knight")) == null)
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Knight" });
+            if ((await _subTypeRepository.GetSubTypeWithNameAsync("Construction")) == null)
+                await _subTypeRepository.CreateSubType(new Subtype { Name = "Construction" });
         }
         private static async Task CreateCardTypes()
         {
@@ -519,6 +599,8 @@ namespace CardGame_DataAccess.DataInitializations
                 await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Land" });
             if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Spell")) == null)
                 await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Spell" });
+            if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Structure")) == null)
+                await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Structure" });
         }
         private static async Task CreateSet()
         {

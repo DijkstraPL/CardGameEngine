@@ -39,6 +39,14 @@ namespace CardGame_DataAccess.Repositories
                  .ToListAsync();
         }
 
+        public async Task RemoveDeck(string deckName)
+        {
+            var deck = await _cardGameDbContext.Decks.FirstOrDefaultAsync(d => d.Name == deckName);
+            if (deck != null)
+                _cardGameDbContext.Decks.Remove(deck);
+            await _cardGameDbContext.SaveChangesAsync();
+        }
+
         public void Dispose()
         {
             _cardGameDbContext.Dispose();

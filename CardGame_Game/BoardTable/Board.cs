@@ -12,6 +12,9 @@ namespace CardGame_Game.BoardTable
         {
             LeftBoardSite = new BoardSide(gameEventsContainer);
             RightBoardSite = new BoardSide(gameEventsContainer);
+
+            LeftBoardSite.EnemyBoardSide = RightBoardSite;
+            RightBoardSite.EnemyBoardSide = LeftBoardSite;
         }
     }
 }

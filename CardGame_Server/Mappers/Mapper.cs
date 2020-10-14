@@ -1,4 +1,5 @@
-﻿using CardGame_Data.GameData;
+﻿using CardGame_Data.Data.Enums;
+using CardGame_Data.GameData;
 using CardGame_Data.GameData.Enums;
 using CardGame_Game.BoardTable;
 using CardGame_Game.BoardTable.Interfaces;
@@ -128,6 +129,7 @@ namespace CardGame_Server.Mappers
                 cardData.Cooldown = cooldown.Cooldown;
             }
 
+            cardData.Trait = MapTrait(card.Trait);
             cardData.Kind = card.Kind;
             cardData.Identifier = card.Identifier;
             cardData.CardState = (CardState)card.CardState;
@@ -138,6 +140,21 @@ namespace CardGame_Server.Mappers
             cardData.OwnerName = card.Owner.Name;
 
             return cardData;
+        }
+
+        private string MapTrait(Trait trait)
+        {
+            switch (trait)
+            {
+                case Trait.None:
+                    return string.Empty; ;
+                case Trait.DistanceAttack:
+                    return "Distance attack";
+                case Trait.Defender:
+                    return "Defender";
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private AttackTargetData MapTarget(IHealthy attackTarget)

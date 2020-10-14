@@ -43,8 +43,14 @@ namespace CardGame_Client.ViewModels.Enemy
             _clientGameManager = clientGameManager ?? throw new ArgumentNullException(nameof(clientGameManager));
             _clientGameManager.TurnStarted += OnTurnStarted;
             _clientGameManager.CardPlayed += OnCardPlayed;
+            _clientGameManager.CardMoved += OnCardMoved;
 
             SetPlayerInfo(_clientGameManager.GameData);
+        }
+
+        private void OnCardMoved(object sender, GameData gameData)
+        {
+            SetPlayerInfo(gameData);
         }
 
         private void OnCardPlayed(object sender, GameData gameData)

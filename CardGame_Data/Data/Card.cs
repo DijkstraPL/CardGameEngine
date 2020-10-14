@@ -8,7 +8,7 @@ namespace CardGame_Data.Data
         public int Number { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public string Trait { get; set; }
+        public Trait Trait { get; set; }
         public ICollection<Rule> Rules { get; private set; }
         public string Flavour { get; set; }
         public Kind Kind { get; set; }

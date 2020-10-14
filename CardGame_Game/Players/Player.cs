@@ -48,6 +48,7 @@ namespace CardGame_Game.Players
         }
 
         public bool IsLoser { get; private set; }
+        public bool Contrattacked { get; set; } 
 
         private readonly Stack<Card> _landDeck;
         private readonly GameCardFactory _gameCardFactory;
@@ -144,6 +145,16 @@ namespace CardGame_Game.Players
         public void AddToGraveyard(GameCard card)
         {
             Graveyard.Push(card);
+        }
+
+        public virtual void OnCardMove()
+        {
+            IncreaseEnergy(PlayerColor, -1);
+        }
+
+        public virtual bool CanMove()
+        {
+            return Energy > 0;
         }
     }
 }

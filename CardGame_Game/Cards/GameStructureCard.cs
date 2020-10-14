@@ -1,17 +1,19 @@
 ﻿using CardGame_Data.Data;
 using CardGame_Data.Data.Enums;
-using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Game.Interfaces;
 using CardGame_Game.Players.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace CardGame_Game.Cards
 {
-    public class GameCreatureCard: GameUnitCard, IMovable
+    public class GameStructureCard : GameUnitCard
     {
         public bool Moved { get; set; }
 
-        public GameCreatureCard(IPlayer owner, Card card,  string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
-            : base(owner ,card,  name, description, cost, invocationTarget, attack, cooldown, health)
+        public GameStructureCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
+            : base(owner, card, name, description, cost, invocationTarget, attack, cooldown, health)
         {
         }
 
@@ -27,5 +29,4 @@ namespace CardGame_Game.Cards
             this.CardState = Enums.CardState.OnField;
         }
     }
-
 }

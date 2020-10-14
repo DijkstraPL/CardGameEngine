@@ -13,6 +13,7 @@ namespace CardGame_Client.Services.Interfaces
         event EventHandler<GameData> TurnStarted; 
         event EventHandler<GameData> CardPlayed;
         event EventHandler<GameData> AttackTargetSet;
+        event EventHandler<GameData> CardMoved;
 
         Task SetReady(string playerName, string deckName);
         Task FinishTurn();
@@ -21,5 +22,6 @@ namespace CardGame_Client.Services.Interfaces
         Task PlayCard(CardData cardData, SelectionTargetData selectionTargetData);
         Task SetAttackTarget(CardData attackSource, CardData attackTarget);
         Task SetAttackTarget(CardData attackSource, PlayerData playerData);
+        Task Move(CardData attackSource, FieldData fieldData);
     }
 }

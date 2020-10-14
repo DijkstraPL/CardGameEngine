@@ -20,7 +20,7 @@ namespace CardGame_Game.Cards
                 case Kind.Creature:
                     return CreateCreatureCard(owner, card);
                 case Kind.Structure:
-                    throw new NotImplementedException();
+                    return CreateStructureCard(owner, card);
                 case Kind.Spell:
                     return CreateSpellCard(owner , card);
                 case Kind.Equipment:
@@ -30,6 +30,12 @@ namespace CardGame_Game.Cards
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        private GameCard CreateStructureCard(IPlayer owner, Card card)
+        {
+            var structureCard = new GameStructureCard(owner, card, card.Name, card.Description, card.CostBlue, card.InvocationTarget, card.Attack, card.Cooldown, card.Health);
+            return structureCard;
         }
 
         private GameCard CreateSpellCard(IPlayer owner, Card card)

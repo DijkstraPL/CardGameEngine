@@ -1,7 +1,10 @@
-﻿using CardGame_Game.BoardTable.Interfaces;
+﻿using CardGame_Data.Data.Enums;
+using CardGame_Game.BoardTable.Interfaces;
 using CardGame_Game.Cards;
 using CardGame_Game.Cards.Interfaces;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CardGame_Game.BoardTable
 {
@@ -18,10 +21,16 @@ namespace CardGame_Game.BoardTable
             Y = y;
         }
 
-        public bool CanAttack(Field targetField)
+        public bool CanAttack(Field targetField, IEnumerable<Field> enemyFields)
         {
-            return Y - 1 <= targetField.Y &&
+            bool isDefender = targetField.Card?.Trait.HasFlag(Trait.Defender) ?? false;
+            bool hasDefender = enemyFields.Where(f => f.Y == Y || f.Y == Y - 1 || f.Y == Y + 1)
+                .Any(f => f.Card?.Trait.HasFlag(Trait.Defender) ?? false);
+
+            bool isNeighbour = Y - 1 <= targetField.Y &&
                        targetField.Y <= Y + 1;
+
+            return isNeighbour && (!hasDefender || isDefender);
         }
     }
 }

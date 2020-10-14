@@ -19,6 +19,7 @@ namespace CardGame_Client.Services
         public event EventHandler<GameData> TurnStarted;
         public event EventHandler<GameData> CardPlayed;
         public event EventHandler<GameData> AttackTargetSet;
+        public event EventHandler<GameData> CardMoved;
 
         public ClientGameManager(IConnectionManager connectionManager)
         {
@@ -55,6 +56,11 @@ namespace CardGame_Client.Services
                 GameData = game;
                 AttackTargetSet?.Invoke(this, game);
             });
+            _connectionManager.Connection.On<GameData>("CardMoved", (game) =>
+            {
+                GameData = game;
+                CardMoved?.Invoke(this, game);
+            });
         }
 
         public async Task SetReady(string playerName, string deckName)
@@ -90,6 +96,11 @@ namespace CardGame_Client.Services
         public async Task SetAttackTarget(CardData attackSource, PlayerData playerData)
         {
             await _connectionManager.Connection.SendAsync("SetPlayerAsAttackTarget", attackSource, playerData);
+        }
+
+        public async Task Move(CardData attackSource, FieldData fieldData)
+        {
+            await _connectionManager.Connection.SendAsync("Move", attackSource, fieldData);
         }
     }
 }

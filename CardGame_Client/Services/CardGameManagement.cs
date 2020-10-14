@@ -13,13 +13,15 @@ namespace CardGame_Client.Services
         public SelectionTargetData SelectionTargetData { get; private set; }
 
         private readonly IClientGameManager _clientGameManager;
+        private readonly ITargetSelectionManagement _targetSelectionManagement;
         private CardData _cardDataToBePlay;
         private CardData _attackSource;
         private CardData _attackTarget;
 
-        public CardGameManagement(IClientGameManager clientGameManager)
+        public CardGameManagement(IClientGameManager clientGameManager, ITargetSelectionManagement targetSelectionManagement)
         {
             _clientGameManager = clientGameManager ?? throw new ArgumentNullException(nameof(clientGameManager));
+            _targetSelectionManagement = targetSelectionManagement ?? throw new ArgumentNullException(nameof(targetSelectionManagement));
         }
 
         public bool HasTarget(CardData cardData)
@@ -114,6 +116,11 @@ namespace CardGame_Client.Services
                     _attackSource = eventArgs.FieldData.UnitCard;
                 else if (eventArgs.IsEnemyField && eventArgs.FieldData.UnitCard != null && _attackSource != null)
                     _attackTarget = eventArgs.FieldData.UnitCard;
+                else if (eventArgs.FieldData.UnitCard == null && _attackSource != null && _targetSelectionManagement.CanMove(_attackSource, eventArgs.FieldData))
+                {
+                    _clientGameManager.Move(_attackSource, eventArgs.FieldData);
+                    _attackSource = null;
+                }
 
                 if (_attackSource != null && _attackTarget != null)
                 {

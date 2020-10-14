@@ -38,6 +38,8 @@ namespace CardGame_Game.Cards
             }
         }
 
+        public bool Contrattacked { get; set; } 
+
         public GameUnitCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
             : base(owner, card, name, description, cost, invocationTarget)
         {

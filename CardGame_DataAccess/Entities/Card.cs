@@ -12,7 +12,7 @@ namespace CardGame_DataAccess.Entities
         public int Number { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public string Trait { get; set; }
+        public Trait Trait { get; set; }
         public ICollection<CardRule> Rules { get; private set; }
         public string Flavour { get; set; }
         public Kind Kind { get; set; }
@@ -60,7 +60,7 @@ namespace CardGame_DataAccess.Entities
                 CostGreen = card.CostGreen,
                 CostRed = card.CostRed,
                 Health = card.Health,
-                Trait = card.Trait
+                Trait = (Data.Enums.Trait)card.Trait
             };
             foreach (var rule in card.Rules)
                 dataCard.Rules.Add(rule.Rule);

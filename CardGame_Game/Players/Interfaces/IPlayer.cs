@@ -39,5 +39,7 @@ namespace CardGame_Game.Players.Interfaces
         void SetStartingHand();
         void IncreaseEnergy(CardColor cardColor, int value);
         void AddToGraveyard(GameCard card);
+        void OnCardMove();
+        bool CanMove();
     }
 }
