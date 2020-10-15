@@ -1,4 +1,6 @@
-﻿using CardGame_Game.Cards;
+﻿using CardGame_Data.Data.Enums;
+using CardGame_Game.Cards;
+using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Cards.Triggers.Interfaces;
 using CardGame_Game.Game;
 using System;
@@ -38,18 +40,23 @@ namespace CardGame_Game.Rules.Effects
                     var fields = gameEventArgs.Player.BoardSide.GetNeighbourFields(field);
                     fields.Where(f => f.Card != null)
                         .ToList()
-                        .ForEach(f => f.Card.HealthCalculators.Add((() => true, neighbourHealthAddition)));
+                        .ForEach(f => f.Card.HealthCalculators.Add((card => true, neighbourHealthAddition)));
                 }
             }
             else if (args[0] == "SELF" &&
                 Int32.TryParse(args[1], out int selfHealthAddition) &&
                 gameEventArgs.SourceCard is GameUnitCard gameUnitCard)
-                gameUnitCard.HealthCalculators.Add((() => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)), selfHealthAddition));
-            else if(args[0]=="TARGET" &&
+                gameUnitCard.HealthCalculators.Add((card => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)), selfHealthAddition));
+            else if (args[0] == "TARGET" &&
                 Int32.TryParse(args[1], out int targetHealthAddition) &&
                 gameEventArgs.Targets.FirstOrDefault() is GameUnitCard targetGameUnitCard)
-                targetGameUnitCard.HealthCalculators.Add((() => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)), targetHealthAddition));
-
+                targetGameUnitCard.HealthCalculators.Add((card => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)), targetHealthAddition));
+            else if (args[0] == "ALLFRIENDLYCREATURES" &&
+                  Int32.TryParse(args[1], out int creaturesHealthAddition))
+            {
+                foreach (IHealthy card in gameEventArgs.Player.AllCards.Where(c => c.Kind == Kind.Creature && c is IHealthy))                
+                    card.HealthCalculators.Add((card => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)), creaturesHealthAddition));
+            }
         }
     }
 }

@@ -39,6 +39,7 @@ namespace CardGame_Game.GameEvents
             UnitKilledEvent = new UnitKilledEvent();
             SpellCastingEvent = new SpellCastingEvent();
 
+
             GameEvents.Add((GameStartingEvent.Name, GameStartingEvent));
             GameEvents.Add((PlayerInitializedEvent.Name, PlayerInitializedEvent));
             GameEvents.Add((GameStartedEvent.Name, GameStartedEvent));

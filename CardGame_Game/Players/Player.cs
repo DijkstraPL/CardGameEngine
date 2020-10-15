@@ -48,7 +48,11 @@ namespace CardGame_Game.Players
         }
 
         public bool IsLoser { get; private set; }
-        public bool Contrattacked { get; set; } 
+        public bool Contrattacked { get; set; }
+
+        public IEnumerable<GameCard> AllCards { get; private set; }
+
+        List<(Func<IHealthy, bool> conditon, int value)> IHealthy.HealthCalculators => throw new NotImplementedException();
 
         private readonly Stack<Card> _landDeck;
         private readonly GameCardFactory _gameCardFactory;
@@ -72,6 +76,8 @@ namespace CardGame_Game.Players
             Deck = new Stack<GameCard>(organizedDeck).Shuffle();
             var organizedLandDeck = _landDeck.Where(c => c.Kind == Kind.Land).Select(c => _gameCardFactory.CreateGameCard(this, c));
             LandDeck = new Stack<GameCard>(organizedLandDeck).Shuffle();
+
+            AllCards = new List<GameCard>(Deck.Concat(LandDeck));
         }
 
         public void RegisterTriggers(IGame game)

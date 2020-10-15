@@ -24,6 +24,7 @@ namespace CardGame_Data.Data
         public Rarity Rarity { get; set; }
         public CardColor Color { get; set; }
         public Set Set { get; set; }
+        public string Rule { get; set; }
 
         public InvocationTarget InvocationTarget { get; set; }
 

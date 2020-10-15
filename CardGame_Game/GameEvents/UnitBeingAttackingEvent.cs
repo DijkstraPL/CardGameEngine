@@ -15,6 +15,7 @@ namespace CardGame_Game.GameEvents
         public override void Raise(object source, GameEventArgs gameEventArgs)
         {
             UnitBeingAttacking?.Invoke(source, gameEventArgs);
+            base.Raise(source, gameEventArgs);
         }
 
         public override void Add(GameCard sourceCard, Action<GameEventArgs> action)

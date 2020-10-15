@@ -11,8 +11,8 @@ namespace CardGame_Game.Cards
     public abstract class GameUnitCard : GameCard, ICooldown, IAttacker, IHealthy
     {
         public int? BaseAttack { get; }
-        public List<(Func<bool> conditon, int value)> AttackCalculators { get; } = new List<(Func<bool> conditon, int value)>();
-        public int? FinalAttack => BaseAttack == null ? null : BaseAttack + AttackCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
+        public List<(Func<IAttacker, bool> conditon, int value)> AttackCalculators { get; } = new List<(Func<IAttacker, bool> conditon, int value)>();
+        public int? FinalAttack => BaseAttack == null ? null : BaseAttack + AttackCalculators.Where(ac => ac.conditon(this)).Sum(ac => ac.value);
 
         public IHealthy AttackTarget { get; set; }
 
@@ -26,15 +26,15 @@ namespace CardGame_Game.Cards
         }
 
         public int? BaseHealth { get; }
-        public List<(Func<bool> conditon, int value)> HealthCalculators { get; } = new List<(Func<bool> conditon, int value)>();
+        public List<(Func<IHealthy, bool> conditon, int value)> HealthCalculators { get; } = new List<(Func<IHealthy, bool> conditon, int value)>();
         public int? FinalHealth
         {
             get
             {
-                var finalHealth = BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
+                var finalHealth = BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon(this)).Sum(ac => ac.value);
                 if (finalHealth <= 0)
                     Dead();
-                return BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
+                return BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon(this)).Sum(ac => ac.value);
             }
         }
 

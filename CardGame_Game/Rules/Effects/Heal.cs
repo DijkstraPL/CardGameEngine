@@ -29,7 +29,7 @@ namespace CardGame_Game.Rules.Effects
                 if (gameEventArgs.Player.FinalHealth + value > gameEventArgs.Player.BaseHealth)
                     gameEventArgs.Player.HealthCalculators.Clear();
                 else
-                    gameEventArgs.Player.HealthCalculators.Add((() => true, value));
+                    gameEventArgs.Player.HealthCalculators.Add((card => true, value));
             }
         }
     }

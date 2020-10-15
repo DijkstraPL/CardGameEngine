@@ -10,7 +10,8 @@ using System.Text;
 namespace CardGame_Game.Rules.Conditions
 {
     /// <summary>
-    /// Controls({'SELF'},{'Card name'},{Amount})
+    /// Check if player controls card with name and min amount
+    /// Controls({'SELF'},{CardName},{Amount})
     /// </summary>
     [Export(Name, typeof(ICondition))]
     public class Controls : ICondition

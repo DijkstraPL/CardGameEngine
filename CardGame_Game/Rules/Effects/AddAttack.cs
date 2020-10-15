@@ -1,4 +1,5 @@
-﻿using CardGame_Game.Cards.Interfaces;
+﻿using CardGame_Game.Cards;
+using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Cards.Triggers.Interfaces;
 using CardGame_Game.Game;
 using CardGame_Game.Game.Interfaces;
@@ -29,20 +30,24 @@ namespace CardGame_Game.Rules.Effects
 
         public void Invoke(GameEventArgs gameEventArgs, IEnumerable<(ICondition condition, string[] args)> conditions, params string[] args)
         {
-            Func<bool> predicate = () => true;
+            Func<bool> turnCounterPredicate = () => true;
             if (Int32.TryParse(args[2], out int turnsAmount) && _turnsLeft == null)
             {
                 _turnsLeft = turnsAmount;
                 _turnStamp = gameEventArgs.Game.TurnCounter;
             }
             if (_turnsLeft != null)
-                predicate = () => _turnStamp + _turnsLeft > gameEventArgs.Game.TurnCounter;
+                turnCounterPredicate = () => _turnStamp + _turnsLeft > gameEventArgs.Game.TurnCounter;
 
-            if (args[0] == "SELF" && Int32.TryParse(args[1], out int value) && gameEventArgs.SourceCard is IAttacker attacker)
-                attacker.AttackCalculators.Add((() => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)) && predicate(), value));
-            else if (args[0] == "TARGET" && Int32.TryParse(args[1], out int targetAttackValue) && gameEventArgs.Targets.FirstOrDefault() is IAttacker targetAttacker)
-                targetAttacker.AttackCalculators.Add((() => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)) && predicate(), targetAttackValue));
+            int value = 0;
+            if (!Int32.TryParse(args[1], out value))
+                return;
 
+            if (args[0] == "SELF" && gameEventArgs.SourceCard is IAttacker attacker)
+                attacker.AttackCalculators.Add((card => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)) && turnCounterPredicate(), value));
+            else if (args[0] == "TARGET" && gameEventArgs.Targets.FirstOrDefault() is IAttacker targetAttacker)
+                targetAttacker.AttackCalculators.Add((card => conditions.All(c => c.condition.Validate(gameEventArgs, c.args)) && turnCounterPredicate(), value));
+         
         }
     }
 }

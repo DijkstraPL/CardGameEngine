@@ -22,6 +22,8 @@ namespace CardGame_Game.Players.Interfaces
 
         bool IsLoser { get; }
 
+        IEnumerable<GameCard> AllCards { get; }
+
         Stack<GameCard> LandDeck { get; }
         Stack<GameCard> Deck { get; }
         Stack<GameCard> Graveyard { get; }

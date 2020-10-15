@@ -27,7 +27,7 @@ namespace CardGame_Game.Cards
         protected readonly Card _card;
         private readonly IList<Trigger> _triggers = new List<Trigger>();
 
-        public GameCard(IPlayer owner, Card card,  string name, string description, int? cost, InvocationTarget invocationTarget)
+        public GameCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget)
         {
             Identifier = Guid.NewGuid();
 
@@ -54,8 +54,15 @@ namespace CardGame_Game.Cards
         {
             foreach (var rule in _card.Rules)
             {
-                var trigger = new Trigger(game.GameEventsContainer, this, rule.When, rule.Condition, rule.Effect);
-                _triggers.Add(trigger);
+                if (string.IsNullOrWhiteSpace(rule.When))
+                {
+                    var ruleMapper = new RuleMapper(game.GameEventsContainer, this, rule.Effect);
+                }
+                else
+                {
+                    var trigger = new Trigger(game.GameEventsContainer, this, rule.When, rule.Condition, rule.Effect);
+                    _triggers.Add(trigger);
+                }
             }
         }
     }

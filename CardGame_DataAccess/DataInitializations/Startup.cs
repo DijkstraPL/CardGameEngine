@@ -80,25 +80,31 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Villager"),
-                Amount = 16,
+                Amount = 5,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Spearman"),
-                Amount = 8,
+                Amount = 5,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Haste blessing"),
-                Amount = 8,
+                Amount = 5,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Wall"),
-                Amount = 8,
+                Amount = 5,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Chapel"),
+                Amount = 10,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -123,13 +129,13 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Villager"),
-                Amount = 20,
+                Amount = 5,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Crossbowman"),
-                Amount = 10,
+                Amount = 5,
                 Deck = deck
             });
             cards.Add(new CardDeck
@@ -138,6 +144,18 @@ namespace CardGame_DataAccess.DataInitializations
                 Amount = 5,
                 Deck = deck
             });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Hound"),
+                Amount = 10,
+                Deck = deck
+            });
+            //cards.Add(new CardDeck
+            //{
+            //    Card = allCards.FirstOrDefault(c => c.Name == "High priest of the dead sun"),
+            //    Amount = 10,
+            //    Deck = deck
+            //});
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Haste blessing"),
@@ -175,13 +193,77 @@ namespace CardGame_DataAccess.DataInitializations
                 await CreateCrossbowman();
             if (cards.All(c => c.Name != "Wall"))
                 await CreateWall();
-            if (cards.All(c => c.Name != "Higher priest of the dead sun"))
-                await CreateHigherPriestOfTheDeadSun();
+            if (cards.All(c => c.Name != "Hound"))
+                await CreateHound();
+            if (cards.All(c => c.Name != "Chapel"))
+                await CreateChapel();
+            //if (cards.All(c => c.Name != "Higher priest of the dead sun"))
+            //    await CreateHigherPriestOfTheDeadSun();
         }
 
-        private static Task CreateHigherPriestOfTheDeadSun()
+        //private static async Task CreateHigherPriestOfTheDeadSun()
+        //{
+        //    var card = new Card
+        //    {
+        //        Name = "High priest of the dead sun",
+        //        CostBlue = 2,
+        //        Cooldown = 2,
+        //        Kind = Kind.Creature,
+        //        InvocationTarget = InvocationTarget.OwnEmptyField,
+        //        Rarity = Rarity.Silver,
+        //        Description = "Increase neighbour creatures attack by 1.",
+        //        Color = CardColor.Blue,
+        //        Number = 11,
+        //        Flavour = "Kapłani zakryli przed ludźmi słońce, a dali im świeczkę.",
+        //        Health = 3,
+        //        Attack = 1,
+        //    };
+
+        //    card.Set = await _setRepository.GetSetWithName("The Big Bang");
+        //    card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+        //    card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Priest");
+        //    var rule = new Rule
+        //    {
+        //        When = "PlayerInitialized",
+        //        Condition = "Owner('SELF');Times(1)",
+        //        Effect = "HighPriestOfTheDeadSun(1)",             
+        //        Description = "Increase neighbour creatures attack by 1."
+        //    };
+        //    card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+        //    await _cardRepository.CreateCard(card);
+        //}
+
+        private static async Task CreateHound()
         {
-            throw new NotImplementedException();
+            var card = new Card
+            {
+                Name = "Hound",
+                CostBlue = 2,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "Suppressor 2",
+                Color = CardColor.Blue,
+                Number = 15,
+                Flavour = "Psu jest wszystko jedno, czy jesteś biedny, czy bogaty, wykształcony czy analfabeta, mądry czy głupi. Daj mu serce, a on odda ci swoje.",
+                Health = 2,
+                Attack = 2,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Beast");
+            var rule = new Rule
+            {
+                When = "UnitAttacked",
+                Condition = "OnField('SELF');IsKind('TARGET','CREATURE')",
+                Effect = "AddHealth('TARGET',-2,'INFINITE')",
+                Description = "Suppressor 2"
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
         }
 
         private static async Task CreateWall()
@@ -207,6 +289,38 @@ namespace CardGame_DataAccess.DataInitializations
             card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Structure");
             card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Construction");
 
+            await _cardRepository.CreateCard(card);
+        }
+        private static async Task CreateChapel()
+        {
+            var card = new Card
+            {
+                Name = "Chapel",
+                CostBlue = 2,
+                Cooldown = null,
+                Kind = Kind.Structure,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "Increase health of all creatures by 1.",
+                Color = CardColor.Blue,
+                Number = 20,
+                Flavour = "Byli też misjonarze. Wykarczowali pole za wioską, postawili kaplicę, a potem zaprosili Carapana na pogadankę. Okazało się, że ten ich nowy Bóg jest taki sam jak nasz (…)",
+                Health = 3,
+                Attack = null,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Structure");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Totem");
+
+            var rule1 = new Rule
+            {
+                When = "PlayerInitialized",
+                Condition = "Times(1)",
+                Effect = "OnField('SELF')->AddHealth('ALLFRIENDLYCREATURES',1,'INFINITE')",
+                Description = "Increase health of all creatures by 1."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
             await _cardRepository.CreateCard(card);
         }
 
@@ -590,6 +704,8 @@ namespace CardGame_DataAccess.DataInitializations
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Knight" });
             if ((await _subTypeRepository.GetSubTypeWithNameAsync("Construction")) == null)
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Construction" });
+            if ((await _subTypeRepository.GetSubTypeWithNameAsync("Totem")) == null)
+                await _subTypeRepository.CreateSubType(new Subtype { Name = "Totem" });
         }
         private static async Task CreateCardTypes()
         {
@@ -601,6 +717,8 @@ namespace CardGame_DataAccess.DataInitializations
                 await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Spell" });
             if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Structure")) == null)
                 await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Structure" });
+            if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Beast")) == null)
+                await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Beast" });
         }
         private static async Task CreateSet()
         {
