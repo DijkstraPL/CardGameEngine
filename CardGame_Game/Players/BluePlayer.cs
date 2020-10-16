@@ -10,11 +10,21 @@ namespace CardGame_Game.Players
 {
     public class BluePlayer : Player
     {
+        public const int MaxMorale = 10;
+
         private int _morale;
-        public int Morale 
-        { 
-            get => _morale; 
-            set => _morale = value >= 0 ? value : 0;
+        public int Morale
+        {
+            get => _morale;
+            set
+            {
+                if (value < 0)
+                    _morale = 0;
+                else if (value > 10)
+                    _morale = MaxMorale;
+                else
+                    _morale = value;
+            }
         }
 
         public BluePlayer(string name, Stack<Card> deck, Stack<Card> landDeck, GameCardFactory gameCardFactory, IGameEventsContainer gameEventsContainer) : base(name, deck, landDeck, gameCardFactory, gameEventsContainer)

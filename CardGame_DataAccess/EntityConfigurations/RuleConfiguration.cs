@@ -14,9 +14,6 @@ namespace CardGame_DataAccess.EntityConfigurations
 
             builder.HasKey(r => r.Id);
 
-            builder.Property(r => r.Condition)
-                .HasMaxLength(1000);
-
             builder.Property(r => r.Effect)
                 .HasMaxLength(1000);
 

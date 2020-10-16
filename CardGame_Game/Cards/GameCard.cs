@@ -53,17 +53,7 @@ namespace CardGame_Game.Cards
         internal void RegisterTriggers(IGame game)
         {
             foreach (var rule in _card.Rules)
-            {
-                if (string.IsNullOrWhiteSpace(rule.When))
-                {
-                    var ruleMapper = new RuleMapper(game.GameEventsContainer, this, rule.Effect);
-                }
-                else
-                {
-                    var trigger = new Trigger(game.GameEventsContainer, this, rule.When, rule.Condition, rule.Effect);
-                    _triggers.Add(trigger);
-                }
-            }
+                _triggers.Add(new Trigger(game.GameEventsContainer, this, rule.Effect));
         }
     }
 

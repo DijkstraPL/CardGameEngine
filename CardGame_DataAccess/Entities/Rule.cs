@@ -5,8 +5,6 @@ namespace CardGame_DataAccess.Entities
     public class Rule
     {
         public int Id { get; set; }
-        public string When { get; set; }
-        public string Condition { get; set; }
         public string Effect { get; set; }
         public string Description { get; set; }
 
@@ -16,8 +14,6 @@ namespace CardGame_DataAccess.Entities
                 return null;
             return new Data.Rule
             {
-                When = rule.When,
-                Condition = rule.Condition,
                 Effect = rule.Effect,
                 Description = rule.Description
             };

@@ -105,7 +105,8 @@ namespace CardGame_Game.Game
 
         public bool PlayCard(GameCard card, InvocationData invocationData)
         {
-            if (CurrentPlayer.Energy >= card.Cost &&
+            if (card != null &&
+                CurrentPlayer.Energy >= card.Cost &&
                 CurrentPlayer.Hand.Any(h => h == card) &&
                 card.CanBePlayed(this, CurrentPlayer, invocationData))
             {

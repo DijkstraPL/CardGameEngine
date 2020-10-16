@@ -9,7 +9,8 @@ namespace CardGame_Data.Data.Enums
     {
         None = 0,
 
-        DistanceAttack = 1 << 0, // 1
-        Defender = 1 << 1  // 2
+        DistanceAttack  = 1 << 0, // 1
+        Defender        = 1 << 1, // 2
+        Flying          = 1 << 2  // 4
     }
 }

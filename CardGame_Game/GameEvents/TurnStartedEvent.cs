@@ -1,9 +1,6 @@
 ﻿using CardGame_Game.Cards;
 using CardGame_Game.Game;
-using CardGame_Game.Rules.When;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CardGame_Game.GameEvents
 {

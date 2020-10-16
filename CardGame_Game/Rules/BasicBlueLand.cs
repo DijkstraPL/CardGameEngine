@@ -44,7 +44,8 @@ namespace CardGame_Game.Rules
 
             gameEventsContainer.PlayerInitializedEvent.Add(gameCard, gea =>
             {
-                if (gameCard is IAttacker attacker &&
+                if (gameCard.Owner == gea.Player &&
+                    gameCard is IAttacker attacker &&
                     Int32.TryParse(args[0], out int morale) &&
                     Int32.TryParse(args[1], out int value))
                     attacker.AttackCalculators.Add((card =>
@@ -264,7 +265,8 @@ namespace CardGame_Game.Rules
 
             gameEventsContainer.PlayerInitializedEvent.Add(gameCard, gea =>
             {
-                if (gameCard is IHealthy healthy &&
+                if (gameCard.Owner == gea.Player &&
+                    gameCard is IHealthy healthy &&
                     Int32.TryParse(args[0], out int morale) &&
                     Int32.TryParse(args[1], out int value))
                     healthy.HealthCalculators.Add((card =>
@@ -297,7 +299,7 @@ namespace CardGame_Game.Rules
 
             gameEventsContainer.UnitAttackedEvent.Add(gameCard, gea =>
             {
-                var target = gea.Targets.FirstOrDefault();
+                var target = gea.Targets?.FirstOrDefault();
                 if (target != null &&
                     target is IHealthy healthy &&
                     target.Kind == Kind.Creature &&
@@ -329,6 +331,129 @@ namespace CardGame_Game.Rules
                         if (card is IHealthy healthy && card.Kind == Kind.Creature)
                             healthy.HealthCalculators.Add((card => gameCard.CardState == CardState.OnField, value));
                     }
+                }
+            });
+        }
+    }
+
+    [Export(nameof(HighPriestOfTheDeadSun), typeof(IRule))]
+    public class HighPriestOfTheDeadSun : IRule
+    {
+        public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
+        {
+            if (gameEventsContainer == null)
+                throw new ArgumentNullException(nameof(gameEventsContainer));
+
+            gameEventsContainer.CardPlayedEvent.Add(gameCard, gea =>
+            {
+                if (gameCard.CardState == CardState.OnField &&
+                      gameCard.Owner == gea.Player &&
+                      gea.SourceCard == gameCard &&
+                    Int32.TryParse(args[0], out int value))
+                {
+                    foreach (var card in gameCard.Owner.AllCards)
+                    {
+                        if (card is IAttacker healthy && card.Kind == Kind.Creature)
+                            healthy.AttackCalculators.Add((card =>
+                            {
+                                var field = gameCard.Owner.BoardSide.Fields.FirstOrDefault(f => f.Card == gameCard);
+                                var neighbourFields = gameCard.Owner.BoardSide.GetNeighbourFields(field);
+                                return gameCard.CardState == CardState.OnField &&
+                                neighbourFields.Any(nf => nf.Card == card);
+                            }, value));
+                    }
+                }
+            });
+        }
+    }
+
+    [Export(nameof(Catapult), typeof(IRule))]
+    public class Catapult : IRule
+    {
+        public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
+        {
+            if (gameEventsContainer == null)
+                throw new ArgumentNullException(nameof(gameEventsContainer));
+
+            gameEventsContainer.CardPlayedEvent.Add(gameCard, gea =>
+            {
+                if (gameCard.CardState == CardState.OnField &&
+                      gameCard.Owner == gea.Player &&
+                      gea.SourceCard == gameCard)
+                {
+                    var catapults = gameCard.Owner.BoardSide.Fields.Where(f => f.Card?.Name == gameCard.Name);
+                    if (catapults.Count() > 0 && gameCard is ICooldown cooldown)
+                        cooldown.Cooldown = Math.Min((int)cooldown.BaseCooldown, (int)catapults.Min(c => c.Card.Cooldown));
+                }
+            });
+        }
+    }
+
+    [Export(nameof(DefenderOfComrades), typeof(IRule))]
+    public class DefenderOfComrades : IRule
+    {
+        public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
+        {
+            if (gameEventsContainer == null)
+                throw new ArgumentNullException(nameof(gameEventsContainer));
+
+            gameEventsContainer.PlayerInitializedEvent.Add(gameCard, gea =>
+            {
+                if (gameCard.Owner == gea.Player &&
+                      gameCard is IAttacker attacker &&
+                    gameCard.Owner is BluePlayer bluePlayer)
+                {
+                    attacker.AttackFuncCalculators.Add((card => true, card => bluePlayer.Morale));
+                }
+            });
+        }
+    }
+
+    [Export(nameof(HighestPriestOfTheDeadSun), typeof(IRule))]
+    public class HighestPriestOfTheDeadSun : IRule
+    {
+        public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
+        {
+            if (gameEventsContainer == null)
+                throw new ArgumentNullException(nameof(gameEventsContainer));
+
+            gameEventsContainer.TurnStartedEvent.Add(gameCard, gea =>
+            {
+                if (gameCard.Owner == gea.Player &&
+                    gameCard.CardState == CardState.OnField &&
+                    gameCard is ICooldown cooldown &&
+                    cooldown.Cooldown == 0 &&
+                    Int32.TryParse(args[0], out int value))
+                {
+                    var field = gameCard.Owner.BoardSide.Fields.FirstOrDefault(f => f.Card == gameCard);
+                    var neighbourFields = gameCard.Owner.BoardSide.GetNeighbourFields(field);
+
+                    foreach (var neighbourField in neighbourFields)
+                    {
+                        if (neighbourField.Card?.Kind == Kind.Creature)
+                            neighbourField.Card.Cooldown -= value;
+                    }        
+                }
+            });
+        }
+    }
+
+    [Export(nameof(MoraleBoost), typeof(IRule))]
+    public class MoraleBoost : IRule
+    {
+        private int _castTurn;
+
+        public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
+        {
+            if (gameEventsContainer == null)
+                throw new ArgumentNullException(nameof(gameEventsContainer));
+
+            gameEventsContainer.SpellCastingEvent.Add(gameCard, gea =>
+            {
+                if (Int32.TryParse(args[0], out int value) &&
+                gameCard.Owner is BluePlayer bluePlayer)
+                {
+                    bluePlayer.Morale += value;
                 }
             });
         }

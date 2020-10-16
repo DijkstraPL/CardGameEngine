@@ -152,6 +152,8 @@ namespace CardGame_Server.Mappers
                     return "Distance attack";
                 case Trait.Defender:
                     return "Defender";
+                case Trait.Flying:
+                    return "Flying";
                 default:
                     throw new NotImplementedException();
             }

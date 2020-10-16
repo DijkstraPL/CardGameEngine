@@ -30,7 +30,9 @@ namespace CardGame_Game.BoardTable
             bool isNeighbour = Y - 1 <= targetField.Y &&
                        targetField.Y <= Y + 1;
 
-            return isNeighbour && (!hasDefender || isDefender);
+            bool hasFlying = Card?.Trait.HasFlag(Trait.Flying) ?? false;
+
+            return isNeighbour && (!hasDefender || isDefender) || hasFlying ;
         }
     }
 }

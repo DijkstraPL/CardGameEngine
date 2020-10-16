@@ -155,7 +155,12 @@ namespace CardGame_Game.BoardTable
             if (field.Card != null && field.Card.FinalHealth > 0)
             {
                 field.Card.AttackTarget.HealthCalculators.Add((card => true, -field.Card.FinalAttack ?? 0));
-                if (!field.Card.Trait.HasFlag(Trait.DistanceAttack) && !field.Card.AttackTarget.Contrattacked)
+
+                if (field.Card.AttackTarget.Contrattacked ||
+                    field.Card.Trait.HasFlag(Trait.DistanceAttack) ||
+                    field.Card.Trait.HasFlag(Trait.Flying) && !attackTarget.Trait.HasFlag(Trait.DistanceAttack))
+                    field.Card.AttackTarget = null;
+                else
                 {
                     field.Card.AttackTarget.Contrattacked = true;
                     field.Card.HealthCalculators.Add((card => true, -attackTarget.FinalAttack / 2 ?? 0));

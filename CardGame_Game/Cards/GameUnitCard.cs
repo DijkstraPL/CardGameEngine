@@ -12,7 +12,15 @@ namespace CardGame_Game.Cards
     {
         public int? BaseAttack { get; }
         public List<(Func<IAttacker, bool> conditon, int value)> AttackCalculators { get; } = new List<(Func<IAttacker, bool> conditon, int value)>();
-        public int? FinalAttack => BaseAttack == null ? null : BaseAttack + AttackCalculators.Where(ac => ac.conditon(this)).Sum(ac => ac.value);
+        public List<(Func<IAttacker, bool> conditon, Func<IAttacker, int> value)> AttackFuncCalculators { get; } = new List<(Func<IAttacker, bool> conditon, Func<IAttacker, int> value)>();
+        public int? FinalAttack => BaseAttack == null ? null : 
+            BaseAttack + 
+            AttackCalculators
+            .Where(ac => ac.conditon(this))
+            .Sum(ac => ac.value) +
+            AttackFuncCalculators
+            .Where(ac => ac.conditon(this))
+            .Sum(ac => ac.value(this));
 
         public IHealthy AttackTarget { get; set; }
 

@@ -79,32 +79,38 @@ namespace CardGame_DataAccess.DataInitializations
             });
             cards.Add(new CardDeck
             {
-                Card = allCards.FirstOrDefault(c => c.Name == "Villager"),
-                Amount = 5,
+                Card = allCards.FirstOrDefault(c => c.Name == "Catapult"),
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Spearman"),
-                Amount = 5,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Haste blessing"),
-                Amount = 5,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Wall"),
-                Amount = 5,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Chapel"),
-                Amount = 10,
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Battle eagle"),
+                Amount = 20,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -129,37 +135,55 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Villager"),
-                Amount = 5,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Crossbowman"),
-                Amount = 5,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Priest of the dead sun"),
-                Amount = 5,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Hound"),
-                Amount = 10,
+                Amount = 3,
                 Deck = deck
             });
-            //cards.Add(new CardDeck
-            //{
-            //    Card = allCards.FirstOrDefault(c => c.Name == "High priest of the dead sun"),
-            //    Amount = 10,
-            //    Deck = deck
-            //});
             cards.Add(new CardDeck
             {
-                Card = allCards.FirstOrDefault(c => c.Name == "Haste blessing"),
+                Card = allCards.FirstOrDefault(c => c.Name == "High priest of the dead sun"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Strength blessing"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Defender of comrades"),
+                Amount = 6,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Highest priest of the dead sun"),
                 Amount = 5,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Morale boost"),
+                Amount = 6,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -197,42 +221,199 @@ namespace CardGame_DataAccess.DataInitializations
                 await CreateHound();
             if (cards.All(c => c.Name != "Chapel"))
                 await CreateChapel();
-            //if (cards.All(c => c.Name != "Higher priest of the dead sun"))
-            //    await CreateHigherPriestOfTheDeadSun();
+            if (cards.All(c => c.Name != "High priest of the dead sun"))
+                await CreateHighPriestOfTheDeadSun();
+            if (cards.All(c => c.Name != "Catapult"))
+                await CreateCatapult();
+            if (cards.All(c => c.Name != "Defender of comrades"))
+                await CreateDefenderOfComrades();
+            if (cards.All(c => c.Name != "Battle eagle"))
+                await CreateBattleEagle();
+            if (cards.All(c => c.Name != "Highest priest of the dead sun"))
+                await CreateHighestPriestOfTheDeadSun();
+            if (cards.All(c => c.Name != "Morale boost"))
+                await CreateMoraleBoost();
         }
 
-        //private static async Task CreateHigherPriestOfTheDeadSun()
-        //{
-        //    var card = new Card
-        //    {
-        //        Name = "High priest of the dead sun",
-        //        CostBlue = 2,
-        //        Cooldown = 2,
-        //        Kind = Kind.Creature,
-        //        InvocationTarget = InvocationTarget.OwnEmptyField,
-        //        Rarity = Rarity.Silver,
-        //        Description = "Increase neighbour creatures attack by 1.",
-        //        Color = CardColor.Blue,
-        //        Number = 11,
-        //        Flavour = "Kapłani zakryli przed ludźmi słońce, a dali im świeczkę.",
-        //        Health = 3,
-        //        Attack = 1,
-        //    };
+        private static async Task CreateMoraleBoost()
+        {
+            var card = new Card
+            {
+                Name = "Morale boost",
+                CostBlue = 3,
+                Kind = Kind.Spell,
+                InvocationTarget = InvocationTarget.None,
+                Rarity = Rarity.Brown,
+                Description = "Add 3 morale.",
+                Color = CardColor.Blue,
+                Number = 36,
+                Flavour = "Człowieka można zniszczyć, ale nie pokonać.",
+            };
 
-        //    card.Set = await _setRepository.GetSetWithName("The Big Bang");
-        //    card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
-        //    card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Priest");
-        //    var rule = new Rule
-        //    {
-        //        When = "PlayerInitialized",
-        //        Condition = "Owner('SELF');Times(1)",
-        //        Effect = "HighPriestOfTheDeadSun(1)",             
-        //        Description = "Increase neighbour creatures attack by 1."
-        //    };
-        //    card.Rules.Add(new CardRule { Card = card, Rule = rule });
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Spell");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Transformation");
+            var rule1 = new Rule
+            {
+                Effect = "MoraleBoost(3)",
+                Description = "Add 3 morale."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
 
-        //    await _cardRepository.CreateCard(card);
-        //}
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateHighestPriestOfTheDeadSun()
+        {
+            var card = new Card
+            {
+                Name = "Highest priest of the dead sun",
+                CostBlue = 5,
+                Cooldown = 3,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Gold,
+                Description = "When his cooldown becomes 0 he decrease cooldown of neighbour creatures by 2.",
+                Color = CardColor.Blue,
+                Number = 52,
+                Flavour = "Jednak w porównaniu z innymi Najwyższy Kapłan sprawia wrażenie, zdrowego, psychotycznego pojeba.",
+                Health = 6,
+                Attack = 4,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Priest");
+            var rule = new Rule
+            {
+                Effect = "HighestPriestOfTheDeadSun(2)",
+                Description = "When his cooldown becomes 0 he decrease cooldown of neighbour creatures by 2."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateBattleEagle()
+        {
+            var card = new Card
+            {
+                Name = "Battle eagle",
+                CostBlue = 4,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "",
+                Trait = Trait.Flying,
+                Color = CardColor.Blue,
+                Number = 43,
+                Flavour = "Za dużo orłów, za mało drobiu.",
+                Health = 4,
+                Attack = 5,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Beast");
+           
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateDefenderOfComrades()
+        {
+            var card = new Card
+            {
+                Name = "Defender of comrades",
+                CostBlue = 2,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "For each morale it gets +1 attack.",
+                Trait= Trait.Defender,
+                Color = CardColor.Blue,
+                Number = 14,
+                Flavour = "Żeby chronić siebie i to, co kochamy, walczymy jak bestie.",
+                Health = 3,
+                Attack = 0,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Soldier");
+            var rule = new Rule
+            {
+                Effect = "DefenderOfComrades",
+                Description = "For each morale it gets +1 attack."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateCatapult()
+        {
+            var card = new Card
+            {
+                Name = "Catapult",
+                CostBlue = 3,
+                Cooldown = 3,
+                Kind = Kind.Structure,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "When come to play it cooldown is the same as the smalest cooldown of your catapults.",
+                Color = CardColor.Blue,
+                Trait = Trait.DistanceAttack,
+                Number = 25,
+                Flavour = "Dlaczego nie są na tyle cywilizowani, żeby atakować mnie trochę wolniej?",
+                Health = 4,
+                Attack = 4,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Structure");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Artillery");
+            var rule = new Rule
+            {
+                Effect = "Catapult",
+                Description = "When come to play it cooldown is the same as the smalest cooldown of your catapults."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+
+
+        private static async Task CreateHighPriestOfTheDeadSun()
+        {
+            var card = new Card
+            {
+                Name = "High priest of the dead sun",
+                CostBlue = 2,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Silver,
+                Description = "Increase neighbour creatures attack by 1.",
+                Color = CardColor.Blue,
+                Number = 11,
+                Flavour = "Kapłani zakryli przed ludźmi słońce, a dali im świeczkę.",
+                Health = 3,
+                Attack = 1,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Priest");
+            var rule = new Rule
+            {
+                Effect = "HighPriestOfTheDeadSun(1)",
+                Description = "Increase neighbour creatures attack by 1."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
 
         private static async Task CreateHound()
         {
@@ -256,9 +437,7 @@ namespace CardGame_DataAccess.DataInitializations
             card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Beast");
             var rule = new Rule
             {
-                When = "UnitAttacked",
-                Condition = "OnField('SELF');IsKind('TARGET','CREATURE')",
-                Effect = "AddHealth('TARGET',-2,'INFINITE')",
+                Effect = "Hound(2)",
                 Description = "Suppressor 2"
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule });
@@ -315,9 +494,7 @@ namespace CardGame_DataAccess.DataInitializations
 
             var rule1 = new Rule
             {
-                When = "PlayerInitialized",
-                Condition = "Times(1)",
-                Effect = "OnField('SELF')->AddHealth('ALLFRIENDLYCREATURES',1,'INFINITE')",
+                Effect = "Chapel(1)",
                 Description = "Increase health of all creatures by 1."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
@@ -370,9 +547,7 @@ namespace CardGame_DataAccess.DataInitializations
             card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Transformation");
             var rule1 = new Rule
             {
-                When = "SpellCasting",
-                Condition = "OnField('TARGET')",
-                Effect = "AddAttack('TARGET',3,1)",
+                Effect = "StrengthBlessing(3)",
                 Description = "Decrease creature cooldown by 1."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
@@ -403,9 +578,7 @@ namespace CardGame_DataAccess.DataInitializations
             card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Knight");
             var rule = new Rule
             {
-                When = "UnitAttacked",
-                Condition = "OnField('SELF')",
-                Effect = "AddBaseCooldown('SELF',1)",
+                Effect = "OldKnight(1)",
                 Description = "After each attack his base cooldown is increased by 1."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule });
@@ -433,21 +606,11 @@ namespace CardGame_DataAccess.DataInitializations
             card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
             var rule1 = new Rule
             {
-                When = "TurnStarted",
-                Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
-                Effect = "AddEnergy('BLUE',1)",
+                Effect = "BlacksmithGuild(1)",
                 Description = "Gives 1 basic energy."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
-            var rule2 = new Rule
-            {
-                When = "TurnStarted",
-                Condition = "Owner('SELF');OnField('SELF');Controls('SELF','Blacksmith guild',2);TimesPerTurn('Blacksmith guild',1)",
-                Effect = "AddEnergy('BLUE',1)",
-                Description = "The same turn you play it you can play another land card."
-            };
-            card.Rules.Add(new CardRule { Card = card, Rule = rule2 });
-
+       
             await _cardRepository.CreateCard(card);
         }
 
@@ -471,21 +634,11 @@ namespace CardGame_DataAccess.DataInitializations
             card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
             var rule1 = new Rule
             {
-                When = "TurnStarted",
-                Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
-                Effect = "AddEnergy('BLUE',1)",
+                Effect = "WatchTower(1)",
                 Description = "Gives 1 basic energy."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
-            var rule2 = new Rule
-            {
-                When = "CardPlayed",
-                Condition = "Owner('SELF');OnField('SELF')",
-                Effect = "SetLandCardPlayedFlag('OWNHERO','FALSE')",
-                Description = "The same turn you play it you can play another land card."
-            };
-            card.Rules.Add(new CardRule { Card = card, Rule = rule2 });
-
+          
             await _cardRepository.CreateCard(card);
         }
 
@@ -509,9 +662,7 @@ namespace CardGame_DataAccess.DataInitializations
             card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Transformation");
             var rule1 = new Rule
             {
-                When = "SpellCasting",
-                Condition = "OnField('TARGET')",
-                Effect = "AddCooldown('TARGET',-1)",
+                Effect = "HasteBlessing",
                 Description = "Decrease creature cooldown by 1."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
@@ -541,22 +692,12 @@ namespace CardGame_DataAccess.DataInitializations
             card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
             card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Soldier");
             var rule1 = new Rule
-            {
-                When = "PlayerInitialized",
-                Condition = "Owner('SELF');Times(1)",
-                Effect = "Morale('SELF',2)->AddHealth('SELF',2,'INFINITE')",
+            {              
+                Effect = "Spearman(2,2,2)",
                 Description = "Morale 2+: +2 health"
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
-            var rule2 = new Rule
-            {
-                When = "UnitBeingAttacking",
-                Condition = "OnField('SELF');HasNotTrait('TARGET',1)",
-                Effect = "AddHealth('TARGET',-2,'INFINITE')",
-                Description = "Spiky 2"
-            };
-            card.Rules.Add(new CardRule { Card = card, Rule = rule2 });
-
+           
             await _cardRepository.CreateCard(card);
         }
 
@@ -583,21 +724,11 @@ namespace CardGame_DataAccess.DataInitializations
             card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Priest");
             var rule1 = new Rule
             {
-                When = "CardPlayed",
-                Condition = "Owner('SELF');OnField('SELF');Times(1)",
-                Effect = "AddHealth('NEIGHBOURS',1,'INFINITE')",
+                Effect = "PriestOfTheDeadSun",
                 Description = "Increase neighbour creatures life by 1."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
-            var rule2 = new Rule
-            {
-                When = "CardPlayed",
-                Condition = "Owner('SELF');OnField('SELF');Times(1)",
-                Effect = "Heal('OWNHERO',2)",
-                Description = "Heals 2 hero hit points."
-            };
-            card.Rules.Add(new CardRule { Card = card, Rule = rule2 });
-
+            
             await _cardRepository.CreateCard(card);
         }
 
@@ -623,9 +754,7 @@ namespace CardGame_DataAccess.DataInitializations
             card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
             var rule = new Rule
             {
-                When = "PlayerInitialized",
-                Condition = "Owner('SELF');Times(1)",
-                Effect = "Morale('SELF',2)->AddAttack('SELF',1,'INFINITE')",
+                Effect = "Villager(2,1)",
                 Description = "Morale 2+: +1 attack"
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule });
@@ -652,9 +781,7 @@ namespace CardGame_DataAccess.DataInitializations
             card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
             var rule = new Rule
             {
-                When = "TurnStarted",
-                Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
-                Effect = "AddEnergy('BLUE',3)",
+                Effect = "BasicBlueLand(3)",
                 Description = "Gives 3 temporary energy."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule });
@@ -682,9 +809,7 @@ namespace CardGame_DataAccess.DataInitializations
             card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
             var rule = new Rule
             {
-                When = "TurnStarted",
-                Condition = "Owner('SELF');Cooldown('SELF',0);OnField('SELF')",
-                Effect = "AddEnergy('BLUE',1)",
+                Effect = "BasicBlueLand(1)",
                 Description = "Gives 1 basic energy."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule });
@@ -706,6 +831,8 @@ namespace CardGame_DataAccess.DataInitializations
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Construction" });
             if ((await _subTypeRepository.GetSubTypeWithNameAsync("Totem")) == null)
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Totem" });
+            if ((await _subTypeRepository.GetSubTypeWithNameAsync("Artillery")) == null)
+                await _subTypeRepository.CreateSubType(new Subtype { Name = "Artillery" });
         }
         private static async Task CreateCardTypes()
         {

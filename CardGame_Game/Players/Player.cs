@@ -35,15 +35,15 @@ namespace CardGame_Game.Players
         public bool IsLandCardPlayed { get; set; }
 
         public int? BaseHealth { get; private set; } = 20;
-        public List<(Func<bool> conditon, int value)> HealthCalculators { get; } = new List<(Func<bool> conditon, int value)>();
+        public List<(Func<IHealthy, bool> conditon, int value)> HealthCalculators { get; } = new List<(Func<IHealthy, bool> conditon, int value)>();
         public int? FinalHealth
         {
             get
             {
-                var finalHealth = BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
+                var finalHealth = BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon(this)).Sum(ac => ac.value);
                 if (finalHealth <= 0)
                     IsLoser = true; 
-                return BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon()).Sum(ac => ac.value);
+                return BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon(this)).Sum(ac => ac.value);
             }
         }
 
@@ -51,8 +51,6 @@ namespace CardGame_Game.Players
         public bool Contrattacked { get; set; }
 
         public IEnumerable<GameCard> AllCards { get; private set; }
-
-        List<(Func<IHealthy, bool> conditon, int value)> IHealthy.HealthCalculators => throw new NotImplementedException();
 
         private readonly Stack<Card> _landDeck;
         private readonly GameCardFactory _gameCardFactory;
@@ -88,7 +86,7 @@ namespace CardGame_Game.Players
 
         public void EndTurn()
         {
-            Energy = 0;
+            Energy = 10;
             CardTaken = false;
             IsLandCardPlayed = false;
         }
