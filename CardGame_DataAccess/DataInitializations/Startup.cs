@@ -68,7 +68,19 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Kathedral city"),
-                Amount = 9,
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Farms"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Castle"),
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
@@ -128,13 +140,31 @@ namespace CardGame_DataAccess.DataInitializations
             var cards = new List<CardDeck>();
             cards.Add(new CardDeck
             {
-                Card = allCards.FirstOrDefault(c => c.Name == "Kathedral city"),
-                Amount = 12,
+                Card = allCards.FirstOrDefault(c => c.Name == "Main cathedra"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Capital city"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Harbour"),
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Blacksmith guild"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Kathedral city"),
                 Amount = 3,
                 Deck = deck
             });
@@ -177,7 +207,13 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Defender of comrades"),
-                Amount = 6,
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Old knight"),
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
@@ -189,7 +225,13 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Morale boost"),
-                Amount = 6,
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Fire monk"),
+                Amount = 3,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -241,6 +283,18 @@ namespace CardGame_DataAccess.DataInitializations
                 await CreateMoraleBoost();
             if (cards.All(c => c.Name != "Revocation"))
                 await CreateRevocation();
+            if (cards.All(c => c.Name != "Farms"))
+                await CreateFarms();
+            if (cards.All(c => c.Name != "Castle"))
+                await CreateCastle();
+            if (cards.All(c => c.Name != "Capital city"))
+                await CreateCapitalCity();
+            if (cards.All(c => c.Name != "Main cathedra"))
+                await CreateMainCathedra();
+            if (cards.All(c => c.Name != "Harbour"))
+                await CreateHarbour();
+            if (cards.All(c => c.Name != "Fire monk"))
+                await CreateFireMonk();
         }
         private static async Task CreateRevocation()
         {
@@ -852,6 +906,174 @@ namespace CardGame_DataAccess.DataInitializations
             await _cardRepository.CreateCard(card);
         }
 
+        private static async Task CreateHarbour()
+        {
+            var card = new Card
+            {
+                Name = "Harbour",
+                CostBlue = 0,
+                Cooldown = 1,
+                Kind = Kind.Land,
+                InvocationTarget = InvocationTarget.None,
+                Rarity = Rarity.Brown,
+                Description = "Gives 1 basic energy.",
+                Color = CardColor.Blue,
+                Number = 64,
+                Flavour = "Nie bój się morza, sztormów, trudu i niebezpieczeństw związanych z żeglowaniem. Ale unikaj portów. Porty są niedobre i dla statków i dla ludzi. W portach rdzewieją statki, a ludzie schodzą na psy.",
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
+            var rule = new Rule
+            {
+                Effect = "BasicBlueLand(1)",
+                Description = "Gives 1 basic energy."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+        private static async Task CreateMainCathedra()
+        {
+            var card = new Card
+            {
+                Name = "Main cathedra",
+                CostBlue = 0,
+                Cooldown = 1,
+                Kind = Kind.Land,
+                InvocationTarget = InvocationTarget.None,
+                Rarity = Rarity.Brown,
+                Description = "Gives 1 basic energy.",
+                Color = CardColor.Blue,
+                Number = 62,
+                Flavour = "Ludzi cechuje przede wszystkim to, że gotowi są we wszystko uwierzyć.",
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
+            var rule = new Rule
+            {
+                Effect = "BasicBlueLand(1)",
+                Description = "Gives 1 basic energy."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+        private static async Task CreateCapitalCity()
+        {
+            var card = new Card
+            {
+                Name = "Capital city",
+                CostBlue = 0,
+                Cooldown = 1,
+                Kind = Kind.Land,
+                InvocationTarget = InvocationTarget.None,
+                Rarity = Rarity.Brown,
+                Description = "Gives 1 basic energy.",
+                Color = CardColor.Blue,
+                Number = 63,
+                Flavour = "Przeprowadziliśmy się do stolicy, gdzie wszystko jest większe. Większe domy, sklepy i smród na ulicy.",
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
+            var rule = new Rule
+            {
+                Effect = "BasicBlueLand(1)",
+                Description = "Gives 1 basic energy."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+        private static async Task CreateCastle()
+        {
+            var card = new Card
+            {
+                Name = "Castle",
+                CostBlue = 0,
+                Cooldown = 1,
+                Kind = Kind.Land,
+                InvocationTarget = InvocationTarget.None,
+                Rarity = Rarity.Brown,
+                Description = "Gives 1 basic energy.",
+                Color = CardColor.Blue,
+                Number = 65,
+                Flavour = "Nawet zamkom z bajki przydaje się warstwa świeżej farby.",
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
+            var rule = new Rule
+            {
+                Effect = "BasicBlueLand(1)",
+                Description = "Gives 1 basic energy."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateFarms()
+        {
+            var card = new Card
+            {
+                Name = "Farms",
+                CostBlue = 0,
+                Cooldown = 1,
+                Kind = Kind.Land,
+                InvocationTarget = InvocationTarget.None,
+                Rarity = Rarity.Brown,
+                Description = "Gives 1 basic energy.",
+                Color = CardColor.Blue,
+                Number = 66,
+                Flavour = "Coś takiego wydobywa ze wszystkich to, co najgorsze. Manham to małe miasteczko. A małe miasteczka rodzą małe umysły.",
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Land");
+            var rule = new Rule
+            {
+                Effect = "BasicBlueLand(1)",
+                Description = "Gives 1 basic energy."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+        private static async Task CreateFireMonk()
+        {
+            var card = new Card
+            {
+                Name = "Fire monk",
+                CostBlue = 4,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "+1 attack for each morale. When comes to play add 1 morale.",
+                Color = CardColor.Blue,
+                Number = 50,
+                Flavour = "Oświecenie bierze się z lata rozmyśleń, a nie ze ślepego przekonania.",
+                Health = 5,
+                Attack = 0,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Monk");
+
+            var rule = new Rule
+            {
+                Effect = "FireMonk(1)",
+                Description = "Gives 1 basic energy."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+
         private static async Task CreateSubTypes()
         {
             if ((await _subTypeRepository.GetSubTypeWithNameAsync("Priest")) == null)
@@ -870,6 +1092,8 @@ namespace CardGame_DataAccess.DataInitializations
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Artillery" });
             if ((await _subTypeRepository.GetSubTypeWithNameAsync("Rejection")) == null)
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Rejection" });
+            if ((await _subTypeRepository.GetSubTypeWithNameAsync("Monk")) == null)
+                await _subTypeRepository.CreateSubType(new Subtype { Name = "Monk" });
         }
         private static async Task CreateCardTypes()
         {

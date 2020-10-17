@@ -50,7 +50,8 @@
                                        HorizontalAlignment="Center"/>
 
                             </Border>
-                            <TextBlock Text="{Binding Name}"
+
+                                <TextBlock Text="{Binding Name}"
                                        FontSize="16"
                                        Grid.Row="1"
                                        HorizontalAlignment="Center"/>
@@ -59,9 +60,9 @@
                                        Foreground="Blue"
                                         Text="{Binding Trait}"
                                        TextWrapping="Wrap"/>
-                            <TextBlock Grid.Row="3"
-                                       Margin="2"
-                                Text="{Binding Description}"
+                                <TextBlock Text="{Binding Description}"
+                                     Grid.Row="3"
+                                     Margin="2"
                                        TextWrapping="Wrap"/>
                             <Grid Grid.Row="4">
                                 <Grid.ColumnDefinitions>

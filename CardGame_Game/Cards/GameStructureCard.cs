@@ -25,6 +25,18 @@ namespace CardGame_Game.Cards
         public override void Play(IGame game, IPlayer player, InvocationData invocationData)
         {
             base.Play(game, player, invocationData);
+            if (Trait.HasFlag(Trait.Legendary))
+            {
+                foreach (var field in player.BoardSide.Fields)
+                {
+                    if (field.Card?.Name == this.Name && field.Card is GameUnitCard gameUnitCard)
+                    {
+                        gameUnitCard.CardState = Enums.CardState.OnGraveyard;
+                        Owner.BoardSide.Kill(gameUnitCard);
+                        Owner.AddToGraveyard(gameUnitCard);
+                    }
+                }
+            }
             invocationData.Field.Card = this;
             this.CardState = Enums.CardState.OnField;
         }

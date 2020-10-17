@@ -22,7 +22,6 @@ namespace CardGame_Game.GameEvents
         {
             UnitAttacked += new EventHandler<GameEventArgs>((s, a) =>
             {
-                if (sourceCard == a.SourceCard)
                     action(a);
             });
         }

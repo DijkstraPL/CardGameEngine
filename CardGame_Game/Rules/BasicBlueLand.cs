@@ -113,7 +113,8 @@ namespace CardGame_Game.Rules
                 const int value = 1;
 
                 var target = gea.Targets.FirstOrDefault();
-                if (target != null &&
+                if (gea.SourceCard == gameCard && 
+                    target != null &&
                     target.CardState == CardState.OnField &&
                     target is ICooldown cooldown)
                 {
@@ -215,7 +216,8 @@ namespace CardGame_Game.Rules
 
             gameEventsContainer.UnitAttackedEvent.Add(gameCard, gea =>
             {
-                if (gea.Player == gameCard.Owner &&
+                if (gea.SourceCard == gameCard &&
+                    gea.Player == gameCard.Owner &&
                     gameCard.CardState == CardState.OnField &&
                     Int32.TryParse(args[0], out int amount) &&
                     gameCard is ICooldown cooldown)
@@ -241,7 +243,8 @@ namespace CardGame_Game.Rules
                 const int turnsAmount = 1;
 
                 var target = gea.Targets.FirstOrDefault();
-                if (target != null &&
+                if (gea.SourceCard == gameCard && 
+                    target != null &&
                     target.CardState == CardState.OnField &&
                     Int32.TryParse(args[0], out int value) &&
                     target is IAttacker attacker)
@@ -256,8 +259,6 @@ namespace CardGame_Game.Rules
     [Export(nameof(Spearman), typeof(IRule))]
     public class Spearman : IRule
     {
-        private int _castTurn;
-
         public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
         {
             if (gameEventsContainer == null)
@@ -280,7 +281,8 @@ namespace CardGame_Game.Rules
             gameEventsContainer.UnitBeingAttackingEvent.Add(gameCard, gea =>
             {
                 var target = gea.Targets.FirstOrDefault();
-                if (target != null &&
+                if (gameCard == gea.SourceCard &&
+                    target != null &&
                     target is IHealthy healthy &&
                     !target.Trait.HasFlag(Trait.DistanceAttack) &&
                     Int32.TryParse(args[2], out int value))
@@ -300,7 +302,8 @@ namespace CardGame_Game.Rules
             gameEventsContainer.UnitAttackedEvent.Add(gameCard, gea =>
             {
                 var target = gea.Targets?.FirstOrDefault();
-                if (target != null &&
+                if (gea.SourceCard == gameCard &&
+                    target != null &&
                     target is IHealthy healthy &&
                     target.Kind == Kind.Creature &&
                     Int32.TryParse(args[0], out int value))
@@ -441,8 +444,6 @@ namespace CardGame_Game.Rules
     [Export(nameof(MoraleBoost), typeof(IRule))]
     public class MoraleBoost : IRule
     {
-        private int _castTurn;
-
         public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
         {
             if (gameEventsContainer == null)
@@ -450,7 +451,8 @@ namespace CardGame_Game.Rules
 
             gameEventsContainer.SpellCastingEvent.Add(gameCard, gea =>
             {
-                if (Int32.TryParse(args[0], out int value) &&
+                if (gea.SourceCard == gameCard && 
+                Int32.TryParse(args[0], out int value) &&
                 gameCard.Owner is BluePlayer bluePlayer)
                 {
                     bluePlayer.Morale += value;
@@ -462,8 +464,6 @@ namespace CardGame_Game.Rules
     [Export(nameof(Revocation), typeof(IRule))]
     public class Revocation : IRule
     {
-        private int _castTurn;
-
         public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
         {
             if (gameEventsContainer == null)
@@ -472,11 +472,39 @@ namespace CardGame_Game.Rules
             gameEventsContainer.SpellCastingEvent.Add(gameCard, gea =>
             {
                 var target = gea.Targets.FirstOrDefault();
-                if (target != null &&
+                if (gea.SourceCard == gameCard &&  
+                target != null &&                
                 target.Kind == Kind.Creature)
                 {
                     gea.Game.SendCardToHand(target, target.Owner);
                 }
+            });
+        }
+    }
+    [Export(nameof(FireMonk), typeof(IRule))]
+    public class FireMonk : IRule
+    {
+        public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
+        {
+            if (gameEventsContainer == null)
+                throw new ArgumentNullException(nameof(gameEventsContainer));
+
+            gameEventsContainer.PlayerInitializedEvent.Add(gameCard, gea =>
+            {
+                if (gameCard.Owner == gea.Player &&
+                      gameCard is IAttacker attacker &&
+                    gameCard.Owner is BluePlayer bluePlayer)
+                {
+                    attacker.AttackFuncCalculators.Add((card => true, card => bluePlayer.Morale));
+                }
+            });
+
+            gameEventsContainer.CardPlayedEvent.Add(gameCard, gea =>
+            {
+                if (gea.SourceCard == gameCard &&
+                    gameCard.Owner is BluePlayer bluePlayer &&
+                    int.TryParse(args[0], out int value))
+                    bluePlayer.Morale += value;
             });
         }
     }

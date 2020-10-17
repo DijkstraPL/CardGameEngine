@@ -15,6 +15,7 @@ namespace CardGame_Game.Cards
         public Guid Identifier { get; }
 
         public string Name { get; }
+        public int Number { get; }
         public string Description { get; }
         public int? Cost { get; }
         public InvocationTarget InvocationTarget { get; }
@@ -34,6 +35,7 @@ namespace CardGame_Game.Cards
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             _card = card ?? throw new System.ArgumentNullException(nameof(card));
             Name = name;
+            Number = card.Number;
             Description = description;
             Cost = cost;
             InvocationTarget = invocationTarget;

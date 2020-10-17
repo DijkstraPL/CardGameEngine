@@ -11,6 +11,7 @@ namespace CardGame_Data.Data.Enums
 
         DistanceAttack  = 1 << 0, // 1
         Defender        = 1 << 1, // 2
-        Flying          = 1 << 2  // 4
+        Flying          = 1 << 2, // 4
+        Legendary       = 1 << 3  // 8
     }
 }

@@ -129,6 +129,7 @@ namespace CardGame_Server.Mappers
                 cardData.Cooldown = cooldown.Cooldown;
             }
 
+            cardData.Number = card.Number;
             cardData.Trait = MapTrait(card.Trait);
             cardData.Kind = card.Kind;
             cardData.Identifier = card.Identifier;

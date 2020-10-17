@@ -22,7 +22,6 @@ namespace CardGame_Game.GameEvents
         {
             SpellCasting += new EventHandler<GameEventArgs>((s, a) =>
             {
-                if (sourceCard == a.SourceCard)
                     action(a);
             });
         }
