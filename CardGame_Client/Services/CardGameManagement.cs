@@ -62,9 +62,11 @@ namespace CardGame_Client.Services
                         (SelectionTargetData.TargetOwnField.UnitCard.Kind == Kind.Creature ||
                         SelectionTargetData.TargetOwnField.UnitCard.Kind == Kind.Structure);
                 case InvocationTarget.OwnStructure:
-                    throw new NotImplementedException();
+                    return SelectionTargetData?.TargetOwnField?.UnitCard != null &&
+                        SelectionTargetData.TargetOwnField.UnitCard.Kind == Kind.Structure;
                 case InvocationTarget.OwnCreature:
-                    throw new NotImplementedException();
+                    return SelectionTargetData?.TargetOwnField?.UnitCard != null &&
+                        SelectionTargetData.TargetOwnField.UnitCard.Kind == Kind.Creature;
                 case InvocationTarget.OwnHero:
                     throw new NotImplementedException();
                 case InvocationTarget.OwnTakenField:
@@ -76,7 +78,8 @@ namespace CardGame_Client.Services
                         (SelectionTargetData.TargetEnemyField.UnitCard.Kind == Kind.Creature ||
                         SelectionTargetData.TargetEnemyField.UnitCard.Kind == Kind.Structure);
                 case InvocationTarget.EnemyStructure:
-                    throw new NotImplementedException();
+                    return SelectionTargetData?.TargetEnemyField?.UnitCard != null &&
+                        SelectionTargetData.TargetEnemyField.UnitCard.Kind == Kind.Structure;
                 case InvocationTarget.EnemyCreature:
                     return SelectionTargetData?.TargetEnemyField?.UnitCard != null &&
                         SelectionTargetData.TargetEnemyField.UnitCard.Kind == Kind.Creature;

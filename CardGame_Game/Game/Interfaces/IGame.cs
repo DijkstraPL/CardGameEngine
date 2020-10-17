@@ -23,5 +23,6 @@ namespace CardGame_Game.Game.Interfaces
         bool GetCardFromDeck();
         bool GetCardFromLandDeck();
         bool PlayCard(GameCard card, InvocationData invocationData);
+        void SendCardToHand(GameCard target, IPlayer owner);
     }
 }

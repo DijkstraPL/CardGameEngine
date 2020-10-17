@@ -110,7 +110,13 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Battle eagle"),
-                Amount = 20,
+                Amount = 10,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Revocation"),
+                Amount = 10,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -233,6 +239,35 @@ namespace CardGame_DataAccess.DataInitializations
                 await CreateHighestPriestOfTheDeadSun();
             if (cards.All(c => c.Name != "Morale boost"))
                 await CreateMoraleBoost();
+            if (cards.All(c => c.Name != "Revocation"))
+                await CreateRevocation();
+        }
+        private static async Task CreateRevocation()
+        {
+            var card = new Card
+            {
+                Name = "Revocation",
+                CostBlue = 4,
+                Kind = Kind.Spell,
+                InvocationTarget = InvocationTarget.EnemyCreature | InvocationTarget.OwnCreature,
+                Rarity = Rarity.Brown,
+                Description = "Send target creature back to owner hand.",
+                Color = CardColor.Blue,
+                Number = 45,
+                Flavour = "Nie warto uciekać przed nieuniknionym, gdyż wcześniej czy później trafia się w miejsce, gdzie nieuniknione właśnie przybyło i czeka.",
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Spell");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Rejection");
+            var rule1 = new Rule
+            {
+                Effect = "Revocation",
+                Description = "Send target creature back to owner hand."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
+
+            await _cardRepository.CreateCard(card);
         }
 
         private static async Task CreateMoraleBoost()
@@ -833,6 +868,8 @@ namespace CardGame_DataAccess.DataInitializations
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Totem" });
             if ((await _subTypeRepository.GetSubTypeWithNameAsync("Artillery")) == null)
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Artillery" });
+            if ((await _subTypeRepository.GetSubTypeWithNameAsync("Rejection")) == null)
+                await _subTypeRepository.CreateSubType(new Subtype { Name = "Rejection" });
         }
         private static async Task CreateCardTypes()
         {

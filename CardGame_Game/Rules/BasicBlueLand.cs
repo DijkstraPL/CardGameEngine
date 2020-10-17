@@ -458,4 +458,26 @@ namespace CardGame_Game.Rules
             });
         }
     }
+
+    [Export(nameof(Revocation), typeof(IRule))]
+    public class Revocation : IRule
+    {
+        private int _castTurn;
+
+        public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
+        {
+            if (gameEventsContainer == null)
+                throw new ArgumentNullException(nameof(gameEventsContainer));
+
+            gameEventsContainer.SpellCastingEvent.Add(gameCard, gea =>
+            {
+                var target = gea.Targets.FirstOrDefault();
+                if (target != null &&
+                target.Kind == Kind.Creature)
+                {
+                    gea.Game.SendCardToHand(target, target.Owner);
+                }
+            });
+        }
+    }
 }

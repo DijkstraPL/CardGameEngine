@@ -1,5 +1,6 @@
 ﻿using CardGame_Game.BoardTable.Interfaces;
 using CardGame_Game.Cards;
+using CardGame_Game.Cards.Enums;
 using CardGame_Game.Game.Interfaces;
 using CardGame_Game.GameEvents;
 using CardGame_Game.GameEvents.Interfaces;
@@ -119,6 +120,17 @@ namespace CardGame_Game.Game
 
         public bool IsGameFinished()
             => CurrentPlayer.FinalHealth <= 0 || NextPlayer.FinalHealth <= 0;
+
+        public void SendCardToHand(GameCard card, IPlayer player)
+        {
+            card.CardState = CardState.InHand;
+            var fieldCard = Board.LeftBoardSite.Fields
+                .Concat(Board.RightBoardSite.Fields)
+                .FirstOrDefault(f => f.Card == card);
+            if (fieldCard != null)
+                fieldCard.Card = null;
+            player.Hand.Add(card);
+        }
 
         private void SetPlayerOrder()
         {
