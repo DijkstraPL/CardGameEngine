@@ -28,6 +28,8 @@ namespace CardGame_Game.Cards
         protected readonly Card _card;
         private readonly IList<Trigger> _triggers = new List<Trigger>();
 
+        protected GameCard _initState;
+
         public GameCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget)
         {
             Identifier = Guid.NewGuid();
@@ -41,6 +43,24 @@ namespace CardGame_Game.Cards
             InvocationTarget = invocationTarget;
             Kind = card.Kind;
             Trait = card.Trait;
+        }
+
+        public GameCard(GameCard gameCard)
+        {
+            Identifier = gameCard.Identifier;
+
+            Owner = gameCard.Owner;
+            _card = gameCard._card;
+            Name = gameCard.Name;
+            Number = gameCard.Number;
+            Description = gameCard.Description;
+            Cost = gameCard.Cost;
+            InvocationTarget = gameCard.InvocationTarget;
+            Kind = gameCard.Kind;
+            Trait = gameCard.Trait;
+
+            foreach (var trigger in gameCard._triggers)
+                _triggers.Add(trigger);
         }
 
         public virtual bool CanBePlayed(IGame game, IPlayer player, InvocationData invocationData)
@@ -57,6 +77,8 @@ namespace CardGame_Game.Cards
             foreach (var rule in _card.Rules)
                 _triggers.Add(new Trigger(game.GameEventsContainer, this, rule.Effect));
         }
+
+        internal abstract void SaveCard();
     }
 
 }

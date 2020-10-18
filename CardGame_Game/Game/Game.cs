@@ -56,6 +56,9 @@ namespace CardGame_Game.Game
             GameEventsContainer.PlayerInitializedEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
             GameEventsContainer.PlayerInitializedEvent.Raise(this, new GameEventArgs { Game = this, Player = NextPlayer });
 
+            _firstPlayer.SaveInitData();
+            _secondPlayer.SaveInitData();
+
             GameEventsContainer.GameStartedEvent.Raise(this, new GameEventArgs { Game = this });
         }
 
@@ -124,6 +127,7 @@ namespace CardGame_Game.Game
         public void SendCardToHand(GameCard card, IPlayer player)
         {
             card.CardState = CardState.InHand;
+            card.Reset();
             var fieldCard = Board.LeftBoardSite.Fields
                 .Concat(Board.RightBoardSite.Fields)
                 .FirstOrDefault(f => f.Card == card);

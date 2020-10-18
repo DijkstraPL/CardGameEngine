@@ -155,6 +155,8 @@ namespace CardGame_Server.Mappers
                     return "Defender";
                 case Trait.Flying:
                     return "Flying";
+                case Trait.Protection:
+                    return "Protection";
                 default:
                     throw new NotImplementedException();
             }

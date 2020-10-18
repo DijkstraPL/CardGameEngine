@@ -154,7 +154,7 @@ namespace CardGame_Game.BoardTable
 
             if (field.Card != null && field.Card.FinalHealth > 0)
             {
-                field.Card.AttackTarget.HealthCalculators.Add((card => true, -field.Card.FinalAttack ?? 0));
+                field.Card.AttackTarget.AddHealthCalculation((card => true, -field.Card.FinalAttack ?? 0));
 
                 if (field.Card.AttackTarget.Contrattacked ||
                     field.Card.Trait.HasFlag(Trait.DistanceAttack) ||
@@ -163,7 +163,7 @@ namespace CardGame_Game.BoardTable
                 else
                 {
                     field.Card.AttackTarget.Contrattacked = true;
-                    field.Card.HealthCalculators.Add((card => true, -attackTarget.FinalAttack / 2 ?? 0));
+                    field.Card.AddHealthCalculation((card => true, -attackTarget.FinalAttack / 2 ?? 0));
                 }
 
                 field.Card.AttackTarget = null;
@@ -175,7 +175,7 @@ namespace CardGame_Game.BoardTable
 
         private void AttackPlayer(IGame game, IPlayer player, Field field)
         {
-            game.NextPlayer.HealthCalculators.Add((card => true, -field.Card.FinalAttack ?? 0));
+            game.NextPlayer.AddHealthCalculation((card => true, -field.Card.FinalAttack ?? 0));
 
             game.GameEventsContainer.UnitAttackedEvent.Raise(this,
                 new GameEventArgs { Game = game, Player = player, SourceCard = field.Card });

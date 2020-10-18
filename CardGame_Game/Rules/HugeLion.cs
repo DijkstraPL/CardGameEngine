@@ -2,18 +2,15 @@
 using CardGame_Game.Cards;
 using CardGame_Game.Cards.Enums;
 using CardGame_Game.Cards.Interfaces;
-using CardGame_Game.GameEvents;
 using CardGame_Game.GameEvents.Interfaces;
 using CardGame_Game.Rules.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Composition;
-using System.Text;
 
 namespace CardGame_Game.Rules
 {
-    [Export(nameof(BasicBlueLand), typeof(IRule))]
-    public class BasicBlueLand : IRule
+    [Export(nameof(HugeLion), typeof(IRule))]
+    public class HugeLion : IRule
     {
         public void Init(GameCard gameCard, IGameEventsContainer gameEventsContainer, string[] args)
         {
@@ -22,12 +19,17 @@ namespace CardGame_Game.Rules
 
             gameEventsContainer.TurnStartedEvent.Add(gameCard, gea =>
             {
-                if (gea.Player == gameCard.Owner &&
+                var enemyPlayer = gea.Game.NextPlayer;
+                if (gameCard.Owner == gea.Player &&
                     gameCard.CardState == CardState.OnField &&
-                    gameCard is ICooldown cooldown &&
-                    cooldown.Cooldown == 0 &&
-                    Int32.TryParse(args[0], out int amount))
-                    gea.Player.IncreaseEnergy(CardColor.Blue, amount);
+                    gameCard is IAttacker attacker &&
+                    Int32.TryParse(args[0], out int life) &&
+                    Int32.TryParse(args[1], out int energy) &&
+                    enemyPlayer != gameCard.Owner)
+                {
+                    if (enemyPlayer.FinalHealth < life)
+                        gameCard.Owner.IncreaseEnergy(CardColor.Blue, energy);
+                }
             });
         }
     }

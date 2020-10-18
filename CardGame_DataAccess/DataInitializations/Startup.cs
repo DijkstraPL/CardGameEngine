@@ -122,13 +122,49 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Battle eagle"),
-                Amount = 10,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Revocation"),
-                Amount = 10,
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Adamant golem"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Huge lion"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Blessed soldier"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Crossbowman"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Hound"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Moment blessing"),
+                Amount = 2,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -176,19 +212,7 @@ namespace CardGame_DataAccess.DataInitializations
             });
             cards.Add(new CardDeck
             {
-                Card = allCards.FirstOrDefault(c => c.Name == "Crossbowman"),
-                Amount = 3,
-                Deck = deck
-            });
-            cards.Add(new CardDeck
-            {
                 Card = allCards.FirstOrDefault(c => c.Name == "Priest of the dead sun"),
-                Amount = 3,
-                Deck = deck
-            });
-            cards.Add(new CardDeck
-            {
-                Card = allCards.FirstOrDefault(c => c.Name == "Hound"),
                 Amount = 3,
                 Deck = deck
             });
@@ -219,7 +243,7 @@ namespace CardGame_DataAccess.DataInitializations
             cards.Add(new CardDeck
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Highest priest of the dead sun"),
-                Amount = 5,
+                Amount = 3,
                 Deck = deck
             });
             cards.Add(new CardDeck
@@ -232,6 +256,24 @@ namespace CardGame_DataAccess.DataInitializations
             {
                 Card = allCards.FirstOrDefault(c => c.Name == "Fire monk"),
                 Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Guard"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Infantryman"),
+                Amount = 3,
+                Deck = deck
+            });
+            cards.Add(new CardDeck
+            {
+                Card = allCards.FirstOrDefault(c => c.Name == "Tactical retreat"),
+                Amount = 2,
                 Deck = deck
             });
             deck.Cards = cards;
@@ -295,6 +337,79 @@ namespace CardGame_DataAccess.DataInitializations
                 await CreateHarbour();
             if (cards.All(c => c.Name != "Fire monk"))
                 await CreateFireMonk();
+            if (cards.All(c => c.Name != "Guard"))
+                await CreateGuard();
+            if (cards.All(c => c.Name != "Huge lion"))
+                await CreateHugeLion();
+            if (cards.All(c => c.Name != "Infantryman"))
+                await CreateInfantryman();
+            if (cards.All(c => c.Name != "Adamant golem"))
+                await CreateAdamantGolem();
+            if (cards.All(c => c.Name != "Blessed soldier"))
+                await CreateBlessedSoldier();
+            if (cards.All(c => c.Name != "Tactical retreat"))
+                await CreateTacticalRetreat();
+            if (cards.All(c => c.Name != "Moment blessing"))
+                await CreateMomentBlessing();
+        }
+        private static async Task CreateInfantryman()
+        {
+            var card = new Card
+            {
+                Name = "Infantryman",
+                CostBlue = 2,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "Morale 2: +2 health.",
+                Color = CardColor.Blue,
+                Number = 23,
+                Flavour = "Żołdacy nie mogą być wybredni,gdy chodzi o pracodawców.W tym fachu trzeba dmuchać z wiatrem.",
+                Health = 2,
+                Attack = 3,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Soldier");
+            var rule = new Rule
+            {
+                Effect = "Infantryman(2,2)",
+                Description = "Morale 2: +2 health."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+        private static async Task CreateHugeLion()
+        {
+            var card = new Card
+            {
+                Name = "Huge lion",
+                CostBlue = 4,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "If enemy hero has less than 10 hit points add 2 energy each turn.",
+                Color = CardColor.Blue,
+                Number = 46,
+                Flavour = "Gazela jak lew chciała zawyć; pękła z wysiłku.",
+                Health = 4,
+                Attack = 4,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Beast");
+            var rule = new Rule
+            {
+                Effect = "HugeLion(10,2)",
+                Description = "If enemy hero has less than 10 hit points add 2 energy each turn."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
         }
         private static async Task CreateRevocation()
         {
@@ -320,6 +435,37 @@ namespace CardGame_DataAccess.DataInitializations
                 Description = "Send target creature back to owner hand."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
+
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateGuard()
+        {
+            var card = new Card
+            {
+                Name = "Guard",
+                CostBlue = 4,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Description = "Morale 5: +4 attack.",
+                Color = CardColor.Blue,
+                Number = 47,
+                Flavour = "Kiedy wszystko zawiedzie, módl się.",
+                Health = 4,
+                Attack = 3,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Soldier");
+            var rule = new Rule
+            {
+                Effect = "Guard(5,4)",
+                Description = "Morale 5: +4 attack."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
 
             await _cardRepository.CreateCard(card);
         }
@@ -740,7 +886,7 @@ namespace CardGame_DataAccess.DataInitializations
                 Kind = Kind.Spell,
                 InvocationTarget = InvocationTarget.OwnUnit | InvocationTarget.EnemyUnit,
                 Rarity = Rarity.Brown,
-                Description = "Decrease creature cooldown by 1.",
+                Description = "Decrease unit cooldown by 1.",
                 Color = CardColor.Blue,
                 Number = 5,
                 Flavour = "Nic nie jest bardziej niebezpieczne niż wróg, który nie ma nic do stracenia.",
@@ -752,7 +898,35 @@ namespace CardGame_DataAccess.DataInitializations
             var rule1 = new Rule
             {
                 Effect = "HasteBlessing",
-                Description = "Decrease creature cooldown by 1."
+                Description = "Decrease unit cooldown by 1."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
+
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateMomentBlessing()
+        {
+            var card = new Card
+            {
+                Name = "Moment blessing",
+                CostBlue = 3,
+                Kind = Kind.Spell,
+                InvocationTarget = InvocationTarget.OwnUnit | InvocationTarget.EnemyUnit,
+                Rarity = Rarity.Silver,
+                Description = "Decrease unit cooldown by 3.",
+                Color = CardColor.Blue,
+                Number = 37,
+                Flavour = "Zwiadowcy nie podróżowali z łukami przewieszonymi przez ramię. Nosili je gotowe do błyskawicznego użycia. Zawsze.",
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Spell");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Transformation");
+            var rule1 = new Rule
+            {
+                Effect = "MomentBlessing",
+                Description = "Decrease creature cooldown by 3."
             };
             card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
 
@@ -1074,6 +1248,92 @@ namespace CardGame_DataAccess.DataInitializations
             await _cardRepository.CreateCard(card);
         }
 
+        private static async Task CreateAdamantGolem()
+        {
+            var card = new Card
+            {
+                Name = "Adamant golem",
+                CostBlue = 6,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Silver,
+                Trait = Trait.Defender,
+                Description = "Attack equal to health value.",
+                Color = CardColor.Blue,
+                Number = 57,
+                Flavour = "Jestem mieczem w ciemności. Jestem strażnikiem na murach. Jestem ogniem, który odpędza zimno, światłem, które przynosi świt, rogiem, który budzi śpiących, tarczą, która osłania krainę człowieka.",
+                Health = 9,
+                Attack = 0,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Construct");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Golem");
+
+            var rule = new Rule
+            {
+                Effect = "AdamantGolem",
+                Description = "Attack equal to health value."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule });
+
+            await _cardRepository.CreateCard(card);
+        }
+
+        private static async Task CreateBlessedSoldier()
+        {
+            var card = new Card
+            {
+                Name = "Blessed soldier",
+                CostBlue = 2,
+                Cooldown = 2,
+                Kind = Kind.Creature,
+                InvocationTarget = InvocationTarget.OwnEmptyField,
+                Rarity = Rarity.Brown,
+                Trait = Trait.Protection,
+                Description = "",
+                Color = CardColor.Blue,
+                Number = 13,
+                Flavour = "Wiara w fatum sprowadza na ziemię fatum. A wiara w wolność sprowadza na ziemię wolność",
+                Health = 2,
+                Attack = 2,
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Human");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Soldier");
+
+            await _cardRepository.CreateCard(card);
+        }
+        private static async Task CreateTacticalRetreat()
+        {
+            var card = new Card
+            {
+                Name = "Tactical retreat",
+                CostBlue = 2,
+                Kind = Kind.Spell,
+                InvocationTarget = InvocationTarget.OwnCreature,
+                Rarity = Rarity.Gold,
+                Description = "Send target creature you control back to your hand. Increase current energy by it's cost.",
+                Color = CardColor.Blue,
+                Number = 22,
+                Flavour = "Wielkość podjętych decyzji mierzy się ich ostatecznością, ale i konsekwencjami.",
+            };
+
+            card.Set = await _setRepository.GetSetWithName("The Big Bang");
+            card.CardType = await _cardTypeRepository.GetCardTypeWithNameAsync("Spell");
+            card.SubType = await _subTypeRepository.GetSubTypeWithNameAsync("Rejection");
+            var rule1 = new Rule
+            {
+                Effect = "TacticalRetreat",
+                Description = "Send target creature you control back to your hand. Increase current energy by it's cost."
+            };
+            card.Rules.Add(new CardRule { Card = card, Rule = rule1 });
+
+            await _cardRepository.CreateCard(card);
+        }
+
         private static async Task CreateSubTypes()
         {
             if ((await _subTypeRepository.GetSubTypeWithNameAsync("Priest")) == null)
@@ -1094,10 +1354,12 @@ namespace CardGame_DataAccess.DataInitializations
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Rejection" });
             if ((await _subTypeRepository.GetSubTypeWithNameAsync("Monk")) == null)
                 await _subTypeRepository.CreateSubType(new Subtype { Name = "Monk" });
+            if ((await _subTypeRepository.GetSubTypeWithNameAsync("Golem")) == null)
+                await _subTypeRepository.CreateSubType(new Subtype { Name = "Golem" });
         }
         private static async Task CreateCardTypes()
         {
-            if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Transformation")) == null)
+            if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Human")) == null)
                 await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Human" });
             if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Land")) == null)
                 await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Land" });
@@ -1107,6 +1369,8 @@ namespace CardGame_DataAccess.DataInitializations
                 await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Structure" });
             if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Beast")) == null)
                 await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Beast" });
+            if ((await _cardTypeRepository.GetCardTypeWithNameAsync("Construct")) == null)
+                await _cardTypeRepository.CreateCardTypeAsync(new CardType { Name = "Construct" });
         }
         private static async Task CreateSet()
         {

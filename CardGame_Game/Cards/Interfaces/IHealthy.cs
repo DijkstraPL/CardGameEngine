@@ -6,8 +6,10 @@ namespace CardGame_Game.Cards.Interfaces
     public interface IHealthy
     {
         int? BaseHealth { get; }
-        List<(Func<IHealthy,bool> conditon, int value)> HealthCalculators { get; } 
+        IEnumerable<(Func<IHealthy,bool> conditon, int value)> HealthCalculators { get; } 
         int? FinalHealth { get; }
         bool Contrattacked { get; set; }
+
+        void AddHealthCalculation((Func<IHealthy, bool> conditon, int value) calc);
     }
 }

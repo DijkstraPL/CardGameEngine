@@ -13,8 +13,8 @@ namespace CardGame_Game.Cards
         public int? BaseAttack { get; }
         public List<(Func<IAttacker, bool> conditon, int value)> AttackCalculators { get; } = new List<(Func<IAttacker, bool> conditon, int value)>();
         public List<(Func<IAttacker, bool> conditon, Func<IAttacker, int> value)> AttackFuncCalculators { get; } = new List<(Func<IAttacker, bool> conditon, Func<IAttacker, int> value)>();
-        public int? FinalAttack => BaseAttack == null ? null : 
-            BaseAttack + 
+        public int? FinalAttack => BaseAttack == null ? null :
+            BaseAttack +
             AttackCalculators
             .Where(ac => ac.conditon(this))
             .Sum(ac => ac.value) +
@@ -34,7 +34,8 @@ namespace CardGame_Game.Cards
         }
 
         public int? BaseHealth { get; }
-        public List<(Func<IHealthy, bool> conditon, int value)> HealthCalculators { get; } = new List<(Func<IHealthy, bool> conditon, int value)>();
+        private List<(Func<IHealthy, bool> conditon, int value)> _healthCalculators = new List<(Func<IHealthy, bool> conditon, int value)>();
+        public IEnumerable<(Func<IHealthy, bool> conditon, int value)> HealthCalculators => _healthCalculators;
         public int? FinalHealth
         {
             get
@@ -46,7 +47,9 @@ namespace CardGame_Game.Cards
             }
         }
 
-        public bool Contrattacked { get; set; } 
+        public bool Contrattacked { get; set; }
+
+        private bool _protectionUsed = false;
 
         public GameUnitCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
             : base(owner, card, name, description, cost, invocationTarget)
@@ -60,6 +63,13 @@ namespace CardGame_Game.Cards
         public void SetAttackTarget(IHealthy attackTarget)
         {
             AttackTarget = attackTarget;
+        }
+        public void AddHealthCalculation((Func<IHealthy, bool> conditon, int value) calc)
+        {
+            if (Trait.HasFlag(Trait.Protection) && calc.value < 0 && !_protectionUsed && calc.conditon(this))
+                _protectionUsed = true;
+            else
+                _healthCalculators.Add(calc);
         }
 
         private void Dead()

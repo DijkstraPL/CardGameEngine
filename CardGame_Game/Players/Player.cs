@@ -35,7 +35,8 @@ namespace CardGame_Game.Players
         public bool IsLandCardPlayed { get; set; }
 
         public int? BaseHealth { get; private set; } = 20;
-        public List<(Func<IHealthy, bool> conditon, int value)> HealthCalculators { get; } = new List<(Func<IHealthy, bool> conditon, int value)>();
+        private List<(Func<IHealthy, bool> conditon, int value)> _healthCalculators = new List<(Func<IHealthy, bool> conditon, int value)>();
+        public IEnumerable<(Func<IHealthy, bool> conditon, int value)> HealthCalculators => _healthCalculators;
         public int? FinalHealth
         {
             get
@@ -86,7 +87,7 @@ namespace CardGame_Game.Players
 
         public void EndTurn()
         {
-            Energy = 10;
+            Energy = 0;
             CardTaken = false;
             IsLandCardPlayed = false;
         }
@@ -159,6 +160,17 @@ namespace CardGame_Game.Players
         public virtual bool CanMove()
         {
             return Energy > 0;
+        }
+
+        public void AddHealthCalculation((Func<IHealthy, bool> conditon, int value) calc)
+        {
+                _healthCalculators.Add(calc);
+        }
+
+        public void SaveInitData()
+        {
+            foreach (var card in AllCards)
+                card.SaveCard();
         }
     }
 }
