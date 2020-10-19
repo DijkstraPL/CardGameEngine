@@ -7,6 +7,7 @@ using CardGame_Game.Rules.Interfaces;
 using System;
 using System.Composition;
 using System.Linq;
+using CardGame_Game.Players.Interfaces;
 
 namespace CardGame_Game.Rules
 {
@@ -26,7 +27,7 @@ namespace CardGame_Game.Rules
                     Int32.TryParse(args[1], out int value))
                     healthy.AddHealthCalculation((card =>
                     {
-                        if (gameCard.Owner is BluePlayer bluePlayer)
+                        if (gameCard.Owner is IBluePlayer bluePlayer)
                             return bluePlayer.Morale >= morale;
                         return false;
                     }, value));

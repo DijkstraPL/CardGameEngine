@@ -11,7 +11,7 @@ namespace CardGame_Game.Game
     {
         public IGame Game { get; set; }
         public IPlayer Player { get; set; }
-        public GameCard SourceCard { get; internal set; }
-        public IEnumerable<GameCard> Targets { get; internal set; }
+        public GameCard SourceCard { get; set; }
+        public IEnumerable<GameCard> Targets { get; set; }
     }
 }

@@ -169,8 +169,8 @@ namespace CardGame_Game.Players
 
         public void SaveInitData()
         {
-            foreach (var card in AllCards)
-                card.SaveCard();
+            //foreach (var card in AllCards)
+            //    card.SaveCard();
         }
     }
 }

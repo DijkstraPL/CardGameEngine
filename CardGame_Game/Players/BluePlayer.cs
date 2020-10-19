@@ -2,13 +2,14 @@
 using CardGame_Data.Data.Enums;
 using CardGame_Game.Cards;
 using CardGame_Game.GameEvents.Interfaces;
+using CardGame_Game.Players.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CardGame_Game.Players
 {
-    public class BluePlayer : Player
+    public class BluePlayer : Player, IBluePlayer
     {
         public const int MaxMorale = 10;
 

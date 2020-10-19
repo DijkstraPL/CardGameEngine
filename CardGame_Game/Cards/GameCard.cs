@@ -78,7 +78,7 @@ namespace CardGame_Game.Cards
                 _triggers.Add(new Trigger(game.GameEventsContainer, this, rule.Effect));
         }
 
-        internal abstract void SaveCard();
+        //internal abstract void SaveCard();
     }
 
 }
