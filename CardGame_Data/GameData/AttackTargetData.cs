@@ -7,5 +7,6 @@ namespace CardGame_Data.GameData
     {
         public string PlayerTargetName { get; set; }
         public Guid CardTargetIdentifier { get; set; }
+        public bool CanAttack { get; set; }
     }
 }

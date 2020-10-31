@@ -1,16 +1,14 @@
 ﻿using CardGame_Data.Data;
 using CardGame_Data.Data.Enums;
+using CardGame_Game.BoardTable;
 using CardGame_Game.Cards;
 using CardGame_Game.Cards.Enums;
 using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Game;
-using CardGame_Game.Game.Interfaces;
-using CardGame_Game.GameEvents;
-using CardGame_Game.GameEvents.Interfaces;
 using CardGame_Game.Players;
-using CardGame_Game.Players.Interfaces;
 using CardGame_Game.Rules;
 using Moq;
+using Moq.Language;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -19,302 +17,134 @@ using System.Text;
 
 namespace CardGame_GameTests.Rules
 {
+
     [TestFixture]
-    public class OldKnightTests
+    public class OldKnightTests : BaseCardRuleTests
     {
         [Test]
         public void BaseCooldownShouldIncreaseAfterAttack()
         {
             var oldKnight = new OldKnight();
 
-            var player = new Mock<IPlayer>();
-            var card = new Card();
+            InitPlayer();
+            InitSourceCard();
+            _sourceCard.As<ICooldown>();
+            _sourceCard.As<ICooldown>().SetupProperty(c => c.BaseCooldown, 1);
+            _sourceCard.Object.CardState = CardState.OnField;
 
-            var gameCard = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None);
-            gameCard.As<ICooldown>();
-            gameCard.As<ICooldown>().SetupProperty(c =>c.BaseCooldown, 1);
+            InitGame();
+            InitEvents();
+            InitGameEventArgs();
 
-            gameCard.Object.CardState = CardState.OnField;
+            oldKnight.Init(_sourceCard.Object, _gameEventsContainer.Object, new string[] { "1" });
 
-            var unitAttackedEvent = new UnitAttackedEvent();
+            _unitAttackedEvent.Raise(null, _gameEventArgs);
 
-            var gameEventsContainer = new Mock<IGameEventsContainer>();
-            gameEventsContainer.Setup(ge => ge.UnitAttackedEvent).Returns(unitAttackedEvent);
-
-            oldKnight.Init(gameCard.Object, gameEventsContainer.Object, new string[] { "1" });
-
-            var gameEventsArgs = new GameEventArgs
-            {
-                Player = player.Object,
-                SourceCard = gameCard.Object
-            };
-
-            unitAttackedEvent.Raise(null, gameEventsArgs);
-
-            Assert.That(gameCard.As<ICooldown>().Object.BaseCooldown, Is.EqualTo(2));
+            Assert.That(_sourceCard.As<ICooldown>().Object.BaseCooldown, Is.EqualTo(2));
         }
     }
 
-    [TestFixture]
-    public class WatchTowerTests
-    {
-        [Test]
-        public void CanPlayAnotherLandCardAfterPlayingThis()
-        {
-            var watchTower = new WatchTower();
-
-            var player = new Mock<IPlayer>();
-            player.SetupProperty(p => p.IsLandCardPlayed, true);
-            var card = new Card();
-
-            var gameCard = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None);
-            gameCard.As<ICooldown>();
-
-            gameCard.Object.CardState = CardState.OnField;
-
-            var cardPlayedEvent = new CardPlayedEvent();
-            var turnStartedEvent = new TurnStartedEvent();
-
-            var gameEventsContainer = new Mock<IGameEventsContainer>();
-            gameEventsContainer.Setup(ge => ge.CardPlayedEvent).Returns(cardPlayedEvent);
-            gameEventsContainer.Setup(ge => ge.TurnStartedEvent).Returns(turnStartedEvent);
-
-            watchTower.Init(gameCard.Object, gameEventsContainer.Object, new string[] { "1" });
-
-            var gameEventsArgs = new GameEventArgs
-            {
-                Player = player.Object,
-                SourceCard = gameCard.Object
-            };
-
-            cardPlayedEvent.Raise(null, gameEventsArgs);
-
-            Assert.That(player.Object.IsLandCardPlayed, Is.EqualTo(false));
-        }
-
-        [Test]
-        public void IncreaseEnergyWhenTurnStarted()
-        {
-            var watchTower = new WatchTower();
-
-            var player = new Mock<IPlayer>();
-            player.SetupProperty(p => p.IsLandCardPlayed, true);
-            var card = new Card();
-
-            var gameCard = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None);
-            gameCard.As<ICooldown>();
-            gameCard.As<ICooldown>().Setup(c => c.Cooldown).Returns(0);
-
-            gameCard.Object.CardState = CardState.OnField;
-
-            var cardPlayedEvent = new CardPlayedEvent();
-            var turnStartedEvent = new TurnStartedEvent();
-
-            var gameEventsContainer = new Mock<IGameEventsContainer>();
-            gameEventsContainer.Setup(ge => ge.CardPlayedEvent).Returns(cardPlayedEvent);
-            gameEventsContainer.Setup(ge => ge.TurnStartedEvent).Returns(turnStartedEvent);
-
-            watchTower.Init(gameCard.Object, gameEventsContainer.Object, new string[] { "1" });
-
-            var gameEventsArgs = new GameEventArgs
-            {
-                Player = player.Object,
-                SourceCard = gameCard.Object
-            };
-
-            turnStartedEvent.Raise(null, gameEventsArgs);
-
-            player.Verify(p => p.IncreaseEnergy(CardColor.Blue, 1));
-        }
-    }
 
     [TestFixture]
-    public class VillagerTests
+    public class PriestOfTheDeadSunTests : BaseCardRuleTests
     {
         [Test]
-        public void ShouldIncreaseAttackWhenMoraleAreHigher()
+        public void IncreaseHealthOfNeighbourUnits()
         {
-            var villager = new Villager();
+            var priestOfTheDeadSun = new PriestOfTheDeadSun();
 
-            var player = new Mock<IPlayer>();
-            player.As<IBluePlayer>();
-            player.As<IBluePlayer>().Setup(bp => bp.Morale).Returns(2);
-            var card = new Card();
+            InitPlayer();
+            var field1 = new Field(0, 0);
+            var field2 = new Field(0, 1);
+            var field3 = new Field(0, 2);
+            _player.Setup(p => p.BoardSide.Fields).Returns(new List<Field> { field1, field2, field3 });
+            _player.Setup(p => p.BoardSide.GetNeighbourFields(field1)).Returns(new List<Field> { field2 });
+            _player.Setup(p => p.FinalHealth).Returns( 10);
+            _player.Setup(p => p.BaseHealth).Returns(20);
+            var playerHealthCalculators = new List<(Func<IHealthy, bool> conditon, int value)>();
+            _player.Setup(c => c.HealthCalculators).Returns(playerHealthCalculators);
+            _player.Setup(h => h.AddHealthCalculation(It.IsAny<(Func<IHealthy, bool> conditon, int value)>()))
+                .Callback<(Func<IHealthy, bool> conditon, int value)>(c => playerHealthCalculators.Add(c));
 
-            var gameCard = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None);
-            var attacker = gameCard.As<IAttacker>();
-            var attackCalculators = new List<(Func<IAttacker, bool> conditon, int value)>();
-            gameCard.As<IAttacker>().Setup(c => c.AttackCalculators).Returns(attackCalculators);
+            var sourceCard = new Mock<GameUnitCard>(_player.Object, new Card(), "a", "desc", 1, InvocationTarget.OwnEmptyField, 1, 2, 3);
+            sourceCard.Object.CardState = CardState.OnField;
+            field1.Card = sourceCard.Object;
 
-            gameCard.Object.CardState = CardState.OnField;
-
-            var playerInitializedEvent = new PlayerInitializedEvent();
-
-            var gameEventsContainer = new Mock<IGameEventsContainer>();
-            gameEventsContainer.Setup(ge => ge.PlayerInitializedEvent).Returns(playerInitializedEvent);
-
-            villager.Init(gameCard.Object, gameEventsContainer.Object, new string[] { "1", "2" });
-
-            var gameEventsArgs = new GameEventArgs
-            {
-                Player = player.Object,
-            };
-
-            playerInitializedEvent.Raise(null, gameEventsArgs);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(attacker.Object.AttackCalculators.Count, Is.EqualTo(1));
-                Assert.That(attacker.Object.AttackCalculators.First().conditon(attacker.Object), Is.EqualTo(true));
-                Assert.That(attacker.Object.AttackCalculators.First().value, Is.EqualTo(2));
-            });
-        }
-    }
-
-    [TestFixture]
-    public class StrengthBlessingTests
-    {
-        [Test]
-        public void ShouldInccreaseTargetStrengthForOneTurn()
-        {
-            var strengthBlessing = new StrengthBlessing();
-
-            var game = new Mock<IGame>();
-            game.Setup(g => g.TurnCounter).Returns(2);
-
-            var player = new Mock<IPlayer>();
-            player.As<IBluePlayer>();
-            var card = new Card();
-
-            var gameCard = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None);
-            var target = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None);
-            var attacker = target.As<IAttacker>();
-            var attackCalculators = new List<(Func<IAttacker, bool> conditon, int value)>();
-            attacker.Setup(c => c.AttackCalculators).Returns(attackCalculators);
-
-            target.Object.CardState = CardState.OnField;
-
-            var spellCastingEvent = new SpellCastingEvent();
-
-            var gameEventsContainer = new Mock<IGameEventsContainer>();
-            gameEventsContainer.Setup(ge => ge.SpellCastingEvent).Returns(spellCastingEvent);
-
-            strengthBlessing.Init(gameCard.Object, gameEventsContainer.Object, new string[] { "3" });
-
-            var gameEventsArgs = new GameEventArgs
-            {
-                Player = player.Object,
-                SourceCard = gameCard.Object,
-                Targets = new List<GameCard> { target.Object },
-                Game = game.Object
-
-            };
-
-            spellCastingEvent.Raise(null, gameEventsArgs);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(attacker.Object.AttackCalculators.Count, Is.EqualTo(1));
-                Assert.That(attacker.Object.AttackCalculators.First().conditon(attacker.Object), Is.EqualTo(true));
-                Assert.That(attacker.Object.AttackCalculators.First().value, Is.EqualTo(3));
-            });
-
-            game.Setup(g => g.TurnCounter).Returns(3);
-
-                Assert.That(attacker.Object.AttackCalculators.First().conditon(attacker.Object), Is.EqualTo(false));
-        }
-    }
-
-    [TestFixture]
-    public class SpearmanTests
-    {
-        [Test]
-        public void ShouldIncreaseHealthWhenMoraleAreHigher()
-        {
-            var spearman = new Spearman();
-
-            var player = new Mock<IPlayer>();
-            player.As<IBluePlayer>();
-            player.As<IBluePlayer>().Setup(bp => bp.Morale).Returns(2);
-            var card = new Card();
-
-            var gameCard = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None);
-            var healthy = gameCard.As<IHealthy>();
+            var neighbour = new Mock<GameUnitCard>(_player.Object, new Card(), "b", "desc", 1, InvocationTarget.OwnEmptyField, 1, 2, 3);
+            var healthy = neighbour.As<IHealthy>();
             var healthCalculators = new List<(Func<IHealthy, bool> conditon, int value)>();
             healthy.Setup(c => c.HealthCalculators).Returns(healthCalculators);
             healthy.Setup(h => h.AddHealthCalculation(It.IsAny<(Func<IHealthy, bool> conditon, int value)>()))
                 .Callback<(Func<IHealthy, bool> conditon, int value)>(c => healthCalculators.Add(c));
+            field2.Card = neighbour.Object;
 
-            gameCard.Object.CardState = CardState.OnField;
-
-            var playerInitializedEvent = new PlayerInitializedEvent();
-            var unitBeingAttackingEvent = new UnitBeingAttackingEvent();
-
-            var gameEventsContainer = new Mock<IGameEventsContainer>();
-            gameEventsContainer.Setup(ge => ge.PlayerInitializedEvent).Returns(playerInitializedEvent);
-            gameEventsContainer.Setup(ge => ge.UnitBeingAttackingEvent).Returns(unitBeingAttackingEvent);
-
-            spearman.Init(gameCard.Object, gameEventsContainer.Object, new string[] { "1", "2", "3" });
-
-            var gameEventsArgs = new GameEventArgs
+            InitGame();
+            InitEvents();
+            _gameEventArgs = new GameEventArgs
             {
-                Player = player.Object,
+                SourceCard = sourceCard.Object,
+                Player = _player.Object,
+                Game = _game.Object
             };
 
-            playerInitializedEvent.Raise(null, gameEventsArgs);
+            priestOfTheDeadSun.Init(sourceCard.Object, _gameEventsContainer.Object, new string[0]);
+
+            _cardPlayedEvent.Raise(null, _gameEventArgs);
 
             Assert.Multiple(() =>
             {
-                Assert.That(healthy.Object.HealthCalculators.Count, Is.EqualTo(1));
-                Assert.That(healthy.Object.HealthCalculators.First().conditon(healthy.Object), Is.EqualTo(true));
-                Assert.That(healthy.Object.HealthCalculators.First().value, Is.EqualTo(2));
+                Assert.That(field2.Card.HealthCalculators.Count(), Is.EqualTo(1));
+                Assert.That(field2.Card.HealthCalculators.First().value, Is.EqualTo(1));
             });
         }
 
-
         [Test]
-        public void ShouldHurtEnemyBeforeAttack()
+        public void IncreaseHealthOfPlayer()
         {
-            var spearman = new Spearman();
+            var priestOfTheDeadSun = new PriestOfTheDeadSun();
 
-            var player = new Mock<IPlayer>();
-            player.As<IBluePlayer>();
-            player.As<IBluePlayer>().Setup(bp => bp.Morale).Returns(2);
-            var card = new Card();
+            InitPlayer();
+            var field1 = new Field(0, 0);
+            var field2 = new Field(0, 1);
+            var field3 = new Field(0, 2);
+            _player.Setup(p => p.BoardSide.Fields).Returns(new List<Field> { field1, field2, field3 });
+            _player.Setup(p => p.BoardSide.GetNeighbourFields(field1)).Returns(new List<Field> { field2 });
+            _player.Setup(p => p.FinalHealth).Returns(10);
+            _player.Setup(p => p.BaseHealth).Returns(20);
+            var playerHealthCalculators = new List<(Func<IHealthy, bool> conditon, int value)>();
+            _player.Setup(c => c.HealthCalculators).Returns(playerHealthCalculators);
+            _player.Setup(h => h.AddHealthCalculation(It.IsAny<(Func<IHealthy, bool> conditon, int value)>()))
+                .Callback<(Func<IHealthy, bool> conditon, int value)>(c => playerHealthCalculators.Add(c));
 
-            var gameCard = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None); 
-            var target = new Mock<GameCard>(player.Object, card, "a", "b", 1, InvocationTarget.None);
-            var healthy = target.As<IHealthy>();
-            var healthyCalculators = new List<(Func<IHealthy, bool> conditon, int value)>();
-            healthy.Setup(c => c.HealthCalculators).Returns(healthyCalculators);
+            var sourceCard = new Mock<GameUnitCard>(_player.Object, new Card(), "a", "desc", 1, InvocationTarget.OwnEmptyField, 1, 2, 3);
+            sourceCard.Object.CardState = CardState.OnField;
+            field1.Card = sourceCard.Object;
+
+            var neighbour = new Mock<GameUnitCard>(_player.Object, new Card(), "b", "desc", 1, InvocationTarget.OwnEmptyField, 1, 2, 3);
+            var healthy = neighbour.As<IHealthy>();
+            var healthCalculators = new List<(Func<IHealthy, bool> conditon, int value)>();
+            healthy.Setup(c => c.HealthCalculators).Returns(healthCalculators);
             healthy.Setup(h => h.AddHealthCalculation(It.IsAny<(Func<IHealthy, bool> conditon, int value)>()))
-                .Callback<(Func<IHealthy, bool> conditon, int value)>(c => healthcalculators.Add(c));
+                .Callback<(Func<IHealthy, bool> conditon, int value)>(c => healthCalculators.Add(c));
+            field2.Card = neighbour.Object;
 
-            gameCard.Object.CardState = CardState.OnField;
-
-            var playerInitializedEvent = new PlayerInitializedEvent();
-            var unitBeingAttackingEvent = new UnitBeingAttackingEvent();
-
-            var gameEventsContainer = new Mock<IGameEventsContainer>();
-            gameEventsContainer.Setup(ge => ge.PlayerInitializedEvent).Returns(playerInitializedEvent);
-            gameEventsContainer.Setup(ge => ge.UnitBeingAttackingEvent).Returns(unitBeingAttackingEvent);
-
-            spearman.Init(gameCard.Object, gameEventsContainer.Object, new string[] { "1", "2", "3" });
-
-            var gameEventsArgs = new GameEventArgs
+            InitGame();
+            InitEvents();
+            _gameEventArgs = new GameEventArgs
             {
-                Player = player.Object,
-                SourceCard = gameCard.Object,
-                Targets = new List<GameCard> { }
+                SourceCard = sourceCard.Object,
+                Player = _player.Object,
+                Game = _game.Object
             };
 
-            unitBeingAttackingEvent.Raise(null, gameEventsArgs);
+            priestOfTheDeadSun.Init(sourceCard.Object, _gameEventsContainer.Object, new string[0]);
+
+            _cardPlayedEvent.Raise(null, _gameEventArgs);
 
             Assert.Multiple(() =>
             {
-                Assert.That(healthy.Object.HealthCalculators.Count, Is.EqualTo(1));
-                Assert.That(healthy.Object.HealthCalculators.First().conditon(healthy.Object), Is.EqualTo(true));
-                Assert.That(healthy.Object.HealthCalculators.First().value, Is.EqualTo(2));
+                Assert.That(_player.Object.HealthCalculators.Count(), Is.EqualTo(1));
+                Assert.That(_player.Object.HealthCalculators.First().value, Is.EqualTo(2));
             });
         }
     }

@@ -96,6 +96,7 @@ namespace CardGame_Server.Mappers
 
             var fieldData = new FieldData
             {
+                Identifier = field.Identifier,
                 X = field.X,
                 Y = field.Y,
             };
@@ -114,7 +115,7 @@ namespace CardGame_Server.Mappers
 
             if (card is IAttacker attackCard)
             {
-                cardData.AttackTarget = MapTarget(attackCard.AttackTarget);
+                cardData.AttackTarget = MapTarget(card, attackCard.AttackTarget);
                 cardData.BaseAttack = attackCard.BaseAttack;
                 cardData.FinalAttack = attackCard.FinalAttack;
             }
@@ -162,7 +163,7 @@ namespace CardGame_Server.Mappers
             }
         }
 
-        private AttackTargetData MapTarget(IHealthy attackTarget)
+        private AttackTargetData MapTarget(GameCard card , IHealthy attackTarget)
         {
             if (attackTarget == null)
                 return null;
@@ -170,9 +171,16 @@ namespace CardGame_Server.Mappers
             var attackTargetData = new AttackTargetData();
 
             if (attackTarget is IPlayer player)
+            {
                 attackTargetData.PlayerTargetName = player.Name;
+                attackTargetData.CanAttack = true;
+            }
             else if (attackTarget is GameCard gameCard)
+            {
                 attackTargetData.CardTargetIdentifier = gameCard.Identifier;
+                var field = card.Owner.BoardSide.Fields.FirstOrDefault(f => f.Card == card);
+                attackTargetData.CanAttack = field.CanAttack(field, gameCard.Owner.BoardSide.Fields);                    
+            }
 
             return attackTargetData;
         }

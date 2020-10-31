@@ -10,6 +10,7 @@ namespace CardGame_Game.BoardTable
 {
     public class Field : IField
     {
+        public Guid Identifier { get; }
         public int X { get; }
         public int Y { get; }
 
@@ -17,6 +18,8 @@ namespace CardGame_Game.BoardTable
 
         public Field(int x, int y)
         {
+            Identifier = Guid.NewGuid();
+
             X = x;
             Y = y;
         }
