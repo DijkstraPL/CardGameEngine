@@ -56,22 +56,24 @@ namespace CardGame_Server
             }
 
             app.UseHttpsRedirection();
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<GameHub>("/gamehub");
-            });
+            //app.UseSignalR(routes =>
+            //{
+            //    routes.MapHub<GameHub>("/gamehub");
+            //});
 
+            app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
+
+                endpoints.MapHub<GameHub>("/gamehub");
             });
 
             //app.UseMvc();
 
-            //app.UseRouting();
 
             //app.UseEndpoints(endpoints =>
             //{

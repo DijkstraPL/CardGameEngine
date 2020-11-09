@@ -7,14 +7,16 @@ using CardGame_Game.GameEvents.Interfaces;
 using CardGame_Game.Helpers;
 using CardGame_Game.Players.Interfaces;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace CardGame_Game.Game
 {
-
     public class Game : IGame
     {
         public int TurnCounter { get; private set; } = 1;
+        public TurnTimer TurnTimer { get; }
+
         public IBoard Board { get; }
 
         public IPlayer CurrentPlayer { get; private set; }
@@ -36,6 +38,8 @@ namespace CardGame_Game.Game
 
             _firstPlayer.BoardSide = Board.LeftBoardSite;
             _secondPlayer.BoardSide = Board.RightBoardSite;
+
+            TurnTimer = new TurnTimer();
         }
 
         public void StartGame()
@@ -60,6 +64,8 @@ namespace CardGame_Game.Game
             _secondPlayer.SaveInitData();
 
             GameEventsContainer.GameStartedEvent.Raise(this, new GameEventArgs { Game = this });
+
+            TurnTimer.Start();
         }
 
         public void FinishTurn()
@@ -91,6 +97,7 @@ namespace CardGame_Game.Game
             CurrentPlayer.BoardSide.StartTurn(this);
 
             GameEventsContainer.TurnStartedEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
+            TurnTimer.Reset();
         }
 
         public bool GetCardFromDeck()

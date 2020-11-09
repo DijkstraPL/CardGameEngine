@@ -2,12 +2,10 @@
 using CardGame_DataAccess.Repositories.Interfaces;
 using CardGame_Game.BoardTable;
 using CardGame_Game.Cards;
-using CardGame_Game.GameEvents;
-using CardGame_Game.GameEvents.Interfaces;
-using CardGame_Game.Players.Interfaces;
 using CardGame_Server.Mappers.Interfaces;
-using CardGame_Server.Services;
+using CardGame_Server.Models;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,81 +13,143 @@ using System.Threading.Tasks;
 
 namespace CardGame_Server.Hubs
 {
-    public enum Status
-    {
-        Connected,
-        ReadyToPlay
-    }
 
     public class GameHub : Hub
     {
-        public static Dictionary<string, Status> ConnectedIds { get; } = new Dictionary<string, Status>();
-        public static HashSet<(string connectionId, IPlayer player)> Players { get; } = new HashSet<(string connectionId, IPlayer player)>();
-        private static readonly object _pendingConnectionsLock = new object();
-        private static IDeckRepository _deckRepository;
-        private readonly IMapper _mapper;
-        private static IGameEventsContainer _gameEventsContainer = new GameEventsContainer();
-        private static GameManager _gameManager;
+        public static IList<ConnectedPlayer> ConnectedPlayers { get; } = new List<ConnectedPlayer>();
+        public static IList<ConnectedGroup> ConnectedGroups { get; } = new List<ConnectedGroup>();
 
-        public GameHub(IDeckRepository deckRepository, IMapper mapper)
+        private readonly IServiceProvider _serviceProvider;
+
+        private static readonly object _pendingConnectionsLock = new object();
+        private readonly IDeckRepository _deckRepository;
+        private readonly IMapper _mapper;
+        private readonly IHubContext<GameHub> _hubContext;
+
+        public GameHub(IServiceProvider serviceProvider, IDeckRepository deckRepository, IMapper mapper, IHubContext<GameHub> hubContext)
         {
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _deckRepository = deckRepository ?? throw new ArgumentNullException(nameof(deckRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
         }
 
-        public override Task OnConnectedAsync()
+        public override async Task OnConnectedAsync()
         {
+            var newPlayer = new ConnectedPlayer(Context.ConnectionId, Status.Connected);
             lock (_pendingConnectionsLock)
-                ConnectedIds.Add(Context.ConnectionId, Status.Connected);
+                ConnectedPlayers.Add(newPlayer);
 
-            Clients.Caller.SendAsync("Connected", Context.ConnectionId);
-            return base.OnConnectedAsync();
+            newPlayer.Decks = await _deckRepository.GetDecks();
+           
+            await Clients.Caller.SendAsync("Connected", Context.ConnectionId);
+            await base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
             lock (_pendingConnectionsLock)
             {
-                ConnectedIds.Remove(Context.ConnectionId);
-                var playerData = Players.FirstOrDefault(p => p.connectionId == Context.ConnectionId);
-                if (playerData != default)
-                    Players.Remove(playerData);
+                ConnectedPlayers.Remove(ConnectedPlayers.FirstOrDefault(p => p.ConnectionId == Context.ConnectionId));
+                //ConnectedIds.Remove(Context.ConnectionId);
+                //var playerData = Players.FirstOrDefault(p => p.connectionId == Context.ConnectionId);
+                //if (playerData != default)
+                //    Players.Remove(playerData);
             }
             return base.OnDisconnectedAsync(exception);
         }
 
         public async Task SetReady(string playerName, string deckName)
         {
-            if (!ConnectedIds.ContainsKey(Context.ConnectionId))
+            var connectedPlayer = ConnectedPlayers.FirstOrDefault(p => p.ConnectionId == Context.ConnectionId);
+            if (connectedPlayer == null)
                 throw new ArgumentException();
-            var playerManager = new PlayerManager(_deckRepository, _gameEventsContainer);
-            var player = await playerManager.GetPlayer(playerName, deckName);
+
             lock (_pendingConnectionsLock)
             {
-                Players.Add((Context.ConnectionId, player));
-                ConnectedIds[Context.ConnectionId] = Status.ReadyToPlay;
+                connectedPlayer.Status = Status.ReadyToPlay;             
+                connectedPlayer.SetPlayer(playerName, deckName);
             }
 
-            await Clients.All.SendAsync("RegisterServerMessage", playerName + " is ready");
+            await Clients.Caller.SendAsync("RegisterServerMessage", playerName + " is ready");
+            await Clients.Caller.SendAsync("RegisterServerMessage", "Looking for player");
 
-            if (ConnectedIds.Count % 2 == 0 && ConnectedIds.All(c => c.Value == Status.ReadyToPlay))
-                await StartGame();
-            else
-                await Clients.All.SendAsync("RegisterServerMessage", "Waiting for other player");
+            lock (_pendingConnectionsLock)
+            {
+                var groupForPlay = ConnectedGroups.FirstOrDefault(cg => cg.Player1 != null && cg.Player2 == null || cg.Player1 == null && cg.Player2 != null);
+
+                if (groupForPlay != null)
+                {
+                    if (groupForPlay.Player1 == null)
+                        groupForPlay.Player1 = connectedPlayer;
+                    else if (groupForPlay.Player2 == null)
+                        groupForPlay.Player2 = connectedPlayer;
+                    connectedPlayer.Group = groupForPlay;
+
+                    Groups.AddToGroupAsync(Context.ConnectionId, groupForPlay.Name);
+
+                    if (groupForPlay.ReadyToPlay)
+                        StartGame(groupForPlay);
+                }
+                else
+                {
+                    string groupName = Guid.NewGuid().ToString();
+                    var connectedGroup = new ConnectedGroup(groupName, _hubContext, _mapper);
+                    ConnectedGroups.Add(connectedGroup);
+
+                    if (connectedGroup.Player1 == null)
+                        connectedGroup.Player1 = connectedPlayer;
+                    else if (connectedGroup.Player2 == null)
+                        connectedGroup.Player2 = connectedPlayer;
+                    connectedPlayer.Group = connectedGroup;
+
+                    Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+                    Clients.Group(groupName).SendAsync("RegisterServerMessage", "Waiting for other player");
+                }
+            }
+        }
+
+        private async Task StartGame(ConnectedGroup group)
+        {
+            await group.Init();
+            group.IsCurrentPlayer(group.Player1);
+
+            await Clients.Client(group.Player1.ConnectionId)
+                .SendAsync("GameStarted", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player1)));
+            await Clients.Client(group.Player2.ConnectionId)
+                .SendAsync("GameStarted", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player2)));
+
+            await Clients.Group(group.Name).SendAsync("RegisterServerMessage", $"Game started");
+            await Clients.Group(group.Name).SendAsync("RegisterServerMessage", $"Turn {group.Game.TurnCounter} started");
+            await Clients.Group(group.Name).SendAsync("RegisterServerMessage", group.Game.CurrentPlayer.Name + " has first move");
+
+        }
+
+        private ConnectedGroup FindGroup(string connectionId)
+            => ConnectedGroups.FirstOrDefault(p => p.Player1?.ConnectionId == connectionId || p.Player2?.ConnectionId == connectionId);
+
+        private ConnectedPlayer FindPlayer(ConnectedGroup group, string connectionId)
+        {
+            if (group.Player1.ConnectionId == connectionId)
+                return group.Player1;
+            if (group.Player2.ConnectionId == connectionId)
+                return group.Player2;
+            throw new ArgumentException();
         }
 
         public async Task DrawLandCard()
         {
-            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
-            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+            var group = FindGroup(Context.ConnectionId);
+            var invocationPlayer = FindPlayer(group, Context.ConnectionId);
+            if (!group.IsCurrentPlayer(invocationPlayer))
                 return;
-            if (_gameManager.Game.GetCardFromLandDeck())
+            if (group.Game.GetCardFromLandDeck())
             {
-                await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " took land card");
-                await Clients.Client(Players.First().connectionId)
-                    .SendAsync("LandCardTaken", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
-                await Clients.Client(Players.Last().connectionId)
-                    .SendAsync("LandCardTaken", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+                await Clients.Group(group.Name).SendAsync("RegisterServerMessage", group.Game.CurrentPlayer.Name + " took land card");
+                await Clients.Client(group.Player1.ConnectionId)
+                    .SendAsync("LandCardTaken", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player1)));
+                await Clients.Client(group.Player2.ConnectionId)
+                    .SendAsync("LandCardTaken", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player2)));
             }
             else
                 await Clients.Caller.SendAsync("RegisterServerMessage", "Can't take a card");
@@ -97,60 +157,70 @@ namespace CardGame_Server.Hubs
 
         public async Task DrawCard()
         {
-            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
-            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+            var group = FindGroup(Context.ConnectionId);
+            var invocationPlayer = FindPlayer(group, Context.ConnectionId);
+            if (!group.IsCurrentPlayer(invocationPlayer))
                 return;
-            if (_gameManager.Game.GetCardFromDeck())
+            if (group.Game.GetCardFromDeck())
             {
-                await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " took card");
-                await Clients.Client(Players.First().connectionId)
-                    .SendAsync("CardTaken", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
-                await Clients.Client(Players.Last().connectionId)
-                    .SendAsync("CardTaken", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+                await Clients.Group(group.Name).SendAsync("RegisterServerMessage", group.Game.CurrentPlayer.Name + " took card");
+                await Clients.Client(group.Player1.ConnectionId)
+                    .SendAsync("CardTaken", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player1)));
+                await Clients.Client(group.Player2.ConnectionId)
+                    .SendAsync("CardTaken", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player2)));
             }
             else
                 await Clients.Caller.SendAsync("RegisterServerMessage", "Can't take a card");
         }
         public async Task FinishTurn()
         {
-            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
-            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
-                return;
-            _gameManager.Game.FinishTurn();
+            var group = FindGroup(Context.ConnectionId);
+            var invocationPlayer = FindPlayer(group, Context.ConnectionId);;
 
-            await Clients.All.SendAsync("RegisterServerMessage", $"Turn {_gameManager.Game.TurnCounter} started");
-            await Clients.Client(Players.First().connectionId)
-                .SendAsync("TurnStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
-            await Clients.Client(Players.Last().connectionId)
-                .SendAsync("TurnStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+            lock (group.TurnFinishingLock)
+            {
+                if (!group.IsCurrentPlayer(invocationPlayer))
+                    return;
+
+                group.Game.FinishTurn();
+
+                Clients.Group(group.Name).SendAsync("RegisterServerMessage", $"Turn {group.Game.TurnCounter} started");
+                Clients.Client(group.Player1.ConnectionId)
+                    .SendAsync("TurnStarted", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player1)));
+                Clients.Client(group.Player2.ConnectionId)
+                    .SendAsync("TurnStarted", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player2)));
+                Clients.Group(group.Name).SendAsync("RegisterServerMessage", group.Game.CurrentPlayer.Name + " turn");
+            }
         }
 
         public async Task PlayCard(CardData cardData, SelectionTargetData selectionTarget)
         {
-            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
-            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+            var group = FindGroup(Context.ConnectionId);
+            var invocationPlayer = FindPlayer(group, Context.ConnectionId);
+            if (!group.IsCurrentPlayer(invocationPlayer))
                 return;
-            var card = _gameManager.Game.CurrentPlayer.Hand.FirstOrDefault(c => c.Identifier == cardData.Identifier);
-            var enemyFields = _gameManager.Game.NextPlayer.BoardSide.Fields;
-            var currentPlayerFields = _gameManager.Game.CurrentPlayer.BoardSide.Fields;
+
+            var card = group.Game.CurrentPlayer.Hand.FirstOrDefault(c => c.Identifier == cardData.Identifier);
+            var enemyFields = group.Game.NextPlayer.BoardSide.Fields;
+            var currentPlayerFields = group.Game.CurrentPlayer.BoardSide.Fields;
             Field field = null;
             if (selectionTarget?.TargetEnemyField != null)
-                 field = enemyFields.FirstOrDefault(f =>
-                f.X == selectionTarget.TargetEnemyField.X &&
-                f.Y == selectionTarget.TargetEnemyField.Y);
+                field = enemyFields.FirstOrDefault(f =>
+               f.X == selectionTarget.TargetEnemyField.X &&
+               f.Y == selectionTarget.TargetEnemyField.Y);
             if (selectionTarget?.TargetOwnField != null)
                 field = currentPlayerFields.FirstOrDefault(f =>
                f.X == selectionTarget.TargetOwnField.X &&
                f.Y == selectionTarget.TargetOwnField.Y);
 
-            if (_gameManager.Game.PlayCard(card, new InvocationData { Field = field }))
+            if (group.Game.PlayCard(card, new InvocationData { Field = field }))
             {
-                await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " play " + cardData.Name);
+                await Clients.Group(group.Name).SendAsync("RegisterServerMessage", group.Game.CurrentPlayer.Name + " play " + cardData.Name);
 
-                await Clients.Client(Players.First().connectionId)
-                    .SendAsync("CardPlayed", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
-                await Clients.Client(Players.Last().connectionId)
-                    .SendAsync("CardPlayed", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+                await Clients.Client(group.Player1.ConnectionId)
+                    .SendAsync("CardPlayed", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player1)));
+                await Clients.Client(group.Player2.ConnectionId)
+                    .SendAsync("CardPlayed", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player2)));
             }
             else
                 await Clients.Caller.SendAsync("RegisterServerMessage", "Can't play a card");
@@ -158,58 +228,63 @@ namespace CardGame_Server.Hubs
 
         public async Task SetAttackTarget(CardData sourceCardData, CardData targetCardData)
         {
-            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
-            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+            var group = FindGroup(Context.ConnectionId);
+            var invocationPlayer = FindPlayer(group, Context.ConnectionId);
+            if (!group.IsCurrentPlayer(invocationPlayer))
                 return;
 
-            var sourceField = _gameManager.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
-            var targetField = _gameManager.Game.NextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == targetCardData.Identifier);
-            if(sourceField != null && targetField != null)
+            var sourceField = group.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
+            var targetField = group.Game.NextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == targetCardData.Identifier);
+            if (sourceField != null && targetField != null)
             {
                 sourceField.Card.SetAttackTarget(targetField.Card);
 
-                await Clients.Client(Players.First().connectionId)
-                    .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
-                await Clients.Client(Players.Last().connectionId)
-                    .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+                await Clients.Client(group.Player1.ConnectionId)
+                    .SendAsync("AttackTargetSet", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player1)));
+                await Clients.Client(group.Player2.ConnectionId)
+                    .SendAsync("AttackTargetSet", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player2)));
             }
         }
 
         public async Task SetPlayerAsAttackTarget(CardData sourceCardData, PlayerData targetPlayerData)
         {
-            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
-            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+            var group = FindGroup(Context.ConnectionId);
+            var invocationPlayer = FindPlayer(group, Context.ConnectionId);
+            if (!group.IsCurrentPlayer(invocationPlayer))
                 return;
-            var sourceField = _gameManager.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
-            var targetPlayer = _gameManager.Game.NextPlayer;
 
-            if(sourceField != null && targetPlayer.Name == targetPlayerData?.Name)
+            var sourceField = group.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
+            var targetPlayer = group.Game.NextPlayer;
+
+            if (sourceField != null && targetPlayer.Name == targetPlayerData?.Name)
             {
                 sourceField.Card.SetAttackTarget(targetPlayer);
 
-                await Clients.Client(Players.First().connectionId)
-                    .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
-                await Clients.Client(Players.Last().connectionId)
-                    .SendAsync("AttackTargetSet", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+                await Clients.Client(group.Player1.ConnectionId)
+                    .SendAsync("AttackTargetSet", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player1)));
+                await Clients.Client(group.Player2.ConnectionId)
+                    .SendAsync("AttackTargetSet", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player2)));
             }
         }
 
         public async Task Move(CardData sourceCardData, FieldData fieldData)
         {
-            var invocationPlayer = Players.First(p => p.connectionId == Context.ConnectionId);
-            if (invocationPlayer.player != _gameManager.Game.CurrentPlayer)
+            var group = FindGroup(Context.ConnectionId);
+            var invocationPlayer = FindPlayer(group, Context.ConnectionId);
+            if (!group.IsCurrentPlayer(invocationPlayer))
                 return;
 
-            var sourceField = _gameManager.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
-            var targetField = _gameManager.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.X == fieldData.X && f.Y == fieldData.Y);
+
+            var sourceField = group.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card?.Identifier == sourceCardData.Identifier);
+            var targetField = group.Game.CurrentPlayer.BoardSide.Fields.FirstOrDefault(f => f.X == fieldData.X && f.Y == fieldData.Y);
             if (sourceField != null && targetField != null)
             {
-                _gameManager.Game.CurrentPlayer.BoardSide.Move(_gameManager.Game.CurrentPlayer, sourceField, targetField);
+                group.Game.CurrentPlayer.BoardSide.Move(group.Game.CurrentPlayer, sourceField, targetField);
 
-                await Clients.Client(Players.First().connectionId)
-                    .SendAsync("CardMoved", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
-                await Clients.Client(Players.Last().connectionId)
-                    .SendAsync("CardMoved", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
+                await Clients.Client(group.Player1.ConnectionId)
+                    .SendAsync("CardMoved", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player1)));
+                await Clients.Client(group.Player2.ConnectionId)
+                    .SendAsync("CardMoved", _mapper.MapGame(group.Game, isCurrentPlayer: group.IsCurrentPlayer(group.Player2)));
             }
         }
 
@@ -218,20 +293,7 @@ namespace CardGame_Server.Hubs
             base.Dispose(disposing);
         }
 
-        private async Task StartGame()
-        {
-            _gameManager = new GameManager(_gameEventsContainer);
-            _gameManager.GameInit(Players.First().player, Players.Last().player);
-            _gameManager.StartGame();
 
-            await Clients.Client(Players.First().connectionId)
-                .SendAsync("GameStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.First().player));
-            await Clients.Client(Players.Last().connectionId)
-                .SendAsync("GameStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: _gameManager.Game.CurrentPlayer == Players.Last().player));
 
-            await Clients.All.SendAsync("RegisterServerMessage", $"Game started");
-            await Clients.All.SendAsync("RegisterServerMessage", $"Turn {_gameManager.Game.TurnCounter} started");
-            await Clients.All.SendAsync("RegisterServerMessage", _gameManager.Game.CurrentPlayer.Name + " has first move");
-        }
     }
 }

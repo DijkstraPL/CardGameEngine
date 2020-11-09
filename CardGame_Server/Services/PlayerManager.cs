@@ -13,19 +13,25 @@ namespace CardGame_Server.Services
 {
     public class PlayerManager
     {
-        private readonly IDeckRepository _deckRepository;
+        //private readonly IDeckRepository _deckRepository;
         private readonly IGameEventsContainer _gameEventsContainer;
+        private IEnumerable<CardGame_DataAccess.Entities.Deck> _decks;
 
-        public PlayerManager(IDeckRepository deckRepository, IGameEventsContainer gameEventsContainer)
+        //public PlayerManager(IDeckRepository deckRepository, IGameEventsContainer gameEventsContainer)
+        //{
+        //    _deckRepository = deckRepository ?? throw new ArgumentNullException(nameof(deckRepository));
+        //    _gameEventsContainer = gameEventsContainer ?? throw new ArgumentNullException(nameof(gameEventsContainer));
+        //}
+
+        public PlayerManager(IEnumerable<CardGame_DataAccess.Entities.Deck> decks, IGameEventsContainer gameEventsContainer)
         {
-            _deckRepository = deckRepository ?? throw new ArgumentNullException(nameof(deckRepository));
-            _gameEventsContainer = gameEventsContainer ?? throw new ArgumentNullException(nameof(gameEventsContainer));
+            _decks = decks;
+            _gameEventsContainer = gameEventsContainer;
         }
 
         public async Task<IPlayer> GetPlayer(string playerName, string deckName)
         {
-            var decks = await _deckRepository.GetDecks();
-            var deck = decks.FirstOrDefault(d => d.Name == deckName);
+            var deck = _decks.FirstOrDefault(d => d.Name == deckName);
 
             var landDeck = new Stack<Card>();
             var landCards = deck.Cards.Where(cd => cd.Card.Kind == CardGame_DataAccess.Entities.Enums.Kind.Land);
