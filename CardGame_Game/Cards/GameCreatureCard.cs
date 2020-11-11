@@ -10,8 +10,13 @@ namespace CardGame_Game.Cards
     {
         public bool Moved { get; set; }
 
+        protected GameCreatureCard _gameCreatureInitState => _initState as GameCreatureCard;
+
         public GameCreatureCard(IPlayer owner, Card card,  string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
             : base(owner ,card,  name, description, cost, invocationTarget, attack, cooldown, health)
+        {
+        }
+        protected GameCreatureCard(GameCreatureCard gameCreatureCard) : base(gameCreatureCard)
         {
         }
 
@@ -26,6 +31,13 @@ namespace CardGame_Game.Cards
             invocationData.Field.Card = this;
             this.CardState = Enums.CardState.OnField;
         }
+        public override void Reset()
+        {
+            base.Reset();
+            Moved = false;
+        }
+        protected override GameCard GetCardCopy() 
+            => new GameCreatureCard(this);
     }
 
 }

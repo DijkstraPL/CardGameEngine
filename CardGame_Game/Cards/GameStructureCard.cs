@@ -10,10 +10,13 @@ namespace CardGame_Game.Cards
 {
     public class GameStructureCard : GameUnitCard
     {
-        public bool Moved { get; set; }
+        protected GameStructureCard _gameStructureInitState => _initState as GameStructureCard;
 
         public GameStructureCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
             : base(owner, card, name, description, cost, invocationTarget, attack, cooldown, health)
+        {
+        }
+        protected GameStructureCard(GameStructureCard gameStructureCard) : base(gameStructureCard)
         {
         }
 
@@ -40,5 +43,11 @@ namespace CardGame_Game.Cards
             invocationData.Field.Card = this;
             this.CardState = Enums.CardState.OnField;
         }
+        public override void Reset()
+        {
+            base.Reset();
+        }
+        protected override GameCard GetCardCopy()
+            => new GameStructureCard(this);
     }
 }

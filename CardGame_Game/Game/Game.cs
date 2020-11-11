@@ -134,7 +134,7 @@ namespace CardGame_Game.Game
         public void SendCardToHand(GameCard card, IPlayer player)
         {
             card.CardState = CardState.InHand;
-            //card.Reset();
+            card.Reset();
             var fieldCard = Board.LeftBoardSite.Fields
                 .Concat(Board.RightBoardSite.Fields)
                 .FirstOrDefault(f => f.Card == card);

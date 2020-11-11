@@ -45,7 +45,7 @@ namespace CardGame_Game.Cards
             Trait = card.Trait;
         }
 
-        public GameCard(GameCard gameCard)
+        protected GameCard(GameCard gameCard)
         {
             Identifier = gameCard.Identifier;
 
@@ -58,6 +58,7 @@ namespace CardGame_Game.Cards
             InvocationTarget = gameCard.InvocationTarget;
             Kind = gameCard.Kind;
             Trait = gameCard.Trait;
+            CardState = CardState.Copy;
 
             foreach (var trigger in gameCard._triggers)
                 _triggers.Add(trigger);
@@ -67,9 +68,18 @@ namespace CardGame_Game.Cards
             => player.Energy >= Cost;
         public virtual void Play(IGame game, IPlayer player, InvocationData invocationData)
         {
+            _initState = GetCardCopy();
+
             if (Cost != null)
                 player.IncreaseEnergy(_card.Color, -(int)Cost);
             player.Hand.Remove(this);
+        }
+
+        public virtual void Reset()
+        {
+            _triggers.Clear();
+            foreach (var trigger in _initState._triggers)
+                _triggers.Add(trigger);
         }
 
         internal void RegisterTriggers(IGame game)
@@ -78,7 +88,6 @@ namespace CardGame_Game.Cards
                 _triggers.Add(new Trigger(game.GameEventsContainer, this, rule.Effect));
         }
 
-        //internal abstract void SaveCard();
+        protected abstract GameCard GetCardCopy();
     }
-
 }

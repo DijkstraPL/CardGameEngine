@@ -168,18 +168,19 @@ namespace CardGame_Server.Mappers
             if (attackTarget == null)
                 return null;
 
+            var field = card.Owner.BoardSide.Fields.FirstOrDefault(f => f.Card == card);
+
             var attackTargetData = new AttackTargetData();
 
             if (attackTarget is IPlayer player)
             {
                 attackTargetData.PlayerTargetName = player.Name;
-                attackTargetData.CanAttack = true;
+                attackTargetData.CanAttack = field.CanAttack(player);
             }
             else if (attackTarget is GameCard gameCard)
             {
                 attackTargetData.CardTargetIdentifier = gameCard.Identifier;
-                var field = card.Owner.BoardSide.Fields.FirstOrDefault(f => f.Card == card);
-                attackTargetData.CanAttack = field.CanAttack(field, gameCard.Owner.BoardSide.Fields);                    
+                attackTargetData.CanAttack = field.CanAttack(field, gameCard.Owner);                    
             }
 
             return attackTargetData;

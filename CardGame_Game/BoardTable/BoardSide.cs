@@ -125,30 +125,34 @@ namespace CardGame_Game.BoardTable
 
         public void FinishTurn(IGame game, IPlayer player)
         {
+            var enemyPlayer = game.CurrentPlayer == player ? game.NextPlayer : game.CurrentPlayer;
+
             foreach (var field in Fields)
             {
                 if (field.Card == null || field.Card.Cooldown > 0)
                     continue;
 
-                if (field.Card.AttackTarget is IPlayer)
+                if (field.Card.AttackTarget is IPlayer targetPlayer &&  field.CanAttack(targetPlayer))
                 {
-                    AttackPlayer(game, player, field);
+                    AttackPlayer(game, player,  field, targetPlayer);
                 }
                 else if (field.Card.AttackTarget is GameUnitCard attackTarget)
                 {
                     var targetField = game.NextPlayer.BoardSide.Fields.FirstOrDefault(f => f.Card == field.Card.AttackTarget);
                     if (targetField == null)
                         continue;
-                    if (!field.CanAttack(targetField, EnemyBoardSide.Fields))
+                    if (!field.CanAttack(targetField, enemyPlayer ))
                         continue;
 
-                    AttackUnit(game, player, field, attackTarget);
+                    AttackUnit(game, player, field, targetField);
                 }
             }
         }
 
-        private void AttackUnit(IGame game, IPlayer player, Field field, GameUnitCard attackTarget)
+        private void AttackUnit(IGame game, IPlayer player, Field field, Field targetField)
         {
+            var attackTarget = targetField.Card;
+
             game.GameEventsContainer.UnitBeingAttackingEvent.Raise(this,
                 new GameEventArgs { Game = game, Player = player, SourceCard = attackTarget, Targets = new List<GameCard> { field.Card } });
 
@@ -156,9 +160,7 @@ namespace CardGame_Game.BoardTable
             {
                 field.Card.AttackTarget.AddHealthCalculation((card => true, -field.Card.FinalAttack ?? 0));
 
-                if (field.Card.AttackTarget.Contrattacked ||
-                    field.Card.Trait.HasFlag(Trait.DistanceAttack) ||
-                    field.Card.Trait.HasFlag(Trait.Flying) && !attackTarget.Trait.HasFlag(Trait.DistanceAttack))
+                if (!targetField.CanContrattackAttackFrom(field))
                     field.Card.AttackTarget = null;
                 else
                 {
@@ -173,12 +175,15 @@ namespace CardGame_Game.BoardTable
                 new GameEventArgs { Game = game, Player = player, SourceCard = field.Card, Targets = new List<GameCard> { attackTarget } });
         }
 
-        private void AttackPlayer(IGame game, IPlayer player, Field field)
+        private void AttackPlayer(IGame game, IPlayer player, Field field, IPlayer enemyPlayer)
         {
-            game.NextPlayer.AddHealthCalculation((card => true, -field.Card.FinalAttack ?? 0));
+            if (field.CanAttack(enemyPlayer))
+            {
+                game.NextPlayer.AddHealthCalculation((card => true, -field.Card.FinalAttack ?? 0));
 
-            game.GameEventsContainer.UnitAttackedEvent.Raise(this,
-                new GameEventArgs { Game = game, Player = player, SourceCard = field.Card });
+                game.GameEventsContainer.UnitAttackedEvent.Raise(this,
+                    new GameEventArgs { Game = game, Player = player, SourceCard = field.Card });
+            }
         }
 
         public void Kill(GameUnitCard gameUnitCard)

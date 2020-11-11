@@ -6,7 +6,8 @@
         InHand,
         OnField,
         OnGraveyard,
-        Exiled
+        Exiled,
+        Copy
     }
 
 }

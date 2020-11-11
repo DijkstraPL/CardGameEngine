@@ -2,6 +2,7 @@
 using CardGame_Data.Data.Enums;
 using CardGame_Game.Cards.Interfaces;
 using CardGame_Game.Players.Interfaces;
+using CardGame_Game.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +52,8 @@ namespace CardGame_Game.Cards
 
         private bool _protectionUsed = false;
 
+        protected GameUnitCard _gameUnitInitState => _initState as GameUnitCard;
+
         public GameUnitCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget, int? attack, int? cooldown, int? health)
             : base(owner, card, name, description, cost, invocationTarget)
         {
@@ -58,6 +61,22 @@ namespace CardGame_Game.Cards
             BaseCooldown = cooldown;
             Cooldown = BaseCooldown;
             BaseHealth = health;
+        }
+
+        protected GameUnitCard(GameUnitCard gameUnitCard) : base(gameUnitCard)
+        {
+            BaseAttack = gameUnitCard.BaseAttack;
+            BaseCooldown = gameUnitCard.BaseCooldown;
+            Cooldown = gameUnitCard.Cooldown;
+            BaseHealth = gameUnitCard.BaseHealth;
+
+            foreach (var attackCalculator in gameUnitCard.AttackCalculators)
+                AttackCalculators.Add(attackCalculator);
+            foreach (var attackCalculator in gameUnitCard.AttackFuncCalculators)
+                AttackFuncCalculators.Add(attackCalculator);
+
+            foreach (var healthCalculator in gameUnitCard.HealthCalculators)
+                _healthCalculators.Add(healthCalculator);
         }
 
         public void SetAttackTarget(IHealthy attackTarget)
@@ -71,6 +90,32 @@ namespace CardGame_Game.Cards
             else
                 _healthCalculators.Add(calc);
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+            //BaseAttack = _gameUnitInitState.BaseAttack;
+            BaseCooldown = _gameUnitInitState.BaseCooldown;
+            Cooldown = _gameUnitInitState.Cooldown;
+            //BaseHealth = _gameUnitInitState.BaseHealth;
+
+            AttackTarget = null;
+
+            Contrattacked = false;
+            _protectionUsed = false;
+
+            AttackCalculators.Clear();
+            foreach (var attackCalculator in _gameUnitInitState.AttackCalculators)
+                AttackCalculators.Add(attackCalculator);
+
+            AttackFuncCalculators.Clear();
+            foreach (var attackCalculator in _gameUnitInitState.AttackFuncCalculators)
+                AttackFuncCalculators.Add(attackCalculator);
+
+            foreach (var healthCalculator in _gameUnitInitState.HealthCalculators)
+                _healthCalculators.Add(healthCalculator);
+        }
+
 
         private void Dead()
         {

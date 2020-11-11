@@ -9,8 +9,13 @@ namespace CardGame_Game.Cards
 {
     public class GameSpellCard : GameCard
     {
+        protected GameSpellCard _spellInitState => _initState as GameSpellCard;
+
         public GameSpellCard(IPlayer owner, Card card, string name, string description, int? cost, InvocationTarget invocationTarget)
             : base(owner, card, name, description, cost, invocationTarget)
+        {
+        }
+        protected GameSpellCard(GameSpellCard gameSpellCard) : base(gameSpellCard)
         {
         }
 
@@ -23,6 +28,14 @@ namespace CardGame_Game.Cards
             game.GameEventsContainer.SpellCastingEvent.Raise(this, gameEventArgs);
             this.CardState = Enums.CardState.OnGraveyard;
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+        }
+
+        protected override GameCard GetCardCopy()
+            => new GameSpellCard(this);
     }
 
 }

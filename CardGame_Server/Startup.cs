@@ -38,7 +38,11 @@ namespace CardGame_Server
             services.AddScoped<IMapper, Mapper>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            services.AddSignalR();
+            services.AddSignalR(hubOptions =>
+            {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(10);
+            });
             services.AddControllers();
         }
 
