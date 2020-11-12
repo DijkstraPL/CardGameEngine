@@ -35,8 +35,8 @@ namespace CardGame_Server
                 options => options.UseSqlServer("server=localhost; database=CardGame; Integrated Security=SSPI;",
                 b => b.MigrationsAssembly("CardGame_DataAccess")));
             services.AddScoped<IDeckRepository, DeckRepository>();
+            services.AddScoped<ICardRepository, CardRepository>();
             services.AddScoped<IMapper, Mapper>();
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddSignalR(hubOptions =>
             {

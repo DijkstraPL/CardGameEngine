@@ -39,6 +39,39 @@ namespace CardGame_DataAccess.Repositories
                  .ToListAsync();
         }
 
+        public async Task<Deck> GetDeck(int id)
+        {
+            return await _cardGameDbContext.Decks
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card)
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card.Set)
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card.CardType)
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card.SubType)
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card.Rules)
+                .ThenInclude(cr => cr.Rule)
+                .FirstOrDefaultAsync(d => d.Id == id);
+        }
+        public async Task<Deck> GetDeck(string name)
+        {
+            return await _cardGameDbContext.Decks
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card)
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card.Set)
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card.CardType)
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card.SubType)
+                .Include(d => d.Cards)
+                .ThenInclude(cd => cd.Card.Rules)
+                .ThenInclude(cr => cr.Rule)
+                .FirstOrDefaultAsync(d => d.Name == name);
+        }
+
         public async Task RemoveDeck(string deckName)
         {
             var deck = await _cardGameDbContext.Decks.FirstOrDefaultAsync(d => d.Name == deckName);
@@ -51,5 +84,6 @@ namespace CardGame_DataAccess.Repositories
         {
             _cardGameDbContext.Dispose();
         }
+
     }
 }
