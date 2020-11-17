@@ -43,6 +43,5 @@ namespace CardGame_Game.Players.Interfaces
         void AddToGraveyard(GameCard card);
         void OnCardMove();
         bool CanMove();
-        void SaveInitData();
     }
 }

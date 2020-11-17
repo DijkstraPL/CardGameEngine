@@ -8,4 +8,8 @@
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(ProjectDir)bin\Debug\netcoreapp2.0\CardGame_Data.dll&quot; &quot;C:\Users\Disseminate\Desktop\Karcianka\Gra\CardGame\Assets\Plugins&quot; /Y /I" />
+  </Target>
+
 </Project>

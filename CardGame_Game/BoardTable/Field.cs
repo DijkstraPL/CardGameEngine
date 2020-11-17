@@ -38,17 +38,6 @@ namespace CardGame_Game.BoardTable
         public bool CanAttack(Field targetField, IPlayer enemyPlayer)
         {
             return _canAttackFieldValidator.Validate(this, targetField, enemyPlayer);
-
-            //bool isDefender = targetField.Card?.Trait.HasFlag(Trait.Defender) ?? false;
-            //bool hasDefender = enemyFields.Where(f => (f.Y == Y || f.Y == Y - 1 || f.Y == Y + 1) && f.X > X)
-            //    .Any(f => f.Card?.Trait.HasFlag(Trait.Defender) ?? false);
-
-            //bool isNeighbour = Y - 1 <= targetField.Y &&
-            //           targetField.Y <= Y + 1;
-
-            //bool hasFlying = Card?.Trait.HasFlag(Trait.Flying) ?? false;
-
-            //return isNeighbour && (!hasDefender || isDefender) || hasFlying ;
         }
 
         public bool CanAttack(IPlayer targetPlayer)

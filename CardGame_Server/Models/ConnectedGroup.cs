@@ -1,11 +1,14 @@
 ﻿using CardGame_Game.Game;
 using CardGame_Game.GameEvents;
 using CardGame_Game.GameEvents.Interfaces;
+using CardGame_Game.Players.Interfaces;
 using CardGame_Server.Hubs;
 using CardGame_Server.Mappers.Interfaces;
 using CardGame_Server.Services;
 using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CardGame_Server.Models
@@ -28,6 +31,8 @@ namespace CardGame_Server.Models
 
         private readonly IHubContext<GameHub> _hubContext;
         private readonly IMapper _mapper;
+
+        private bool _gameFinished = false;
 
         public ConnectedGroup(string name, IHubContext<GameHub> hubContext, IMapper mapper)
         {
@@ -52,6 +57,7 @@ namespace CardGame_Server.Models
 
             _gameManager.Game.TurnTimer.Timer.Elapsed += Tick;
             _gameManager.Game.TurnTimer.TimeEnded += TimeEnded;
+            _gameManager.Game.GameEventsContainer.GameFinishedEvent.Add(null, async gea => await OnGameFinished());
         }
 
         public bool IsCurrentPlayer(ConnectedPlayer player)
@@ -79,6 +85,26 @@ namespace CardGame_Server.Models
                 .SendAsync("TurnStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: IsCurrentPlayer(Player1)));
             await _hubContext.Clients.Client(Player2.ConnectionId)
                 .SendAsync("TurnStarted", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: IsCurrentPlayer(Player2)));
+        }
+
+        private async Task OnGameFinished()
+        {
+            if (_gameManager.Game.IsGameFinished() && !_gameFinished)
+            {
+                _gameFinished = true;
+                var players = new List<IPlayer> { _gameManager.Game.CurrentPlayer, _gameManager.Game.NextPlayer };
+                var winner = players.SingleOrDefault(p => !p.IsLoser);
+                var loser = players.SingleOrDefault(p => p.IsLoser);
+                if (winner != null)
+                    await _hubContext.Clients.Group(Name).SendAsync("RegisterServerMessage", $"{winner.Name} won the game.");
+                else
+                    await _hubContext.Clients.Group(Name).SendAsync("RegisterServerMessage", $"Somehow we have a draw.");
+
+                await _hubContext.Clients.Client(Player1.ConnectionId)
+                    .SendAsync("GameFinished", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: IsCurrentPlayer(Player1)));
+                await _hubContext.Clients.Client(Player2.ConnectionId)
+                    .SendAsync("GameFinished", _mapper.MapGame(_gameManager.Game, isCurrentPlayer: IsCurrentPlayer(Player2)));
+            }
         }
 
     }

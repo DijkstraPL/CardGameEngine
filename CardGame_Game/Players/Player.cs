@@ -27,14 +27,12 @@ namespace CardGame_Game.Players
         public CardColor PlayerColor { get; protected set; }
         public int Energy { get; private set; }
 
-        //public int HitPoints { get; set; } 
-        //public int MaxHitPoints { get; set; } = 20;
         public bool CardTaken { get; private set; } = false;
         public IBoardSide BoardSide { get; set; }
 
         public bool IsLandCardPlayed { get; set; }
 
-        public int? BaseHealth { get; private set; } = 20;
+        public int? BaseHealth { get; private set; } = 2;
         private List<(Func<IHealthy, bool> conditon, int value)> _healthCalculators = new List<(Func<IHealthy, bool> conditon, int value)>();
         public IEnumerable<(Func<IHealthy, bool> conditon, int value)> HealthCalculators => _healthCalculators;
         public int? FinalHealth
@@ -43,7 +41,8 @@ namespace CardGame_Game.Players
             {
                 var finalHealth = BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon(this)).Sum(ac => ac.value);
                 if (finalHealth <= 0)
-                    IsLoser = true; 
+                    IsLoser = true;
+
                 return BaseHealth == null ? null : BaseHealth + HealthCalculators.Where(ac => ac.conditon(this)).Sum(ac => ac.value);
             }
         }
@@ -56,6 +55,7 @@ namespace CardGame_Game.Players
         private readonly Stack<Card> _landDeck;
         private readonly GameCardFactory _gameCardFactory;
         private readonly Stack<Card> _deck;
+        private IGame _game;
 
         public Player(string name, Stack<Card> deck, Stack<Card> landDeck, GameCardFactory gameCardFactory, IGameEventsContainer gameEventsContainer)
         {
@@ -81,6 +81,7 @@ namespace CardGame_Game.Players
 
         public void RegisterTriggers(IGame game)
         {
+            _game = game;
             foreach (var card in Deck.Concat(LandDeck))
                 card.RegisterTriggers(game);
         }
@@ -165,12 +166,6 @@ namespace CardGame_Game.Players
         public void AddHealthCalculation((Func<IHealthy, bool> conditon, int value) calc)
         {
                 _healthCalculators.Add(calc);
-        }
-
-        public void SaveInitData()
-        {
-            //foreach (var card in AllCards)
-            //    card.SaveCard();
         }
     }
 }

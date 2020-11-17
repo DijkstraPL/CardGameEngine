@@ -9,6 +9,7 @@ namespace CardGame_Game.GameEvents.Interfaces
         GameStartingEvent GameStartingEvent { get; }
         PlayerInitializedEvent PlayerInitializedEvent { get; }
         GameStartedEvent GameStartedEvent { get; }
+        GameFinishedEvent GameFinishedEvent { get; }
 
         TurnStartingEvent TurnStartingEvent { get; }
         TurnStartedEvent TurnStartedEvent { get; }

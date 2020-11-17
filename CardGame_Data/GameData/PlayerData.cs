@@ -19,6 +19,7 @@ namespace CardGame_Data.GameData
         public int? FinalHealth { get; set; }
         public ICollection<CardData> HandCards { get; set; }
 
+        public bool IsLoser { get; set; }
         public int? Morale { get; set; }
     }
 }

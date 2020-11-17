@@ -60,9 +60,6 @@ namespace CardGame_Game.Game
             GameEventsContainer.PlayerInitializedEvent.Raise(this, new GameEventArgs { Game = this, Player = CurrentPlayer });
             GameEventsContainer.PlayerInitializedEvent.Raise(this, new GameEventArgs { Game = this, Player = NextPlayer });
 
-            _firstPlayer.SaveInitData();
-            _secondPlayer.SaveInitData();
-
             GameEventsContainer.GameStartedEvent.Raise(this, new GameEventArgs { Game = this });
 
             TurnTimer.Start();
@@ -129,7 +126,7 @@ namespace CardGame_Game.Game
         }
 
         public bool IsGameFinished()
-            => CurrentPlayer.FinalHealth <= 0 || NextPlayer.FinalHealth <= 0;
+            => ( CurrentPlayer?.IsLoser ?? false) || (NextPlayer?.IsLoser ?? false);
 
         public void SendCardToHand(GameCard card, IPlayer player)
         {

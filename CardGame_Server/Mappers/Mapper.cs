@@ -57,6 +57,7 @@ namespace CardGame_Server.Mappers
             playerData.LandDeck = player.LandDeck.Count;
             playerData.Name = player.Name;
             playerData.PlayerColor = player.PlayerColor;
+            playerData.IsLoser = player.IsLoser;
 
             return playerData;
         }

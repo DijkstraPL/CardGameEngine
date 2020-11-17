@@ -10,6 +10,7 @@ namespace CardGame_Game.GameEvents
         public GameStartingEvent GameStartingEvent { get; }
         public PlayerInitializedEvent PlayerInitializedEvent { get; }
         public GameStartedEvent GameStartedEvent { get; }
+        public GameFinishedEvent GameFinishedEvent { get; }
 
         public TurnStartingEvent TurnStartingEvent { get; }
         public TurnStartedEvent TurnStartedEvent { get; }
@@ -28,6 +29,7 @@ namespace CardGame_Game.GameEvents
             GameStartingEvent = new GameStartingEvent();
             PlayerInitializedEvent = new PlayerInitializedEvent();
             GameStartedEvent = new GameStartedEvent();
+            GameFinishedEvent = new GameFinishedEvent();
 
             TurnStartingEvent = new TurnStartingEvent();
             TurnStartedEvent = new TurnStartedEvent();
@@ -53,6 +55,15 @@ namespace CardGame_Game.GameEvents
             GameEvents.Add((UnitAttackedEvent.Name, UnitAttackedEvent));
             GameEvents.Add((UnitKilledEvent.Name, UnitKilledEvent));
             GameEvents.Add((SpellCastingEvent.Name, SpellCastingEvent));
+
+            GameEvents.ForEach(ge =>
+            {
+                ge.gameEvent.Add(null, gea =>
+                {
+                    if (gea.Game.IsGameFinished())
+                        GameFinishedEvent.Raise(this, gea);
+                });
+            });
         }
     }
 }

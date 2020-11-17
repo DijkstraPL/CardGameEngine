@@ -122,7 +122,6 @@ namespace CardGame_Server.Hubs
             await Clients.Group(group.Name).SendAsync("RegisterServerMessage", $"Game started");
             await Clients.Group(group.Name).SendAsync("RegisterServerMessage", $"Turn {group.Game.TurnCounter} started");
             await Clients.Group(group.Name).SendAsync("RegisterServerMessage", group.Game.CurrentPlayer.Name + " has first move");
-
         }
 
         private ConnectedGroup FindGroup(string connectionId)
