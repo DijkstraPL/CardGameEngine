@@ -4,7 +4,6 @@ using CardGame_Client.ViewModels;
 using CardGame_Client.Views;
 using CardGame_Client.Views.Player;
 using CardGame_Client.Views.Enemy;
-using CommonServiceLocator;
 using Prism.Ioc;
 using Prism.Regions;
 using Prism.Unity;

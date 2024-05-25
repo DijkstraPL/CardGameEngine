@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:local="clr-namespace:CardGame_Client.Views.Player" 
-             xmlns:prism="http://prismlibrary.com/"
+             xmlns:prism="http://prismlibrary.com/" xmlns:i1="http://schemas.microsoft.com/xaml/behaviors"
              prism:ViewModelLocator.AutoWireViewModel="True"
              x:Name="root"
              mc:Ignorable="d" 
@@ -39,11 +39,11 @@
                                        HorizontalAlignment="Right"
                                        VerticalAlignment="Top"
                                     Cursor="Hand">
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="MouseLeftButtonDown">
-                                        <i:InvokeCommandAction Command="{Binding ElementName=root, Path=DataContext.PlayCardCommand}" CommandParameter="{Binding}"  />
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
+                                <i1:Interaction.Triggers>
+                                    <i1:EventTrigger EventName="MouseLeftButtonDown">
+                                        <i1:InvokeCommandAction Command="{Binding ElementName=root, Path=DataContext.PlayCardCommand}" CommandParameter="{Binding}"  />
+                                    </i1:EventTrigger>
+                                </i1:Interaction.Triggers>
                                 <TextBlock Text="{Binding Cost}"
                                         Background="Transparent"
                                        FontSize="16"

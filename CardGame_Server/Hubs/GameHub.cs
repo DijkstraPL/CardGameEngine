@@ -171,6 +171,7 @@ namespace CardGame_Server.Hubs
             else
                 await Clients.Caller.SendAsync("RegisterServerMessage", "Can't take a card");
         }
+
         public async Task FinishTurn()
         {
             var group = FindGroup(Context.ConnectionId);
